@@ -14,8 +14,8 @@ def unpack_type_hint(hint: t.Any) -> t.Tuple[t.Optional[t.Any], t.List[t.Any]]:
   if isinstance(hint, t._GenericAlias):  # type: ignore
     return hint.__origin__, list(hint.__args__)
 
-  # if isinstance(hint, t._SpecialGenericAlias):  # type: ignore
-  #   return hint.__origin__, []
+  if hasattr(t, '_SpecialGenericAlias') and isinstance(hint, t._SpecialGenericAlias):  # type: ignore
+    return hint.__origin__, []
 
   if isinstance(hint, type):
     return hint, []
