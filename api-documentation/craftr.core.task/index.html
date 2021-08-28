@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>craftr.core.task - craftr-core</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "craftr.core.task";
+    var mkdocs_page_input_path = "api-documentation/craftr.core.task.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> craftr-core</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">API Documentation</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.actions/">craftr.core.actions</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.configurable/">craftr.core.configurable</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.context/">craftr.core.context</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.error/">craftr.core.error</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.executor/">craftr.core.executor</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.plugin/">craftr.core.plugin</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.project/">craftr.core.project</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.property/">craftr.core.property</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.settings/">craftr.core.settings</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">craftr.core.task</a>
+    <ul class="current">
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.util/">craftr.core.util</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">craftr-core</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>API Documentation &raquo;</li>
+        
+      
+    
+    <li>craftr.core.task</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/craftr-build/craftr-core/edit/master/docs/api-documentation/craftr.core.task.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <p><a id="craftr.core.task"></a></p>
+<h1 id="craftrcoretask">craftr.core.task</h1>
+<p><a id="craftr.core.task.selector"></a></p>
+<h1 id="craftrcoretaskselector">craftr.core.task.selector</h1>
+<p><a id="craftr.core.task.selector.default"></a></p>
+<h1 id="craftrcoretaskselectordefault">craftr.core.task.selector.default</h1>
+<p><a id="craftr.core.task.selector.default.DefaultTaskSelector"></a></p>
+<h2 id="defaulttaskselector-objects">DefaultTaskSelector Objects</h2>
+<pre><code class="language-python">class DefaultTaskSelector(ITaskSelector)
+</code></pre>
+<p>The default task selector employs the following selector syntax:</p>
+<pre><code>[:][subProject:]+[taskName]
+</code></pre>
+<p>If the selector is prefixed with a semi-colon (<code>:</code>), the task path must be exact and relative
+to the current project. The <code>taskName</code> may refer to an individial task's name or a task group.</p>
+<p>Without the <code>:</code> prefix, the path must only match exactly at the end of the path (e.g. <code>a:b</code>
+matches both tasks with an absolute path <code>foo:a:b</code> and <code>egg:spam:a:b</code>).</p>
+<p><a id="craftr.core.task.selector.api"></a></p>
+<h1 id="craftrcoretaskselectorapi">craftr.core.task.selector.api</h1>
+<p><a id="craftr.core.task.selector.api.ITaskSelector"></a></p>
+<h2 id="itaskselector-objects">ITaskSelector Objects</h2>
+<pre><code class="language-python">@t.runtime_checkable
+class ITaskSelector(t.Protocol, metaclass=abc.ABCMeta)
+</code></pre>
+<p>An interface to expand a string into a set of tasks in the context of a project.</p>
+<p><a id="craftr.core.task.state"></a></p>
+<h1 id="craftrcoretaskstate">craftr.core.task.state</h1>
+<p><a id="craftr.core.task.state.calculate_task_hash"></a></p>
+<h4 id="calculate_task_hash">calculate_task_hash</h4>
+<pre><code class="language-python">calculate_task_hash(task: 'Task', hash_algo: str = 'sha1') -&gt; str
+</code></pre>
+<p>Calculates a hash for the task that represents the state of it's inputs (property values
+and input file contents). That hash is used to determine if the task is up to date with
+it's previous execution or if it needs to be executed.</p>
+<blockquote>
+<p>Implementation detail: Expects that all important information of a property value is
+included in it's <code>repr()</code>, and that the <code>repr()</code> is consistent.</p>
+</blockquote>
+<p><a id="craftr.core.task.task"></a></p>
+<h1 id="craftrcoretasktask">craftr.core.task.task</h1>
+<p><a id="craftr.core.task.task.Task"></a></p>
+<h2 id="task-objects">Task Objects</h2>
+<pre><code class="language-python">class Task(HavingProperties,  Configurable)
+</code></pre>
+<p>A task represents a set of sequential actions that are configurable through properties and may
+have dependencies on other tasks. Using the property system, dependencies between tasks can be
+computed automatically without having to explicitly list the dependencies.</p>
+<p>Tasks are rendered into executable <code>BuildNode</code> objects to construct the <code>BuildGraph</code>.</p>
+<p><a id="craftr.core.task.task.Task.dependencies"></a></p>
+<h4 id="dependencies">dependencies</h4>
+<p>Explicit dependencies of the task. Tasks in this list will always be executed before
+this task.</p>
+<p><a id="craftr.core.task.task.Task.default"></a></p>
+<h4 id="default">default</h4>
+<p>Whether the task should be included if no explicit set of tasks is selected for execution.
+This is <code>True</code> by default for all tasks (but can be overwritten by subclasses).</p>
+<p><a id="craftr.core.task.task.Task.description"></a></p>
+<h4 id="description">description</h4>
+<p>A short description of the task.</p>
+<p><a id="craftr.core.task.task.Task.group"></a></p>
+<h4 id="group">group</h4>
+<p>A name for the group that the task belongs to. Task groups are used to select tasks via
+common identifiers (e.g. <code>run</code>, <code>compile</code> or <code>debug</code> are generic terms that could apply to
+a variety of tasks).</p>
+<p><a id="craftr.core.task.task.Task.always_outdated"></a></p>
+<h4 id="always_outdated">always_outdated</h4>
+<p>A boolean flag that indicates whether the task is always to be considered outdated.</p>
+<p><a id="craftr.core.task.task.Task.finalized"></a></p>
+<h4 id="finalized">finalized</h4>
+<pre><code class="language-python"> | @property
+ | finalized() -&gt; bool
+</code></pre>
+<p>True if <a href="#craftr.core.task.task.Task.finalize"><code>finalize()</code></a> was called.</p>
+<p><a id="craftr.core.task.task.Task.init"></a></p>
+<h4 id="init">init</h4>
+<pre><code class="language-python"> | init() -&gt; None
+</code></pre>
+<p>Called from <code>__init__()</code>. Useful to implement by subclasses.</p>
+<p><a id="craftr.core.task.task.Task.finalize"></a></p>
+<h4 id="finalize">finalize</h4>
+<pre><code class="language-python"> | finalize() -&gt; None
+</code></pre>
+<p>Called to finalize the task. This is called automatically after the task is configured.
+Properties are finalized in this call. The subclass gets a chance to set any output properties
+that are derived other properties.</p>
+<p><a id="craftr.core.task.task.Task.get_dependencies"></a></p>
+<h4 id="get_dependencies">get_dependencies</h4>
+<pre><code class="language-python"> | get_dependencies() -&gt; t.List['Task']
+</code></pre>
+<p>Get all direct dependencies of the task, including those inherited through properties.</p>
+<p><a id="craftr.core.task.task.Task.get_actions"></a></p>
+<h4 id="get_actions">get_actions</h4>
+<pre><code class="language-python"> | get_actions() -&gt; t.List['Action']
+</code></pre>
+<p>Get the list of actions for this task. This should be called when everything is loaded.</p>
+<p><a id="craftr.core.task.task.Task.is_outdated"></a></p>
+<h4 id="is_outdated">is_outdated</h4>
+<pre><code class="language-python"> | is_outdated() -&gt; bool
+</code></pre>
+<p>Checks if the task is outdated.</p>
+<p><a id="craftr.core.task.task.Task.completed"></a></p>
+<h4 id="completed">completed</h4>
+<pre><code class="language-python"> | completed() -&gt; None
+</code></pre>
+<p>Called when the task was executed.</p>
+<p><a id="craftr.core.task.task.Task.depends_on"></a></p>
+<h4 id="depends_on">depends_on</h4>
+<pre><code class="language-python"> | depends_on(*tasks: t.Union[str, 'Task']) -&gt; None
+</code></pre>
+<p>Specify that the task dependends on the specified other tasks. Strings are resolved from
+the tasks own project.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../craftr.core.util/" class="btn btn-neutral float-right" title="craftr.core.util">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../craftr.core.settings/" class="btn btn-neutral" title="craftr.core.settings"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/craftr-build/craftr-core/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../craftr.core.settings/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../craftr.core.util/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>craftr.core.project - craftr-core</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "craftr.core.project";
+    var mkdocs_page_input_path = "api-documentation/craftr.core.project.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> craftr-core</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">API Documentation</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.actions/">craftr.core.actions</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.configurable/">craftr.core.configurable</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.context/">craftr.core.context</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.error/">craftr.core.error</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.executor/">craftr.core.executor</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.plugin/">craftr.core.plugin</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">craftr.core.project</a>
+    <ul class="current">
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.property/">craftr.core.property</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.settings/">craftr.core.settings</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.task/">craftr.core.task</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.util/">craftr.core.util</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">craftr-core</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>API Documentation &raquo;</li>
+        
+      
+    
+    <li>craftr.core.project</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/craftr-build/craftr-core/edit/master/docs/api-documentation/craftr.core.project.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <p><a id="craftr.core.project"></a></p>
+<h1 id="craftrcoreproject">craftr.core.project</h1>
+<p><a id="craftr.core.project.loader"></a></p>
+<h1 id="craftrcoreprojectloader">craftr.core.project.loader</h1>
+<p><a id="craftr.core.project.loader.default"></a></p>
+<h1 id="craftrcoreprojectloaderdefault">craftr.core.project.loader.default</h1>
+<p>Implements the default project loader which loads <code>build.craftr.py</code> files and executes them as a
+plain Python script providing the current <code>Project</code> in the global scope.</p>
+<p><a id="craftr.core.project.loader.api"></a></p>
+<h1 id="craftrcoreprojectloaderapi">craftr.core.project.loader.api</h1>
+<p><a id="craftr.core.project.loader.delegate"></a></p>
+<h1 id="craftrcoreprojectloaderdelegate">craftr.core.project.loader.delegate</h1>
+<p><a id="craftr.core.project.loader.delegate.DelegateProjectLoader"></a></p>
+<h2 id="delegateprojectloader-objects">DelegateProjectLoader Objects</h2>
+<pre><code class="language-python">class DelegateProjectLoader(IProjectLoader,  IHasFromSettings)
+</code></pre>
+<p>Delegates the project loading process to a sequence of other loaders. Returns the first project
+loaded by any loader.</p>
+<p>If created from configuration, the <code>craftr.plugin.loader.delegates</code> option is respected, which
+must be a comma-separated list of fully qualified lodaer names. A loader name may be trailed by
+a question mark to ignore if the loader name cannot be resolved.</p>
+<p><a id="craftr.core.project.project"></a></p>
+<h1 id="craftrcoreprojectproject">craftr.core.project.project</h1>
+<p><a id="craftr.core.project.project.Project"></a></p>
+<h2 id="project-objects">Project Objects</h2>
+<pre><code class="language-python">class Project(ExtensibleObject)
+</code></pre>
+<p>A project is a collection of tasks, usually populated through a build script, tied to a
+directory. Projects can have sub projects and there is usually only one root project in
+build.</p>
+<p><a id="craftr.core.project.project.Project.__init__"></a></p>
+<h4 id="__init__">__init__</h4>
+<pre><code class="language-python"> | __init__(context: 'Context', parent: t.Optional['Project'] = None, directory: t.Union[None, str, Path] = None) -&gt; None
+</code></pre>
+<p>Create a new project. If no <em>directory</em> is specified, it will default to the parent directory
+of the caller. If the given <em>context</em> does not have a root project defined yet, the project
+will be promoted to the root project.</p>
+<p><a id="craftr.core.project.project.Project.task"></a></p>
+<h4 id="task">task</h4>
+<pre><code class="language-python"> | task(name: str, task_class: t.Optional[t.Type[T_Task]] = None) -&gt; T_Task
+</code></pre>
+<p>Create a new task of type <em>task_class</em> (defaulting to <code>Task</code>) and add it to the project. The
+task name must be unique within the project.</p>
+<p><a id="craftr.core.project.project.Project.tasks"></a></p>
+<h4 id="tasks">tasks</h4>
+<pre><code class="language-python"> | @property
+ | tasks() -&gt; 'TaskContainer'
+</code></pre>
+<p>Returns the <code>TaskContainer</code> object for this project.</p>
+<p><a id="craftr.core.project.project.Project.subproject"></a></p>
+<h4 id="subproject">subproject</h4>
+<pre><code class="language-python"> | subproject(directory: str) -&gt; 'Project'
+</code></pre>
+<p>Reference a subproject by a path relative to the project directory. If the project has not
+been loaded yet, it will be created and initialized.</p>
+<p><a id="craftr.core.project.project.Project.get_subproject_by_name"></a></p>
+<h4 id="get_subproject_by_name">get_subproject_by_name</h4>
+<pre><code class="language-python"> | get_subproject_by_name(name: str) -&gt; 'Project'
+</code></pre>
+<p>Returns a sub project of this project by it's name. Raises a <code>ValueError</code> if no sub project
+with the specified name exists in the project.</p>
+<p><a id="craftr.core.project.project.Project.subprojects"></a></p>
+<h4 id="subprojects">subprojects</h4>
+<pre><code class="language-python"> | @t.overload
+ | subprojects() -&gt; t.List['Project']
+</code></pre>
+<p>Returns a list of the project's loaded subprojects.</p>
+<p><a id="craftr.core.project.project.Project.subprojects"></a></p>
+<h4 id="subprojects_1">subprojects</h4>
+<pre><code class="language-python"> | @t.overload
+ | subprojects(closure: t.Callable[['Project'], None]) -&gt; None
+</code></pre>
+<p>Call <em>closure</em> for every subproject currently loaded in the project..</p>
+<p><a id="craftr.core.project.project.Project.on_apply"></a></p>
+<h4 id="on_apply">on_apply</h4>
+<pre><code class="language-python"> | on_apply(func: Closure) -&gt; None
+</code></pre>
+<p>Register a function to call when the project is applied using <code>apply from_project: &lt;project&gt;</code>.</p>
+<p><a id="craftr.core.project.project.Project.apply"></a></p>
+<h4 id="apply">apply</h4>
+<pre><code class="language-python"> | apply(plugin_name: t.Optional[str] = None, from_project: t.Union[None, str, 'Project'] = None) -&gt; t.Any
+</code></pre>
+<p>Loads a plugin and applies it to the project. Plugins are loaded via <code>Context.plugin_loader</code>
+and applied to the project immediately after. The default implementation for loading plugins
+uses Python package entrypoints.</p>
+<p><a id="craftr.core.project.project.Project.glob"></a></p>
+<h4 id="glob">glob</h4>
+<pre><code class="language-python"> | glob(pattern: str) -&gt; t.List[Path]
+</code></pre>
+<p>Apply the specified glob pattern relative to the project directory and return a list of the
+matched files.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../craftr.core.property/" class="btn btn-neutral float-right" title="craftr.core.property">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../craftr.core.plugin/" class="btn btn-neutral" title="craftr.core.plugin"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/craftr-build/craftr-core/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../craftr.core.plugin/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../craftr.core.property/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>craftr.core.executor - craftr-core</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "craftr.core.executor";
+    var mkdocs_page_input_path = "api-documentation/craftr.core.executor.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> craftr-core</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">API Documentation</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.actions/">craftr.core.actions</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.configurable/">craftr.core.configurable</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.context/">craftr.core.context</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.error/">craftr.core.error</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">craftr.core.executor</a>
+    <ul class="current">
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.plugin/">craftr.core.plugin</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.project/">craftr.core.project</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.property/">craftr.core.property</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.settings/">craftr.core.settings</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.task/">craftr.core.task</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../craftr.core.util/">craftr.core.util</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">craftr-core</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>API Documentation &raquo;</li>
+        
+      
+    
+    <li>craftr.core.executor</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/craftr-build/craftr-core/edit/master/docs/api-documentation/craftr.core.executor.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <p><a id="craftr.core.executor"></a></p>
+<h1 id="craftrcoreexecutor">craftr.core.executor</h1>
+<p><a id="craftr.core.executor.default"></a></p>
+<h1 id="craftrcoreexecutordefault">craftr.core.executor.default</h1>
+<p>A very simple, sequential executor.</p>
+<p><a id="craftr.core.executor.graph"></a></p>
+<h1 id="craftrcoreexecutorgraph">craftr.core.executor.graph</h1>
+<p><a id="craftr.core.executor.graph.ExecutionGraph"></a></p>
+<h2 id="executiongraph-objects">ExecutionGraph Objects</h2>
+<pre><code class="language-python">class ExecutionGraph()
+</code></pre>
+<p>The execution graph contains a plan for the order in which tasks need to be executed. It is
+accessible via the <code>Context.graph</code> property, but it will be empty until all projects have
+been evaluated and <code>Context.execute()</code> is called.</p>
+<p>The execution graph contains only those tasks that are selected for execution. Some tasks may
+not be included by default (if <code>Task.default</code> is set to <code>False</code>) or are skipped because they
+have not been explicitly selected.</p>
+<p><a id="craftr.core.executor.graph.ExecutionGraph.when_ready"></a></p>
+<h4 id="when_ready">when_ready</h4>
+<pre><code class="language-python"> | when_ready(closure: t.Callable[['ExecutionGraph'], None]) -&gt; None
+</code></pre>
+<p>Adds a callback that is invoked when the execution graph is ready. If the graph is ready
+by the time this method is called, the <em>closure</em> is invoked immediately.</p>
+<p><a id="craftr.core.executor.graph.ExecutionGraph.ready"></a></p>
+<h4 id="ready">ready</h4>
+<pre><code class="language-python"> | ready() -&gt; None
+</code></pre>
+<p>Declare that the execution graph is ready. Invokes registered listeners.</p>
+<p><a id="craftr.core.executor.graph.ExecutionGraph.add_task"></a></p>
+<h4 id="add_task">add_task</h4>
+<pre><code class="language-python"> | add_task(task: Task) -&gt; None
+</code></pre>
+<p>Add a task and all it's dependencies to the graph.</p>
+<p><a id="craftr.core.executor.graph.ExecutionGraph.has_task"></a></p>
+<h4 id="has_task">has_task</h4>
+<pre><code class="language-python"> | has_task(task: t.Union[str, Task]) -&gt; bool
+</code></pre>
+<p>Returns <code>True</code> if the specified <em>task</em> (either the <em>absolute</em> path of the task or the <code>Task</code>
+instance itself) is contained in the execution graph.</p>
+<p><a id="craftr.core.executor.graph.ExecutionGraph.get_ordered_tasks"></a></p>
+<h4 id="get_ordered_tasks">get_ordered_tasks</h4>
+<pre><code class="language-python"> | get_ordered_tasks() -&gt; t.List[Task]
+</code></pre>
+<p>Retrieve the tasks of the execution graph in the order that they need to be executed.</p>
+<p><a id="craftr.core.executor.api"></a></p>
+<h1 id="craftrcoreexecutorapi">craftr.core.executor.api</h1>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../craftr.core.plugin/" class="btn btn-neutral float-right" title="craftr.core.plugin">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../craftr.core.error/" class="btn btn-neutral" title="craftr.core.error"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/craftr-build/craftr-core/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../craftr.core.error/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../craftr.core.plugin/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="None">
+  
+  
+  <link rel="shortcut icon" href="img/favicon.ico">
+  <title>craftr-core</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="css/theme.css" />
+  <link rel="stylesheet" href="css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Home";
+    var mkdocs_page_input_path = "index.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="js/jquery-2.1.1.min.js" defer></script>
+  <script src="js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="." class="icon icon-home"> craftr-core</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href=".">Home</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#concepts">Concepts</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#projects">Projects</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#tasks">Tasks</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#actions">Actions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#plugins">Plugins</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#settings">Settings</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">API Documentation</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="api-documentation/craftr.core.actions/">craftr.core.actions</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="api-documentation/craftr.core.configurable/">craftr.core.configurable</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="api-documentation/craftr.core.context/">craftr.core.context</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="api-documentation/craftr.core.error/">craftr.core.error</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="api-documentation/craftr.core.executor/">craftr.core.executor</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="api-documentation/craftr.core.plugin/">craftr.core.plugin</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="api-documentation/craftr.core.project/">craftr.core.project</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="api-documentation/craftr.core.property/">craftr.core.property</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="api-documentation/craftr.core.settings/">craftr.core.settings</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="api-documentation/craftr.core.task/">craftr.core.task</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="api-documentation/craftr.core.util/">craftr.core.util</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href=".">craftr-core</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Home</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/craftr-build/craftr-core/edit/master/docs/index.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="craftr-core">craftr-core</h1>
+<p>The <code>craftr-core</code> package provides the core build system functions for the Craftr build system.</p>
+<h2 id="concepts">Concepts</h2>
+<h3 id="projects">Projects</h3>
+<p>A project is the main unit that is used to represent a collection of tasks. A project has a collection
+of tasks and possibly other sub-projects. Every project has a name and unique ID (aka. path) inside the
+current build context.</p>
+<h3 id="tasks">Tasks</h3>
+<p>Tasks encapsulate the configuration and logic of an operation in a build. Examples include the compilation
+or generation of source files, copying or compressing files. Such operations are usually described using a
+sequence of Actions, see below. Dependencies between individual tasks describe a directed acyclic graph used
+for determining the order in which tasks need to be executed.</p>
+<p>A task has a set of input and output files. If an input files changes or an output file does not exist, a
+task is considered outdated and will be executed again. There are also tasks that are not executed by
+default unless depended on by another tasks that is executed or explicitly specified as to be executed in
+a given execution of the build graph.</p>
+<h3 id="actions">Actions</h3>
+<p>An action is a concrete unit of work that can be executed as part of a build. A task is usually described
+by one or more actions. Dependencies between actions express the order in which they are to be executed
+relative to the other actions produced by the same task.</p>
+<h3 id="plugins">Plugins</h3>
+<p>Plugins are reusable pieces of build logic that can be applied to projects. A plugin usually registers
+a new task or task factory in the project which is subsequently accessible via the <code>project.ext</code> object
+or from the namespace object returned by <code>Project.apply()</code>.</p>
+<h3 id="settings">Settings</h3>
+<p>Craftr settings are files in a line-based <code>key=value</code> format. There are a bunch of settings that control
+the behaviour of the Craftr core components. No settings file is loaded implicitly by the <code>Context</code> class.</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Default value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>core.build_directory</code></td>
+<td><code>.build</code></td>
+</tr>
+<tr>
+<td><code>core.executor</code></td>
+<td><code>craftr.core.executor.default.DefaultExecutor</code></td>
+</tr>
+<tr>
+<td><code>core.plugin.loader</code></td>
+<td><code>craftr.core.plugin.default.DefaultPluginLoader</code></td>
+</tr>
+<tr>
+<td><code>core.plugin.loader.delegates</code></td>
+<td><code>craftr.core.project.loader.default.DefaultProjectLoader,craftr.build.loader.DslProjectLoader?</code></td>
+</tr>
+<tr>
+<td><code>core.plugin.entrypoint</code></td>
+<td><code>craftr.plugins</code></td>
+</tr>
+<tr>
+<td><code>core.project.loader</code></td>
+<td><code>craftr.core.project.loader.delegate.DelegateProjectLoader</code></td>
+</tr>
+<tr>
+<td><code>core.verbose</code></td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>core.task_selector</code></td>
+<td><code>craftr.core.task.selector.default.DefaultTaskSelector</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p align="center">Copyright &copy; 2021 Niklas Rosenstein</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api-documentation/craftr.core.actions/" class="btn btn-neutral float-right" title="craftr.core.actions">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/craftr-build/craftr-core/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+      <span><a href="api-documentation/craftr.core.actions/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '.';</script>
+    <script src="js/theme_extra.js" defer></script>
+    <script src="js/theme.js" defer></script>
+      <script src="search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.2.2
+Build Date UTC : 2021-08-28 20:34:23.461111+00:00
+-->
