@@ -7,7 +7,7 @@ from pathlib import Path
 
 import typing_extensions as te
 from craftr.core.util.preconditions import check_not_none
-from craftr.core.util.typing import unpack_type_hint
+from craftr.core.util.typing import get_type_hints, unpack_type_hint
 from .provider import Box, NoValueError, Provider, T, visit_captured_providers
 from .typechecking import TypeCheckingContext, type_repr, check_type, mutate_values, MutableVisitContext
 
@@ -178,7 +178,7 @@ class HavingProperties:
   def __init__(self, **kwargs: t.Any) -> None:
     self.__properties: t.Dict[str, Property] = {}
 
-    type_hints = t.get_type_hints(type(self)) if sys.version_info < (3, 9) else t.get_type_hints(type(self), include_extras=True)
+    type_hints = get_type_hints(type(self))
 
     for key, value in type_hints.items():
 

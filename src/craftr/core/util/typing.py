@@ -1,6 +1,12 @@
 
 import typing as t
 import typing_extensions as te
+import sys
+
+
+def get_type_hints(obj: t.Any) -> t.Dict[str, t.Any]:
+  kwargs = {} if sys.version_info < (3, 9) else {'include_extras': True}
+  return t.get_type_hints(obj, **kwargs)  # type: ignore
 
 
 def _filter_typevars(args: t.Iterable[t.Any]) -> t.List[t.Any]:
