@@ -12,7 +12,7 @@ from craftr.core.task import Task
 try:
   from termcolor import colored
 except ImportError:
-  def colored(s, *a, **kw): return str(s)
+  def colored(s, *a, **kw): return str(s)  # type: ignore
 
 if t.TYPE_CHECKING:
   from .graph import ExecutionGraph

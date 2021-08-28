@@ -6,7 +6,7 @@ from craftr.core.util.typing import unpack_type_hint
 
 
 def test_unpack_type_hint():
-  from typing import T
+  from typing import T  # type: ignore
   assert unpack_type_hint(t.Any) == (t.Any, [])
   assert unpack_type_hint(list) == (list, [])
   assert unpack_type_hint(t.List) == (list, [T])

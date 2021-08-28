@@ -1,3 +1,4 @@
+# type: ignore
 
 import enum
 import typing as t

@@ -60,6 +60,7 @@ class Context:
   @property
   def metadata_store(self) -> NamespaceStore:
     if self._metadata_store is None:
+      assert self.root_project, 'Context.root_project is not set'
       self._metadata_store = JsonDirectoryStore(
         str(self.get_default_build_directory(self.root_project) / '.craftr-metadata'), create_dir=True)
     return self._metadata_store
@@ -98,11 +99,9 @@ class Context:
     else:
       return Path(build_directory)
 
-  def finalize(self) -> None:
-    self.root_project.finalize()
-
   def execute(self, selection: t.Union[None, str, t.List[str], Task, t.List[Task]] = None) -> None:
     root_project = check_not_none(self.root_project, 'no root project initialized')
+    root_project.finalize()
     selected_tasks: t.Set[Task] = set()
 
     if selection is None:

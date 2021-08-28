@@ -186,7 +186,7 @@ class Task(HavingProperties, Configurable):
     check_instance_of(action, (Action, Closure), 'action')
     if isinstance(action, Closure):
       closure = action
-      action = LambdaAction(lambda context: closure.with_locals(context=context).apply(self))
+      action = LambdaAction(lambda context: closure(self, context).apply(self))
     self.do_first_actions.append(action)
 
   def do_last(self, action: t.Union['Action', Closure]) -> None:
@@ -194,7 +194,7 @@ class Task(HavingProperties, Configurable):
     check_instance_of(action, (Action, Closure), 'action')
     if isinstance(action, Closure):
       closure = action
-      action = LambdaAction(lambda context: closure.with_locals(context=context).apply(self))
+      action = LambdaAction(lambda context: closure(self, context).apply(self))
     self.do_last_actions.append(action)
 
   # Configurable

@@ -59,7 +59,7 @@ class Project(ExtensibleObject):
     super().__init__()
     self._context = weakref.ref(context)
     self._parent = weakref.ref(parent) if parent is not None else parent
-    self.directory = Path(directory) if directory else context.directory
+    self.directory = Path(directory)
     self._name: t.Optional[str] = None
     self._build_directory: t.Optional[Path] = None
     self._tasks: t.Dict[str, 'Task'] = {}
@@ -180,7 +180,7 @@ class Project(ExtensibleObject):
       raise RuntimeError(f'{self}.on_apply() already set')
     self._on_apply = func
 
-  def apply(self, plugin_name: t.Optional[str] = None, from_project: t.Union[None, str, 'Project'] = None) -> None:
+  def apply(self, plugin_name: t.Optional[str] = None, from_project: t.Union[None, str, 'Project'] = None) -> t.Any:
     """
     Loads a plugin and applies it to the project. Plugins are loaded via #Context.plugin_loader
     and applied to the project immediately after. The default implementation for loading plugins
@@ -231,18 +231,22 @@ class TaskContainer:
     self._project = weakref.ref(project)
     self._tasks = tasks
 
+  @property
+  def project(self) -> 'Project':
+    return check_not_none(self._project(), 'lost reference to project')
+
   def __iter__(self):
     return iter(self._tasks.values())
 
   def for_each(self, closure: 'Closure') -> None:
     for task in self._tasks.values():
-      task.configure(closure)
+      task(closure)
 
   def resolve(self, selector: str, raise_empty: bool = True) -> t.Set['Task']:
-    tasks = self._project().context.task_selector.select_tasks(selector, self._project())
+    tasks = self.project.context.task_selector.select_tasks(selector, self.project)
     if not tasks and raise_empty:
-      raise ValueError(f'no task matched selector {selector!r} in project {self._project()}')
-    return tasks
+      raise ValueError(f'no task matched selector {selector!r} in project {self.project}')
+    return set(tasks)
 
   def __getattr__(self, key: str) -> 'Task':
     try:
@@ -250,7 +254,7 @@ class TaskContainer:
     except KeyError:
       raise AttributeError(key)
 
-  def __getitem__(self, key: str) -> t.Union['Task', t.Set['Task']]:
+  def __getitem__(self, key: str) -> 'Task':
     return self._tasks[key]
 
 
