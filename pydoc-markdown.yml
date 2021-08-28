@@ -1,0 +1,41 @@
+loaders:
+  - type: python
+    search_path: [ src ]
+processors:
+  - type: filter
+  - type: smart
+  - type: crossref
+renderer:
+  type: mkdocs
+  pages:
+    - title: Home
+      name: index
+      source: README.md
+    - title: API Documentation
+      children:
+        - title: craftr.core.actions
+          contents: [ craftr.core.actions, craftr.core.actions.* ]
+        - title: craftr.core.configurable
+          contents: [ craftr.core.configurable, craftr.core.configurable.* ]
+        - title: craftr.core.context
+          contents: [ craftr.core.context, craftr.core.context.* ]
+        - title: craftr.core.error
+          contents: [ craftr.core.error, craftr.core.error.* ]
+        - title: craftr.core.executor
+          contents: [ craftr.core.executor, craftr.core.executor.* ]
+        - title: craftr.core.plugin
+          contents: [ craftr.core.plugin, craftr.core.plugin.* ]
+        - title: craftr.core.project
+          contents: [ craftr.core.project, craftr.core.project.* ]
+        - title: craftr.core.property
+          contents: [ craftr.core.property, craftr.core.property.* ]
+        - title: craftr.core.settings
+          contents: [ craftr.core.settings, craftr.core.settings.* ]
+        - title: craftr.core.task
+          contents: [ craftr.core.task, craftr.core.task.* ]
+        - title: craftr.core.util
+          contents: [ craftr.core.util, craftr.core.util.* ]
+  mkdocs_config:
+    site_name: craftr-core
+    theme: readthedocs
+    repo_url: https://github.com/craftr-build/craftr-core

@@ -1,0 +1,12 @@
+*.py[cod]
+*.egg-info
+*.egg
+build/
+.build/
+.craftr/
+.vscode/
+.mypy_cache/
+.pytest_cache/
+.venv*/
+/test.py
+!src/craftr/build
