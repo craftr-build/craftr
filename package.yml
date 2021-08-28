@@ -11,3 +11,6 @@ requirements:
 test-drivers:
 - type: mypy
 - type: pytest
+test-requirements:
+- types-setuptools
+- types-termcolor

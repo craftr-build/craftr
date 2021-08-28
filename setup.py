@@ -19,6 +19,12 @@ requirements = [
   'nr.caching >=0.3.2,<1.0.0',
   'typing-extensions >=3.10.0.0,<4.0.0',
 ]
+test_requirements = [
+  'types-setuptools',
+  'types-termcolor',
+]
+extras_require = {}
+extras_require['test'] = test_requirements
 
 setuptools.setup(
   name = 'craftr-core',
@@ -34,8 +40,8 @@ setuptools.setup(
   package_dir = {'': 'src'},
   include_package_data = True,
   install_requires = requirements,
-  extras_require = {},
-  tests_require = [],
+  extras_require = extras_require,
+  tests_require = test_requirements,
   python_requires = '>=3.8.0,<4.0.0',
   data_files = [],
   entry_points = {},
