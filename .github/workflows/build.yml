@@ -12,11 +12,29 @@ on:
 
 jobs:
 
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ '3.8', '3.9', '3.x' ]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Shut
+      run: python -m pip install shut==0.18.1
+    - name: Test
+      run: shut pkg test --isolate
+    - name: Verify package
+      run: shut pkg checks
+
   run-craftr-examples:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.x']
+        python-version: [ '3.8', '3.9', '3.x' ]
         example: [ 'hello_world.py' ]
     steps:
     - uses: actions/checkout@v2

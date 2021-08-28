@@ -105,13 +105,13 @@ class Provider(t.Generic[T], metaclass=abc.ABCMeta):
   def map(self, func: t.Callable[[T], R]) -> 'Provider[R]':
     return MappedProvider(func, self)
 
-  def flatmap(self, func: t.Callable[[T], R]) -> 'Provider[R]':
+  def flatmap(self: 'Provider[t.Collection[T]]', func: t.Callable[[T], t.Collection[R]]) -> 'Provider[t.Collection[R]]':
     return FlatMappedProvider(func, self)
 
 
 class Box(Provider[T]):
 
-  def __init__(self, value: t.Union[t.Callable[[], T], t.Optional[T]]) -> None:
+  def __init__(self, value: t.Union[t.Callable[[], T], Provider[T], T, None]) -> None:
     self._value = value
 
   def get(self) -> T:
@@ -119,6 +119,8 @@ class Box(Provider[T]):
       raise NoValueError
     if callable(self._value):
       return self._value()
+    if isinstance(self._value, Provider):
+      return self._value.get()
     return self._value
 
   def visit(self, func: t.Callable[['Provider'], bool]) -> None:
@@ -141,6 +143,7 @@ class Box(Provider[T]):
 
 def visit_captured_providers(subject: t.Callable, func: t.Callable[[Provider], bool]) -> None:
   assert isinstance(subject, (types.FunctionType, types.MethodType)), type(subject)
+  assert isinstance(subject, _IHasClosure)
   for cell in (subject.__closure__ or []):
     if isinstance(cell.cell_contents, Provider):
       cell.cell_contents.visit(func)
@@ -216,9 +219,9 @@ class MappedProvider(Provider[R]):
           cell.cell_contents.visit(visitor)
 
 
-class FlatMappedProvider(Provider[R]):
+class FlatMappedProvider(Provider[t.Collection[R]]):
 
-  def __init__(self, func: t.Callable[[T], R], sub: Provider[T]) -> None:
+  def __init__(self, func: t.Callable[[T], t.Collection[R]], sub: Provider[t.Collection[T]]) -> None:
     self._func = func
     self._sub = sub
 
@@ -229,11 +232,12 @@ class FlatMappedProvider(Provider[R]):
     value = self._sub.or_none()
     if value is None:
       return False
-    return bool(self._func(value))
+    return bool(value)
 
-  def get(self) -> R:
+  def get(self) -> t.Collection[R]:
     value = self._sub.get()
-    return type(value)(map(self._func, value))
+    it = map(self._func, value)
+    return type(value)(it)  # type: ignore
 
   def visit(self, visitor: t.Callable[[Provider], bool]) -> None:
     if visitor(self):

@@ -27,7 +27,7 @@ def on_property_set_value(value_type: t.Any, value: t.Any) -> t.Any:
   Called when #Property.set() is called with not a real value. Allows to transform the value.
   """
 
-  assert isinstance(value_type, type) or isinstance(value_type, (t._SpecialForm, t._GenericAlias)), repr(value_type)
+  assert isinstance(value_type, type) or isinstance(value_type, (t._SpecialForm, t._GenericAlias)), repr(value_type)  # type: ignore
 
   if isinstance(value, str) and isinstance(value_type, type) and issubclass(value_type, enum.Enum):
     # Find the matching enum value, case in-sensitive.
@@ -254,7 +254,7 @@ def collect_properties(provider: t.Union[HavingProperties, Provider]) -> t.List[
       prop.visit(_append_if_property)
   elif isinstance(provider, Provider):
     provider.visit(_append_if_property)
-    if provider in result:
+    if isinstance(provider, Property) and provider in result:
       result.remove(provider)
   else:
     raise TypeError('expected Provider or HavingProperties instance, '

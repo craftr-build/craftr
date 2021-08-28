@@ -25,7 +25,7 @@ setuptools.setup(
   version = '0.1.0',
   author = 'Niklas Rosenstein',
   author_email = 'rosensteinniklas@gmail.com',
-  description = 'The pure Python API for describing and executing builds with Craftr.',
+  description = 'The core framework for the Craftr build system.',
   long_description = long_description,
   long_description_content_type = 'text/markdown',
   url = None,
