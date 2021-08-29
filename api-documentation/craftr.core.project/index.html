@@ -142,7 +142,7 @@ a question mark to ignore if the loader name cannot be resolved.</p>
 <h1 id="craftrcoreprojectproject">craftr.core.project.project</h1>
 <p><a id="craftr.core.project.project.Project"></a></p>
 <h2 id="project-objects">Project Objects</h2>
-<pre><code class="language-python">class Project(ExtensibleObject)
+<pre><code class="language-python">class Project()
 </code></pre>
 <p>A project is a collection of tasks, usually populated through a build script, tied to a
 directory. Projects can have sub projects and there is usually only one root project in
@@ -197,11 +197,13 @@ with the specified name exists in the project.</p>
 <p>Register a function to call when the project is applied using <code>apply from_project: &lt;project&gt;</code>.</p>
 <p><a id="craftr.core.project.project.Project.apply"></a></p>
 <h4 id="apply">apply</h4>
-<pre><code class="language-python"> | apply(plugin_name: t.Optional[str] = None, from_project: t.Union[None, str, 'Project'] = None) -&gt; t.Any
+<pre><code class="language-python"> | apply(plugin_name: t.Optional[str] = None, from_project: t.Union[None, str, 'Project'] = None, merge: bool = True) -&gt; Namespace
 </code></pre>
-<p>Loads a plugin and applies it to the project. Plugins are loaded via <code>Context.plugin_loader</code>
-and applied to the project immediately after. The default implementation for loading plugins
-uses Python package entrypoints.</p>
+<p>Loads a plugin and applies it to the project. Plugins are loaded via <code>Context.plugin_loader</code> and applied to the
+project immediately after. The default implementation for loading plugins uses Python package entrypoints
+as configured in the <code>Context</code>.</p>
+<p>Returns the extension namespace created for the plugin. The extension is also merged into the <code>Project.ext</code>
+namespace unless the <em>merge</em> parameter is set to <code>False</code>.</p>
 <p><a id="craftr.core.project.project.Project.glob"></a></p>
 <h4 id="glob">glob</h4>
 <pre><code class="language-python"> | glob(pattern: str) -&gt; t.List[Path]

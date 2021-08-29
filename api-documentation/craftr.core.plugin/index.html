@@ -129,6 +129,41 @@ class DefaultPluginLoader(IPluginLoader)
 <p>Default implementation for loading plugins via the <code>craftr.plugins</code> entrypoint.</p>
 <p><a id="craftr.core.plugin.api"></a></p>
 <h1 id="craftrcorepluginapi">craftr.core.plugin.api</h1>
+<p><a id="craftr.core.plugin.api.TaskFactory"></a></p>
+<h2 id="taskfactory-objects">TaskFactory Objects</h2>
+<pre><code class="language-python">class TaskFactory(t.Generic[T_Task])
+</code></pre>
+<p>This is a helper class that wraps a <code>Task</code> subclass to act as a factory for that class. It is used
+as a convenience when registering a task as an extension to a <code>Project</code> such that it can be used
+to define a default task as well as defining a custom named task of the type.</p>
+<pre><code class="language-py">def apply(project: Project, name: str) -&gt; None:
+  project.register_extension('myTaskType', TaskFactoryExtension(project, 'myTaskType', MyTaskType))
+</code></pre>
+<p>Inside a project, the task can then be instantiated with a configuration closure, and optionally
+with a custom task name.</p>
+<pre><code class="language-py">myTaskType {
+  # ...
+}
+myTaskType('otherTaskName') {
+  # ...
+}
+
+assert 'myTaskType' in tasks
+assert 'otherTaskName' in tasks
+</code></pre>
+<p><a id="craftr.core.plugin.api.TaskFactory.__call__"></a></p>
+<h4 id="__call__">__call__</h4>
+<pre><code class="language-python"> | __call__(arg: t.Union[str, Closure]) -&gt; T_Task
+</code></pre>
+<p>Create a new instance of the task type. If a string is specified, it will be used as the task
+name. If a closure is specified, the default task name will be used and the task will be
+configured with the closure.</p>
+<p><a id="craftr.core.plugin.api.Namespace"></a></p>
+<h2 id="namespace-objects">Namespace Objects</h2>
+<pre><code class="language-python">class Namespace(Configurable)
+</code></pre>
+<p>Represents a namespace that is directly associated with a project. Plugins register members to
+the namespace with the <code>add()</code> method or <a href="#craftr.core.plugin.api.TaskFactory"><code>TaskFactorys</code></a> with the <code>add_task_factory()</code> method.</p>
 <p><a id="craftr.core.plugin.api.IPlugin"></a></p>
 <h2 id="iplugin-objects">IPlugin Objects</h2>
 <pre><code class="language-python">@t.runtime_checkable
@@ -137,9 +172,9 @@ class IPlugin(t.Protocol, metaclass=abc.ABCMeta)
 <p><a id="craftr.core.plugin.api.IPlugin.apply"></a></p>
 <h4 id="apply">apply</h4>
 <pre><code class="language-python"> | @abc.abstractmethod
- | apply(project: 'Project', name: str) -&gt; t.Any
+ | apply(project: 'Project', namespace: Namespace) -&gt; t.Any
 </code></pre>
-<p>Apply the plugin to the given project.</p>
+<p>Apply the plugin to the given project and register members to the given <em>namespace</em>.</p>
 <p><a id="craftr.core.plugin.api.IPluginLoader"></a></p>
 <h2 id="ipluginloader-objects">IPluginLoader Objects</h2>
 <pre><code class="language-python">@t.runtime_checkable
