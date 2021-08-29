@@ -152,7 +152,7 @@ def visit_captured_providers(subject: t.Callable, func: t.Callable[[Provider], b
 class UnaryProvider(Provider[T]):
 
   def __init__(self, func: t.Callable[[t.Optional[U]], t.Optional[T]], inner: Provider[U]) -> None:
-    check_instance_of(inner, Provider)
+    check_instance_of(inner, Provider)  # type: ignore  # python/mypy#5374
     self._func = func
     self._inner = inner
 
@@ -175,8 +175,8 @@ class BinaryProvider(Provider[T]):
     left: Provider[U],
     right: Provider[V],
   ) -> None:
-    check_instance_of(left, Provider)
-    check_instance_of(right, Provider)
+    check_instance_of(left, Provider)  # type: ignore  # python/mypy#5374
+    check_instance_of(right, Provider)  # type: ignore  # python/mypy#5374
     self._func = func
     self._left = left
     self._right = right

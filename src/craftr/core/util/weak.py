@@ -1,5 +1,6 @@
 
 import types
+import typing as t
 import weakref
 
 from nr.preconditions import check_not_none
@@ -7,7 +8,7 @@ from nr.preconditions import check_not_none
 
 class WeakInstanceMethod:
 
-  def __init__(self, method: types.MethodType) -> None:
+  def __init__(self, method: t.Union[types.MethodType, t.Any]) -> None:
     assert isinstance(method, types.MethodType), type(method)
     self._obj = weakref.ref(method.__self__)
     self._func = method.__func__
