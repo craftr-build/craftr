@@ -6,7 +6,8 @@ import weakref
 from pathlib import Path
 
 import typing_extensions as te
-from craftr.core.util.preconditions import check_not_none
+from nr.preconditions import check_not_none
+
 from craftr.core.util.typing import get_type_hints, unpack_type_hint
 from .provider import Box, NoValueError, Provider, T, visit_captured_providers
 from .typechecking import TypeCheckingContext, type_repr, check_type, mutate_values, MutableVisitContext

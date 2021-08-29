@@ -4,7 +4,7 @@ import types
 import typing as t
 from craftr.core.property.typechecking import TypeCheckingContext, check_type
 
-from craftr.core.util.preconditions import check_instance_of
+from nr.preconditions import check_instance_of
 
 T = t.TypeVar('T')
 U = t.TypeVar('U')

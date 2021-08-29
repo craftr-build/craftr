@@ -5,11 +5,11 @@ import weakref
 from pathlib import Path
 
 from nr.caching.api import KeyDoesNotExist
+from nr.preconditions import check_instance_of, check_not_none
 
 from craftr.core.property import HavingProperties, collect_properties
 from craftr.core.configurable import Closure, Configurable
 from craftr.core.util.collections import unique
-from craftr.core.util.preconditions import check_instance_of, check_not_none
 from .state import calculate_task_hash, unwrap_file_property
 
 if t.TYPE_CHECKING:

@@ -3,7 +3,8 @@ import abc
 import typing as t
 from pathlib import Path
 
-from craftr.core.util.preconditions import check_instance_of
+from nr.preconditions import check_instance_of
+
 from craftr.core.util.pyimport import load_class
 
 T = t.TypeVar('T')

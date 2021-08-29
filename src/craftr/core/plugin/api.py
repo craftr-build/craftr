@@ -91,28 +91,36 @@ class Namespace(Configurable):
     self.__project = weakref.ref(project)
     self.__name__ = name
     self.__type__ = type
-    self.__attrs: t.Dict[str, t.Any] = {}
+    self.__attrs__: t.Dict[str, t.Any] = {}
 
   def __repr__(self) -> str:
-    return f'Namespace({self.__type__.value}: {self.__name__!r})'
+    project = check_not_none(self.__project(), 'lost reference to project')
+    if self.__type__ == Namespace.Type.PLUGIN:
+      return f'Namespace({self.__type__.value}: {self.__name__!r}, for project: {project.path!r})'
+    else:
+      return f'Namespace({self.__type__.value}: {project.path!r})'
 
   def __call__(self, closure: Closure['Namespace', t.Any]) -> None:
     closure(self)
 
   def __getattr__(self, name: str) -> t.Any:
     try:
-      return self.__attrs[name]
+      return self.__attrs__[name]
     except KeyError:
       raise AttributeError(f'{self!r} has no attribute {name!r}')
 
   def add(self, name: str, value: t.Any) -> None:
-    if name in self.__attrs:
+    if name in self.__attrs__:
       raise RuntimeError(f'{name!r} already registered in {self!r}')
-    self.__attrs[name] = value
+    self.__attrs__[name] = value
 
   def add_task_factory(self, name: str, task_type: t.Type['Task'], default_task_name: t.Optional[str] = None) -> None:
     project = check_not_none(self.__project(), 'lost reference to project')
     self.add(name, TaskFactory(project, default_task_name or name, task_type))
+
+  def merge_into(self, other: 'Namespace') -> None:
+    for key, value in self.__attrs__.items():
+      other.add(key, value)
 
 
 @dataclass

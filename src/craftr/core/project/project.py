@@ -6,9 +6,10 @@ import typing as t
 import weakref
 from pathlib import Path
 
+from nr.preconditions import check_instance_of, check_not_none
 from craftr.core.configurable import Closure
 from craftr.core.plugin.api import Namespace
-from craftr.core.util.preconditions import check_instance_of, check_not_none
+from craftr.core.util.weak import WeakInstanceMethod
 
 if t.TYPE_CHECKING:
   from craftr.core.task import Task
@@ -17,26 +18,7 @@ if t.TYPE_CHECKING:
 T_Task = t.TypeVar('T_Task', bound='Task')
 
 
-class ExtensibleObject:
-
-  def __init__(self, name: t.Optional[str] = None) -> None:
-    self._name = name
-    self._extensions: t.Dict[str, t.Any] = {}
-
-  def __repr__(self) -> str:
-    return f'ExtensibleObject(name={self._name!r})'
-
-  def __getattr__(self, key: t.Any) -> t.Any:
-    try:
-      return object.__getattribute__(self, '_extensions')[key]
-    except KeyError:
-      raise AttributeError(f'{self} has no attribute or extension named "{key}".')
-
-  def add_extension(self, key: str, extension: t.Any) -> None:
-    self._extensions[key] = extension
-
-
-class Project(ExtensibleObject):
+class Project:
   """
   A project is a collection of tasks, usually populated through a build script, tied to a
   directory. Projects can have sub projects and there is usually only one root project in
@@ -57,7 +39,6 @@ class Project(ExtensibleObject):
     if directory is None:
       directory = Path(sys._getframe(1).f_code.co_filename).parent
 
-    super().__init__()
     self._context = weakref.ref(context)
     self._parent = weakref.ref(parent) if parent is not None else parent
     self.directory = Path(directory)
@@ -68,6 +49,10 @@ class Project(ExtensibleObject):
     self._on_apply: t.Optional[Closure] = None
     self.ext = Namespace(self, self.path, Namespace.Type.PROJECT_EXT)
     self.exports = Namespace(self, self.path, Namespace.Type.PROJECT_EXPORTS)
+
+    self.ext.add('project', weakref.proxy(self))
+    self.ext.add('apply', WeakInstanceMethod(self.apply))
+    self.ext.add('exports', self.exports)
 
     if not context._root_project:
       context._root_project = self

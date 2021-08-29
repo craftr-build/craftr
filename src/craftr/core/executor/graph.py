@@ -1,8 +1,9 @@
 
 import typing as t
 
+from nr.preconditions import check_argument
+
 from craftr.core.task import Task
-from craftr.core.util.preconditions import check_argument
 
 
 class ExecutionGraph:

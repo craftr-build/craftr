@@ -3,6 +3,7 @@ import typing as t
 from pathlib import Path
 
 from nr.caching.api import NamespaceStore
+from nr.preconditions import check_not_none
 
 from craftr.core.executor import IExecutor, ExecutionGraph
 from craftr.core.plugin import IPluginLoader
@@ -10,7 +11,6 @@ from craftr.core.project import IProjectLoader, Project
 from craftr.core.settings import Settings
 from craftr.core.task import Task, ITaskSelector
 from craftr.core.util.caching import JsonDirectoryStore
-from craftr.core.util.preconditions import check_not_none
 
 
 class Context:
