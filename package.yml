@@ -8,9 +8,10 @@ requirements:
 - nr.caching ^0.3.2
 - python ^3.8
 - typing-extensions ^3.10.0.0
-test-drivers:
-- type: mypy
-- type: pytest
+- nr.preconditions ^0.0.4
 test-requirements:
 - types-setuptools
 - types-termcolor
+test-drivers:
+- type: mypy
+- type: pytest
