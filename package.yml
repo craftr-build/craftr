@@ -1,5 +1,5 @@
 name: craftr-core
-version: 0.2.1
+version: 0.2.2
 author: Niklas Rosenstein <rosensteinniklas@gmail.com>
 modulename: craftr.core
 description: The core framework for the Craftr build system.

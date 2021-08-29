@@ -29,7 +29,7 @@ extras_require['test'] = test_requirements
 
 setuptools.setup(
   name = 'craftr-core',
-  version = '0.2.1',
+  version = '0.2.2',
   author = 'Niklas Rosenstein',
   author_email = 'rosensteinniklas@gmail.com',
   description = 'The core framework for the Craftr build system.',
