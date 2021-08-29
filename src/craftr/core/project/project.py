@@ -7,6 +7,7 @@ import weakref
 from pathlib import Path
 
 from craftr.core.configurable import Closure
+from craftr.core.plugin.api import Namespace
 from craftr.core.util.preconditions import check_instance_of, check_not_none
 
 if t.TYPE_CHECKING:
@@ -65,7 +66,8 @@ class Project(ExtensibleObject):
     self._tasks: t.Dict[str, 'Task'] = {}
     self._subprojects: t.Dict[Path, 'Project'] = {}
     self._on_apply: t.Optional[Closure] = None
-    self.exports = ExtensibleObject(self.path)
+    self.ext = Namespace(self, self.path, Namespace.Type.PROJECT_EXT)
+    self.exports = Namespace(self, self.path, Namespace.Type.PROJECT_EXPORTS)
 
     if not context._root_project:
       context._root_project = self
@@ -180,20 +182,28 @@ class Project(ExtensibleObject):
       raise RuntimeError(f'{self}.on_apply() already set')
     self._on_apply = func
 
-  def apply(self, plugin_name: t.Optional[str] = None, from_project: t.Union[None, str, 'Project'] = None) -> t.Any:
+  def apply(
+    self,
+    plugin_name: t.Optional[str] = None,
+    from_project: t.Union[None, str, 'Project'] = None,
+    merge: bool = True,
+  ) -> Namespace:
     """
-    Loads a plugin and applies it to the project. Plugins are loaded via #Context.plugin_loader
-    and applied to the project immediately after. The default implementation for loading plugins
-    uses Python package entrypoints.
+    Loads a plugin and applies it to the project. Plugins are loaded via #Context.plugin_loader and applied to the
+    project immediately after. The default implementation for loading plugins uses Python package entrypoints
+    as configured in the #Context.
+
+    Returns the extension namespace created for the plugin. The extension is also merged into the #Project.ext
+    namespace unless the *merge* parameter is set to #False.
     """
 
     if plugin_name is not None:
       if from_project is not None:
         raise TypeError('plugin_name and from_project should not be specified at the same time')
-
       check_instance_of(plugin_name, str, 'plugin_name')
       plugin = self.context.plugin_loader.load_plugin(plugin_name)
-      return plugin.apply(self, plugin_name)
+      namespace = Namespace(self, plugin_name, Namespace.Type.PLUGIN)
+      plugin.apply(self, namespace)
 
     elif from_project is not None:
       from_project = self.subproject(from_project) if isinstance(from_project, str) else from_project
@@ -201,10 +211,15 @@ class Project(ExtensibleObject):
       if not from_project._on_apply:
         raise ValueError(f'{from_project} has no on_apply handler')
       from_project._on_apply(self)
-      return from_project.exports
+      namespace = from_project.exports
 
     else:
       raise TypeError('need plugin_name or from_project')
+
+    if merge:
+      namespace.merge_into(self.ext)
+
+    return namespace
 
   def file(self, sub_path: str) -> Path:
     return self.directory / sub_path
