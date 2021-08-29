@@ -99,6 +99,12 @@ class Project:
   def build_directory(self, path: t.Union[str, Path]) -> None:
     self._build_directory = Path(path)
 
+  @t.overload
+  def task(self, name: str) -> Task: ...
+
+  @t.overload
+  def task(self, name: str, task_class: t.Type[T_Task]) -> T_Task: ...
+
   def task(self, name: str, task_class: t.Optional[t.Type[T_Task]] = None) -> T_Task:
     """
     Create a new task of type *task_class* (defaulting to #Task) and add it to the project. The

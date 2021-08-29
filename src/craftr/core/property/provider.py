@@ -54,7 +54,7 @@ class Provider(t.Generic[T], metaclass=abc.ABCMeta):
   def get(self) -> T:
     """ Get the value of the propery, or raise a #NoValueError. """
 
-  def or_else(self, default: U) -> t.Union[T, U]:
+  def or_else(self, default: T) -> T:
     """ Get the value of the property, or return *default*. """
 
     try:
