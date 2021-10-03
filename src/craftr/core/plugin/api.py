@@ -25,7 +25,7 @@ class TaskFactory(t.Generic[T_Task]):
 
   ```py
   def apply(project: Project, name: str) -> None:
-    project.register_extension('myTaskType', TaskFactoryExtension(project, 'myTaskType', MyTaskType))
+    project.register_extension('myTaskType', TaskFactory(project, 'myTaskType', MyTaskType))
   ```
 
   Inside a project, the task can then be instantiated with a configuration closure, and optionally
@@ -50,7 +50,7 @@ class TaskFactory(t.Generic[T_Task]):
     self._task_type = task_type
 
   def __repr__(self) -> str:
-    return f'TaskFactoryExtension(project={self._project()}, type={self._task_type})'
+    return f'{type(self).__name__}(project={self._project()}, type={self._task_type})'
 
   @property
   def project(self) -> 'Project':
@@ -60,7 +60,7 @@ class TaskFactory(t.Generic[T_Task]):
   def type(self) -> t.Type[T_Task]:
     return self._task_type
 
-  def __call__(self, arg: t.Union[str, Closure]) -> T_Task:
+  def __call__(self, arg: t.Union[str, Closure], closure: t.Optional[Closure] = None) -> T_Task:
     """
     Create a new instance of the task type. If a string is specified, it will be used as the task
     name. If a closure is specified, the default task name will be used and the task will be
@@ -70,9 +70,11 @@ class TaskFactory(t.Generic[T_Task]):
     project = check_not_none(self._project(), 'lost project reference')
     if isinstance(arg, str):
       task = project.task(arg or self._default_name, self._task_type)
+      if closure is not None:
+        closure(task)
     else:
       task = project.task(self._default_name, self._task_type)
-      task(arg)
+      arg(task)
     return task
 
 

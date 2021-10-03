@@ -7,7 +7,7 @@ from craftr.core.property import Property
 from craftr.core.util.typing import unpack_type_hint
 
 if t.TYPE_CHECKING:
-  from .task import Task
+  from .task import DefaultTask
 
 
 class _IHasher(t.Protocol):
@@ -25,16 +25,16 @@ def _hash_file(hasher: _IHasher, path: Path) -> None:
 
 
 def check_file_property(prop: Property) -> t.Tuple[bool, bool, bool]:
-  from .task import Task
+  from .task import TaskPropertyType
   item_type = unpack_type_hint(prop.value_type)[1]
   is_sequence = item_type is not None and prop.value_type != Path
   is_file_type = (prop.value_type == Path or (item_type and item_type[0] == Path))
   is_input_file_property = (
-      Task.Input in prop.annotations and is_file_type
-      or Task.InputFile in prop.annotations)
+      TaskPropertyType.Input in prop.annotations and is_file_type
+      or TaskPropertyType.InputFile in prop.annotations)
   is_output_file_property = (
-      Task.Output in prop.annotations and is_file_type
-      or Task.OutputFile in prop.annotations)
+      TaskPropertyType.Output in prop.annotations and is_file_type
+      or TaskPropertyType.OutputFile in prop.annotations)
   return is_sequence, is_input_file_property, is_output_file_property
 
 
@@ -50,7 +50,7 @@ def unwrap_file_property(prop: Property) -> t.Tuple[bool, bool, t.List[Path]]:
   return is_input_file_property, is_output_file_property, result
 
 
-def calculate_task_hash(task: 'Task', hash_algo: str = 'sha1') -> str:  # NOSONAR
+def calculate_task_hash(task: 'DefaultTask', hash_algo: str = 'sha1') -> str:  # NOSONAR
   """
   Calculates a hash for the task that represents the state of it's inputs (property values
   and input file contents). That hash is used to determine if the task is up to date with

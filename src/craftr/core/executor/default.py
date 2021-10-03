@@ -38,6 +38,6 @@ class DefaultExecutor(IExecutor):
         actions = task.do_first_actions + task.get_actions() + task.do_last_actions
         for action in actions:
           action.execute(context)
-        task.completed()
+        task.on_completed()
       else:
         print('> Task', task.path, colored('UP TO DATE', 'green'), flush=True)

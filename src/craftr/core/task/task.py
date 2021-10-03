@@ -1,4 +1,5 @@
 
+import abc
 import enum
 import typing as t
 import weakref
@@ -7,12 +8,14 @@ from pathlib import Path
 from nr.caching.api import KeyDoesNotExist
 from nr.preconditions import check_instance_of, check_not_none
 
+import craftr
 from craftr.core.property import HavingProperties, collect_properties
-from craftr.core.configurable import Closure, Configurable
+from craftr.core.configurable import Closure
 from craftr.core.util.collections import unique
 from .state import calculate_task_hash, unwrap_file_property
 
 if t.TYPE_CHECKING:
+  import craftr.core.actions
   from craftr.core.actions import Action
   from craftr.core.project import Project
 
@@ -26,23 +29,20 @@ class TaskPropertyType(enum.Enum):
   OutputFile = enum.auto()
 
 
-class Task(HavingProperties, Configurable):
+class Task(abc.ABC):
   """
-  A task represents a set of sequential actions that are configurable through properties and may
-  have dependencies on other tasks. Using the property system, dependencies between tasks can be
-  computed automatically without having to explicitly list the dependencies.
-
-  Tasks are rendered into executable #BuildNode objects to construct the #BuildGraph.
+  The raw base class for tasks that represents a logically closed unit of work. It is common to subclass the
+  #DefaultTask class instead.
   """
 
-  Input = TaskPropertyType.Input
-  InputFile = TaskPropertyType.InputFile
-  Output = TaskPropertyType.Output
-  OutputFile = TaskPropertyType.OutputFile
-
-  #: Explicit dependencies of the task. Tasks in this list will always be executed before
-  #: this task.
+  #: A list of direct dependencies of this task.
   dependencies: t.List['Task']
+
+  #: A list of actions to perform before any other actions in the task.
+  do_first_actions: t.List['craftr.core.actions.Action']
+
+  #: A list of actions to perform after any other actions in the task.
+  do_last_actions: t.List['craftr.core.actions.Action']
 
   #: Whether the task should be included if no explicit set of tasks is selected for execution.
   #: This is `True` by default for all tasks (but can be overwritten by subclasses).
@@ -64,9 +64,9 @@ class Task(HavingProperties, Configurable):
     self._project = weakref.ref(project)
     self._name = name
     self._finalized = False
+    self.dependencies = []
     self.do_first_actions: t.List['Action'] = []
     self.do_last_actions: t.List['Action'] = []
-    self.dependencies = []
     self.init()
 
   def __repr__(self) -> str:
@@ -91,9 +91,103 @@ class Task(HavingProperties, Configurable):
     return self._finalized
 
   def init(self) -> None:
-    """ Called from `__init__()`. Useful to implement by subclasses. """
+    """
+    Called from #__init__().
+    """
 
-    pass
+  def finalize(self) -> None:
+    """
+    Called to finalize the state of the task. Raises a #RuntimeError if the task has already been finalized.
+    """
+
+    if self._finalized:
+      raise RuntimeError('Task already finalized')
+    self._finalized = True
+
+  def get_dependencies(self) -> t.List['Task']:
+    """
+    Return a list of the task's dependencies. This does not not need to include #dependencies as they will be
+    taken into account by the executor automatically.
+    """
+
+    return []
+
+  def get_actions(self) -> t.List['Action']:
+    """
+    Return the actions that need to be executed for this task. This does not have to include #do_first_actions
+    and #do_last_actions as they will be handled separately by the executor.
+    """
+
+    return []
+
+  def is_outdated(self) -> bool:
+    """
+    Check if the task is outdated and needs to be re-run. This does not have to take into account #always_outdated,
+    because the executor can check it separately. The default implementation returns always #True.
+
+    Tasks should use the #Context.metadata_store to read and write previous information about itself.
+    """
+
+    return True
+
+  def on_completed(self) -> None:
+    """
+    Called when the task has finished executing.
+    """
+
+  def depends_on(self, *tasks: t.Union[str, 'Task']) -> None:
+    """
+    Specify that the task dependends on the specified other tasks. Strings are resolved from the tasks own project.
+    """
+
+    for index, item in enumerate(tasks):
+      check_instance_of(item, (str, Task), lambda: 'task ' + str(index))
+      if isinstance(item, str):
+        self.dependencies += self.project.tasks.resolve(item)
+      elif isinstance(item, Task):
+        self.dependencies.append(item)
+
+  def do_first(self, action: t.Union['Action', Closure]) -> None:
+    from craftr.core.actions import Action, LambdaAction
+    check_instance_of(action, (Action, Closure), 'action')
+    if isinstance(action, Closure):
+      closure = action
+      action = LambdaAction(lambda context: closure(self, context).apply(self))
+    self.do_first_actions.append(action)
+
+  def do_last(self, action: t.Union['Action', Closure]) -> None:
+    from craftr.core.actions import Action, LambdaAction
+    check_instance_of(action, (Action, Closure), 'action')
+    if isinstance(action, Closure):
+      closure = action
+      action = LambdaAction(lambda context: closure(self, context).apply(self))
+    self.do_last_actions.append(action)
+
+  def __call__(self, closure: Closure) -> 'Task':
+    """
+    Allows the task to be configured using a closure in Craftr DSL land.
+    """
+
+    closure(self)
+    return self
+
+
+class DefaultTask(Task, HavingProperties):
+  """
+  This task implementation is what is commonly used to implement custom tasks, as it provides capabilities to
+  automatically deduce dependencies between tasks via property relationships (see #HavingProperties). If you
+  use the property of one task to set the value of another, that first task becomes a dependency of the latter.
+
+  Furthermore, the type of the property can define how the task's properties are handled in respect to its
+  up-to-date calculation. E.g. if a property is marked as a #TaskPropertyType.OutputFile, the task is considered
+  out-of-date if the output file does not exist or if any of the task's input files (marked with
+  #TaskPropertyType.InputFile) have been changed since the output file was produced.
+  """
+
+  Input = TaskPropertyType.Input
+  InputFile = TaskPropertyType.InputFile
+  Output = TaskPropertyType.Output
+  OutputFile = TaskPropertyType.OutputFile
 
   def finalize(self) -> None:
     """
@@ -127,11 +221,6 @@ class Task(HavingProperties, Configurable):
 
     return dependencies
 
-  def get_actions(self) -> t.List['Action']:
-    """ Get the list of actions for this task. This should be called when everything is loaded. """
-
-    return []
-
   def is_outdated(self) -> bool:
     """
     Checks if the task is outdated.
@@ -159,7 +248,7 @@ class Task(HavingProperties, Configurable):
 
     return hash_value != stored_hash
 
-  def completed(self) -> None:
+  def on_completed(self) -> None:
     """
     Called when the task was executed.
     """
@@ -167,38 +256,3 @@ class Task(HavingProperties, Configurable):
     if not self.always_outdated:
       self.project.context.metadata_store.\
           namespace(TASK_HASH_NAMESPACE).store(self.path, calculate_task_hash(self).encode())
-
-  def depends_on(self, *tasks: t.Union[str, 'Task']) -> None:
-    """
-    Specify that the task dependends on the specified other tasks. Strings are resolved from
-    the tasks own project.
-    """
-
-    for index, item in enumerate(tasks):
-      check_instance_of(item, (str, Task), lambda: 'task ' + str(index))
-      if isinstance(item, str):
-        self.dependencies += self.project.tasks.resolve(item)
-      elif isinstance(item, Task):
-        self.dependencies.append(item)
-
-  def do_first(self, action: t.Union['Action', Closure]) -> None:
-    from craftr.core.actions import Action, LambdaAction
-    check_instance_of(action, (Action, Closure), 'action')
-    if isinstance(action, Closure):
-      closure = action
-      action = LambdaAction(lambda context: closure(self, context).apply(self))
-    self.do_first_actions.append(action)
-
-  def do_last(self, action: t.Union['Action', Closure]) -> None:
-    from craftr.core.actions import Action, LambdaAction
-    check_instance_of(action, (Action, Closure), 'action')
-    if isinstance(action, Closure):
-      closure = action
-      action = LambdaAction(lambda context: closure(self, context).apply(self))
-    self.do_last_actions.append(action)
-
-  # Configurable
-  def __call__(self, closure: Closure) -> 'Task':
-    closure(self)
-    self.finalize()
-    return self
