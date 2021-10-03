@@ -119,56 +119,23 @@
               
                 <p><a id="craftr.core.task"></a></p>
 <h1 id="craftrcoretask">craftr.core.task</h1>
-<p><a id="craftr.core.task.selector"></a></p>
-<h1 id="craftrcoretaskselector">craftr.core.task.selector</h1>
-<p><a id="craftr.core.task.selector.default"></a></p>
-<h1 id="craftrcoretaskselectordefault">craftr.core.task.selector.default</h1>
-<p><a id="craftr.core.task.selector.default.DefaultTaskSelector"></a></p>
-<h2 id="defaulttaskselector-objects">DefaultTaskSelector Objects</h2>
-<pre><code class="language-python">class DefaultTaskSelector(ITaskSelector)
-</code></pre>
-<p>The default task selector employs the following selector syntax:</p>
-<pre><code>[:][subProject:]+[taskName]
-</code></pre>
-<p>If the selector is prefixed with a semi-colon (<code>:</code>), the task path must be exact and relative
-to the current project. The <code>taskName</code> may refer to an individial task's name or a task group.</p>
-<p>Without the <code>:</code> prefix, the path must only match exactly at the end of the path (e.g. <code>a:b</code>
-matches both tasks with an absolute path <code>foo:a:b</code> and <code>egg:spam:a:b</code>).</p>
-<p><a id="craftr.core.task.selector.api"></a></p>
-<h1 id="craftrcoretaskselectorapi">craftr.core.task.selector.api</h1>
-<p><a id="craftr.core.task.selector.api.ITaskSelector"></a></p>
-<h2 id="itaskselector-objects">ITaskSelector Objects</h2>
-<pre><code class="language-python">@t.runtime_checkable
-class ITaskSelector(t.Protocol, metaclass=abc.ABCMeta)
-</code></pre>
-<p>An interface to expand a string into a set of tasks in the context of a project.</p>
-<p><a id="craftr.core.task.state"></a></p>
-<h1 id="craftrcoretaskstate">craftr.core.task.state</h1>
-<p><a id="craftr.core.task.state.calculate_task_hash"></a></p>
-<h4 id="calculate_task_hash">calculate_task_hash</h4>
-<pre><code class="language-python">calculate_task_hash(task: 'Task', hash_algo: str = 'sha1') -&gt; str
-</code></pre>
-<p>Calculates a hash for the task that represents the state of it's inputs (property values
-and input file contents). That hash is used to determine if the task is up to date with
-it's previous execution or if it needs to be executed.</p>
-<blockquote>
-<p>Implementation detail: Expects that all important information of a property value is
-included in it's <code>repr()</code>, and that the <code>repr()</code> is consistent.</p>
-</blockquote>
 <p><a id="craftr.core.task.task"></a></p>
 <h1 id="craftrcoretasktask">craftr.core.task.task</h1>
 <p><a id="craftr.core.task.task.Task"></a></p>
 <h2 id="task-objects">Task Objects</h2>
-<pre><code class="language-python">class Task(HavingProperties,  Configurable)
+<pre><code class="language-python">class Task(abc.ABC)
 </code></pre>
-<p>A task represents a set of sequential actions that are configurable through properties and may
-have dependencies on other tasks. Using the property system, dependencies between tasks can be
-computed automatically without having to explicitly list the dependencies.</p>
-<p>Tasks are rendered into executable <code>BuildNode</code> objects to construct the <code>BuildGraph</code>.</p>
+<p>The raw base class for tasks that represents a logically closed unit of work. It is common to subclass the
+<a href="#craftr.core.task.task.DefaultTask"><code>DefaultTask</code></a> class instead.</p>
 <p><a id="craftr.core.task.task.Task.dependencies"></a></p>
 <h4 id="dependencies">dependencies</h4>
-<p>Explicit dependencies of the task. Tasks in this list will always be executed before
-this task.</p>
+<p>A list of direct dependencies of this task.</p>
+<p><a id="craftr.core.task.task.Task.do_first_actions"></a></p>
+<h4 id="do_first_actions">do_first_actions</h4>
+<p>A list of actions to perform before any other actions in the task.</p>
+<p><a id="craftr.core.task.task.Task.do_last_actions"></a></p>
+<h4 id="do_last_actions">do_last_actions</h4>
+<p>A list of actions to perform after any other actions in the task.</p>
 <p><a id="craftr.core.task.task.Task.default"></a></p>
 <h4 id="default">default</h4>
 <p>Whether the task should be included if no explicit set of tasks is selected for execution.
@@ -194,40 +161,115 @@ a variety of tasks).</p>
 <h4 id="init">init</h4>
 <pre><code class="language-python"> | init() -&gt; None
 </code></pre>
-<p>Called from <code>__init__()</code>. Useful to implement by subclasses.</p>
+<p>Called from <code>__init__()</code>.</p>
 <p><a id="craftr.core.task.task.Task.finalize"></a></p>
 <h4 id="finalize">finalize</h4>
+<pre><code class="language-python"> | finalize() -&gt; None
+</code></pre>
+<p>Called to finalize the state of the task. Raises a <code>RuntimeError</code> if the task has already been finalized.</p>
+<p><a id="craftr.core.task.task.Task.get_dependencies"></a></p>
+<h4 id="get_dependencies">get_dependencies</h4>
+<pre><code class="language-python"> | get_dependencies() -&gt; t.List['Task']
+</code></pre>
+<p>Return a list of the task's dependencies. This does not not need to include <a href="#craftr.core.task.task.Task.dependencies"><code>dependencies</code></a> as they will be
+taken into account by the executor automatically.</p>
+<p><a id="craftr.core.task.task.Task.get_actions"></a></p>
+<h4 id="get_actions">get_actions</h4>
+<pre><code class="language-python"> | get_actions() -&gt; t.List['Action']
+</code></pre>
+<p>Return the actions that need to be executed for this task. This does not have to include <a href="#craftr.core.task.task.Task.do_first_actions"><code>do_first_actions</code></a>
+and <a href="#craftr.core.task.task.Task.do_last_actions"><code>do_last_actions</code></a> as they will be handled separately by the executor.</p>
+<p><a id="craftr.core.task.task.Task.is_outdated"></a></p>
+<h4 id="is_outdated">is_outdated</h4>
+<pre><code class="language-python"> | is_outdated() -&gt; bool
+</code></pre>
+<p>Check if the task is outdated and needs to be re-run. This does not have to take into account <a href="#craftr.core.task.task.Task.always_outdated"><code>always_outdated</code></a>,
+because the executor can check it separately. The default implementation returns always <code>True</code>.</p>
+<p>Tasks should use the <code>Context.metadata_store</code> to read and write previous information about itself.</p>
+<p><a id="craftr.core.task.task.Task.on_completed"></a></p>
+<h4 id="on_completed">on_completed</h4>
+<pre><code class="language-python"> | on_completed() -&gt; None
+</code></pre>
+<p>Called when the task has finished executing.</p>
+<p><a id="craftr.core.task.task.Task.depends_on"></a></p>
+<h4 id="depends_on">depends_on</h4>
+<pre><code class="language-python"> | depends_on(*tasks: t.Union[str, 'Task']) -&gt; None
+</code></pre>
+<p>Specify that the task dependends on the specified other tasks. Strings are resolved from the tasks own project.</p>
+<p><a id="craftr.core.task.task.Task.__call__"></a></p>
+<h4 id="__call__">__call__</h4>
+<pre><code class="language-python"> | __call__(closure: Closure) -&gt; 'Task'
+</code></pre>
+<p>Allows the task to be configured using a closure in Craftr DSL land.</p>
+<p><a id="craftr.core.task.task.DefaultTask"></a></p>
+<h2 id="defaulttask-objects">DefaultTask Objects</h2>
+<pre><code class="language-python">class DefaultTask(Task,  HavingProperties)
+</code></pre>
+<p>This task implementation is what is commonly used to implement custom tasks, as it provides capabilities to
+automatically deduce dependencies between tasks via property relationships (see <code>HavingProperties</code>). If you
+use the property of one task to set the value of another, that first task becomes a dependency of the latter.</p>
+<p>Furthermore, the type of the property can define how the task's properties are handled in respect to its
+up-to-date calculation. E.g. if a property is marked as a <code>TaskPropertyType.OutputFile</code>, the task is considered
+out-of-date if the output file does not exist or if any of the task's input files (marked with
+<code>TaskPropertyType.InputFile</code>) have been changed since the output file was produced.</p>
+<p><a id="craftr.core.task.task.DefaultTask.finalize"></a></p>
+<h4 id="finalize_1">finalize</h4>
 <pre><code class="language-python"> | finalize() -&gt; None
 </code></pre>
 <p>Called to finalize the task. This is called automatically after the task is configured.
 Properties are finalized in this call. The subclass gets a chance to set any output properties
 that are derived other properties.</p>
-<p><a id="craftr.core.task.task.Task.get_dependencies"></a></p>
-<h4 id="get_dependencies">get_dependencies</h4>
+<p><a id="craftr.core.task.task.DefaultTask.get_dependencies"></a></p>
+<h4 id="get_dependencies_1">get_dependencies</h4>
 <pre><code class="language-python"> | get_dependencies() -&gt; t.List['Task']
 </code></pre>
 <p>Get all direct dependencies of the task, including those inherited through properties.</p>
-<p><a id="craftr.core.task.task.Task.get_actions"></a></p>
-<h4 id="get_actions">get_actions</h4>
-<pre><code class="language-python"> | get_actions() -&gt; t.List['Action']
-</code></pre>
-<p>Get the list of actions for this task. This should be called when everything is loaded.</p>
-<p><a id="craftr.core.task.task.Task.is_outdated"></a></p>
-<h4 id="is_outdated">is_outdated</h4>
+<p><a id="craftr.core.task.task.DefaultTask.is_outdated"></a></p>
+<h4 id="is_outdated_1">is_outdated</h4>
 <pre><code class="language-python"> | is_outdated() -&gt; bool
 </code></pre>
 <p>Checks if the task is outdated.</p>
-<p><a id="craftr.core.task.task.Task.completed"></a></p>
-<h4 id="completed">completed</h4>
-<pre><code class="language-python"> | completed() -&gt; None
+<p><a id="craftr.core.task.task.DefaultTask.on_completed"></a></p>
+<h4 id="on_completed_1">on_completed</h4>
+<pre><code class="language-python"> | on_completed() -&gt; None
 </code></pre>
 <p>Called when the task was executed.</p>
-<p><a id="craftr.core.task.task.Task.depends_on"></a></p>
-<h4 id="depends_on">depends_on</h4>
-<pre><code class="language-python"> | depends_on(*tasks: t.Union[str, 'Task']) -&gt; None
+<p><a id="craftr.core.task.state"></a></p>
+<h1 id="craftrcoretaskstate">craftr.core.task.state</h1>
+<p><a id="craftr.core.task.state.calculate_task_hash"></a></p>
+<h4 id="calculate_task_hash">calculate_task_hash</h4>
+<pre><code class="language-python">calculate_task_hash(task: 'DefaultTask', hash_algo: str = 'sha1') -&gt; str
 </code></pre>
-<p>Specify that the task dependends on the specified other tasks. Strings are resolved from
-the tasks own project.</p>
+<p>Calculates a hash for the task that represents the state of it's inputs (property values
+and input file contents). That hash is used to determine if the task is up to date with
+it's previous execution or if it needs to be executed.</p>
+<blockquote>
+<p>Implementation detail: Expects that all important information of a property value is
+included in it's <code>repr()</code>, and that the <code>repr()</code> is consistent.</p>
+</blockquote>
+<p><a id="craftr.core.task.selector"></a></p>
+<h1 id="craftrcoretaskselector">craftr.core.task.selector</h1>
+<p><a id="craftr.core.task.selector.default"></a></p>
+<h1 id="craftrcoretaskselectordefault">craftr.core.task.selector.default</h1>
+<p><a id="craftr.core.task.selector.default.DefaultTaskSelector"></a></p>
+<h2 id="defaulttaskselector-objects">DefaultTaskSelector Objects</h2>
+<pre><code class="language-python">class DefaultTaskSelector(ITaskSelector)
+</code></pre>
+<p>The default task selector employs the following selector syntax:</p>
+<pre><code>[:][subProject:]+[taskName]
+</code></pre>
+<p>If the selector is prefixed with a semi-colon (<code>:</code>), the task path must be exact and relative
+to the current project. The <code>taskName</code> may refer to an individial task's name or a task group.</p>
+<p>Without the <code>:</code> prefix, the path must only match exactly at the end of the path (e.g. <code>a:b</code>
+matches both tasks with an absolute path <code>foo:a:b</code> and <code>egg:spam:a:b</code>).</p>
+<p><a id="craftr.core.task.selector.api"></a></p>
+<h1 id="craftrcoretaskselectorapi">craftr.core.task.selector.api</h1>
+<p><a id="craftr.core.task.selector.api.ITaskSelector"></a></p>
+<h2 id="itaskselector-objects">ITaskSelector Objects</h2>
+<pre><code class="language-python">@t.runtime_checkable
+class ITaskSelector(t.Protocol, metaclass=abc.ABCMeta)
+</code></pre>
+<p>An interface to expand a string into a set of tasks in the context of a project.</p>
               
             </div>
           </div>

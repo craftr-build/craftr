@@ -137,7 +137,7 @@ class DefaultPluginLoader(IPluginLoader)
 as a convenience when registering a task as an extension to a <code>Project</code> such that it can be used
 to define a default task as well as defining a custom named task of the type.</p>
 <pre><code class="language-py">def apply(project: Project, name: str) -&gt; None:
-  project.register_extension('myTaskType', TaskFactoryExtension(project, 'myTaskType', MyTaskType))
+  project.register_extension('myTaskType', TaskFactory(project, 'myTaskType', MyTaskType))
 </code></pre>
 <p>Inside a project, the task can then be instantiated with a configuration closure, and optionally
 with a custom task name.</p>
@@ -153,7 +153,7 @@ assert 'otherTaskName' in tasks
 </code></pre>
 <p><a id="craftr.core.plugin.api.TaskFactory.__call__"></a></p>
 <h4 id="__call__">__call__</h4>
-<pre><code class="language-python"> | __call__(arg: t.Union[str, Closure]) -&gt; T_Task
+<pre><code class="language-python"> | __call__(arg: t.Union[str, Closure], closure: t.Optional[Closure] = None) -&gt; T_Task
 </code></pre>
 <p>Create a new instance of the task type. If a string is specified, it will be used as the task
 name. If a closure is specified, the default task name will be used and the task will be

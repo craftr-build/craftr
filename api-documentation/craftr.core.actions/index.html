@@ -121,6 +121,35 @@
 <h1 id="craftrcoreactions">craftr.core.actions</h1>
 <p><a id="craftr.core.actions.lambda_action"></a></p>
 <h1 id="craftrcoreactionslambda_action">craftr.core.actions.lambda_action</h1>
+<p><a id="craftr.core.actions.write_file_action"></a></p>
+<h1 id="craftrcoreactionswrite_file_action">craftr.core.actions.write_file_action</h1>
+<p><a id="craftr.core.actions.write_file_action.WriteFileAction"></a></p>
+<h2 id="writefileaction-objects">WriteFileAction Objects</h2>
+<pre><code class="language-python">@dataclass
+class WriteFileAction(Action)
+</code></pre>
+<p><a id="craftr.core.actions.write_file_action.WriteFileAction.file_path"></a></p>
+<h4 id="file_path">file_path</h4>
+<p>The path of the file to write to.</p>
+<p><a id="craftr.core.actions.write_file_action.WriteFileAction.text"></a></p>
+<h4 id="text">text</h4>
+<p>The contents of the file as text.</p>
+<p><a id="craftr.core.actions.write_file_action.WriteFileAction.encoding"></a></p>
+<h4 id="encoding">encoding</h4>
+<p>The encoding if <a href="#craftr.core.actions.write_file_action.WriteFileAction.text"><code>text</code></a> is provided.</p>
+<p><a id="craftr.core.actions.write_file_action.WriteFileAction.data"></a></p>
+<h4 id="data">data</h4>
+<p>The contents of the file to write as binary data.</p>
+<p><a id="craftr.core.actions.create_directory_action"></a></p>
+<h1 id="craftrcoreactionscreate_directory_action">craftr.core.actions.create_directory_action</h1>
+<p><a id="craftr.core.actions.create_directory_action.CreateDirectoryAction"></a></p>
+<h2 id="createdirectoryaction-objects">CreateDirectoryAction Objects</h2>
+<pre><code class="language-python">@dataclass
+class CreateDirectoryAction(Action)
+</code></pre>
+<p><a id="craftr.core.actions.create_directory_action.CreateDirectoryAction.path"></a></p>
+<h4 id="path">path</h4>
+<p>The path of the directory to create.</p>
 <p><a id="craftr.core.actions.command_action"></a></p>
 <h1 id="craftrcoreactionscommand_action">craftr.core.actions.command_action</h1>
 <p><a id="craftr.core.actions.command_action.CommandAction"></a></p>
@@ -141,16 +170,6 @@ specified, <a href="#craftr.core.actions.command_action.CommandAction.command"><
 <p><a id="craftr.core.actions.command_action.CommandAction.verbose"></a></p>
 <h4 id="verbose">verbose</h4>
 <p>If this is enabled, the command that is being run is printed to stdout.</p>
-<p><a id="craftr.core.actions.create_directory_action"></a></p>
-<h1 id="craftrcoreactionscreate_directory_action">craftr.core.actions.create_directory_action</h1>
-<p><a id="craftr.core.actions.create_directory_action.CreateDirectoryAction"></a></p>
-<h2 id="createdirectoryaction-objects">CreateDirectoryAction Objects</h2>
-<pre><code class="language-python">@dataclass
-class CreateDirectoryAction(Action)
-</code></pre>
-<p><a id="craftr.core.actions.create_directory_action.CreateDirectoryAction.path"></a></p>
-<h4 id="path">path</h4>
-<p>The path of the directory to create.</p>
 <p><a id="craftr.core.actions.action"></a></p>
 <h1 id="craftrcoreactionsaction">craftr.core.actions.action</h1>
 <p><a id="craftr.core.actions.action.Action"></a></p>
@@ -160,30 +179,11 @@ class CreateDirectoryAction(Action)
 <p><a id="craftr.core.actions.action.Action.as_task"></a></p>
 <h4 id="as_task">as_task</h4>
 <pre><code class="language-python"> | @classmethod
- | as_task(cls, project: 'Project', name: str) -&gt; 'Task'
+ | as_task(cls, project: 'Project', name: str) -&gt; 'DefaultTask'
 </code></pre>
 <p>Factory function to produce a task that contains exactly the properties of this action through
 the class annotations. The action will be created by passing a keyword argument for every
 populated property value.</p>
-<p><a id="craftr.core.actions.write_file_action"></a></p>
-<h1 id="craftrcoreactionswrite_file_action">craftr.core.actions.write_file_action</h1>
-<p><a id="craftr.core.actions.write_file_action.WriteFileAction"></a></p>
-<h2 id="writefileaction-objects">WriteFileAction Objects</h2>
-<pre><code class="language-python">@dataclass
-class WriteFileAction(Action)
-</code></pre>
-<p><a id="craftr.core.actions.write_file_action.WriteFileAction.file_path"></a></p>
-<h4 id="file_path">file_path</h4>
-<p>The path of the file to write to.</p>
-<p><a id="craftr.core.actions.write_file_action.WriteFileAction.text"></a></p>
-<h4 id="text">text</h4>
-<p>The contents of the file as text.</p>
-<p><a id="craftr.core.actions.write_file_action.WriteFileAction.encoding"></a></p>
-<h4 id="encoding">encoding</h4>
-<p>The encoding if <a href="#craftr.core.actions.write_file_action.WriteFileAction.text"><code>text</code></a> is provided.</p>
-<p><a id="craftr.core.actions.write_file_action.WriteFileAction.data"></a></p>
-<h4 id="data">data</h4>
-<p>The contents of the file to write as binary data.</p>
               
             </div>
           </div>

@@ -119,25 +119,6 @@
               
                 <p><a id="craftr.core.project"></a></p>
 <h1 id="craftrcoreproject">craftr.core.project</h1>
-<p><a id="craftr.core.project.loader"></a></p>
-<h1 id="craftrcoreprojectloader">craftr.core.project.loader</h1>
-<p><a id="craftr.core.project.loader.default"></a></p>
-<h1 id="craftrcoreprojectloaderdefault">craftr.core.project.loader.default</h1>
-<p>Implements the default project loader which loads <code>build.craftr.py</code> files and executes them as a
-plain Python script providing the current <code>Project</code> in the global scope.</p>
-<p><a id="craftr.core.project.loader.api"></a></p>
-<h1 id="craftrcoreprojectloaderapi">craftr.core.project.loader.api</h1>
-<p><a id="craftr.core.project.loader.delegate"></a></p>
-<h1 id="craftrcoreprojectloaderdelegate">craftr.core.project.loader.delegate</h1>
-<p><a id="craftr.core.project.loader.delegate.DelegateProjectLoader"></a></p>
-<h2 id="delegateprojectloader-objects">DelegateProjectLoader Objects</h2>
-<pre><code class="language-python">class DelegateProjectLoader(IProjectLoader,  IHasFromSettings)
-</code></pre>
-<p>Delegates the project loading process to a sequence of other loaders. Returns the first project
-loaded by any loader.</p>
-<p>If created from configuration, the <code>craftr.plugin.loader.delegates</code> option is respected, which
-must be a comma-separated list of fully qualified lodaer names. A loader name may be trailed by
-a question mark to ignore if the loader name cannot be resolved.</p>
 <p><a id="craftr.core.project.project"></a></p>
 <h1 id="craftrcoreprojectproject">craftr.core.project.project</h1>
 <p><a id="craftr.core.project.project.Project"></a></p>
@@ -210,6 +191,25 @@ namespace unless the <em>merge</em> parameter is set to <code>False</code>.</p>
 </code></pre>
 <p>Apply the specified glob pattern relative to the project directory and return a list of the
 matched files.</p>
+<p><a id="craftr.core.project.loader"></a></p>
+<h1 id="craftrcoreprojectloader">craftr.core.project.loader</h1>
+<p><a id="craftr.core.project.loader.default"></a></p>
+<h1 id="craftrcoreprojectloaderdefault">craftr.core.project.loader.default</h1>
+<p>Implements the default project loader which loads <code>build.craftr.py</code> files and executes them as a
+plain Python script providing the current <code>Project</code> in the global scope.</p>
+<p><a id="craftr.core.project.loader.api"></a></p>
+<h1 id="craftrcoreprojectloaderapi">craftr.core.project.loader.api</h1>
+<p><a id="craftr.core.project.loader.delegate"></a></p>
+<h1 id="craftrcoreprojectloaderdelegate">craftr.core.project.loader.delegate</h1>
+<p><a id="craftr.core.project.loader.delegate.DelegateProjectLoader"></a></p>
+<h2 id="delegateprojectloader-objects">DelegateProjectLoader Objects</h2>
+<pre><code class="language-python">class DelegateProjectLoader(IProjectLoader,  IHasFromSettings)
+</code></pre>
+<p>Delegates the project loading process to a sequence of other loaders. Returns the first project
+loaded by any loader.</p>
+<p>If created from configuration, the <code>craftr.plugin.loader.delegates</code> option is respected, which
+must be a comma-separated list of fully qualified lodaer names. A loader name may be trailed by
+a question mark to ignore if the loader name cannot be resolved.</p>
               
             </div>
           </div>

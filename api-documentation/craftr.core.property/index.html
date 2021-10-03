@@ -119,24 +119,38 @@
               
                 <p><a id="craftr.core.property"></a></p>
 <h1 id="craftrcoreproperty">craftr.core.property</h1>
-<p><a id="craftr.core.property.typechecking"></a></p>
-<h1 id="craftrcorepropertytypechecking">craftr.core.property.typechecking</h1>
-<p>Runtime type checking for properties based on type hints.</p>
-<p><a id="craftr.core.property.typechecking.TypeCheckingContext"></a></p>
-<h2 id="typecheckingcontext-objects">TypeCheckingContext Objects</h2>
-<pre><code class="language-python">class TypeCheckingContext(BaseContext)
+<p><a id="craftr.core.property.provider"></a></p>
+<h1 id="craftrcorepropertyprovider">craftr.core.property.provider</h1>
+<p><a id="craftr.core.property.provider.NoValueError"></a></p>
+<h2 id="novalueerror-objects">NoValueError Objects</h2>
+<pre><code class="language-python">class NoValueError(Exception)
 </code></pre>
-<p><a id="craftr.core.property.typechecking.TypeCheckingContext.type_error"></a></p>
-<h4 id="type_error">type_error</h4>
-<pre><code class="language-python"> | type_error(current_value: t.Any, expected_type: t.Any) -&gt; TypeCheckingError
+<p>Raised when a provider has no value.</p>
+<p><a id="craftr.core.property.provider.Provider"></a></p>
+<h2 id="provider-objects">Provider Objects</h2>
+<pre><code class="language-python">class Provider(t.Generic[T], metaclass=abc.ABCMeta)
 </code></pre>
-<p>Constructs a <code>TypeError</code> with information from the context.</p>
-<p><a id="craftr.core.property.typechecking.check_type"></a></p>
-<h4 id="check_type">check_type</h4>
-<pre><code class="language-python">check_type(value: t.Any, context: TypeCheckingContext) -&gt; None
+<p><a id="craftr.core.property.provider.Provider.get"></a></p>
+<h4 id="get">get</h4>
+<pre><code class="language-python"> | @abc.abstractmethod
+ | get() -&gt; T
 </code></pre>
-<p>Checks if the type of <em>value</em> matches the specified <em>type_hint</em>. The check is performed
-recursively to exhaustively verify the value type.</p>
+<p>Get the value of the propery, or raise a <a href="#craftr.core.property.provider.NoValueError"><code>NoValueError</code></a>.</p>
+<p><a id="craftr.core.property.provider.Provider.or_else"></a></p>
+<h4 id="or_else">or_else</h4>
+<pre><code class="language-python"> | or_else(default: T) -&gt; T
+</code></pre>
+<p>Get the value of the property, or return <em>default</em>.</p>
+<p><a id="craftr.core.property.provider.Provider.or_else_get"></a></p>
+<h4 id="or_else_get">or_else_get</h4>
+<pre><code class="language-python"> | or_else_get(default_supplier: t.Callable[[], U]) -&gt; t.Union[T, U]
+</code></pre>
+<p>Get the value of the property, or return the value returned by <em>default_supplier</em>.</p>
+<p><a id="craftr.core.property.provider.Provider.or_none"></a></p>
+<h4 id="or_none">or_none</h4>
+<pre><code class="language-python"> | or_none() -&gt; t.Optional[T]
+</code></pre>
+<p>Get the value of the property, or return None.</p>
 <p><a id="craftr.core.property.property"></a></p>
 <h1 id="craftrcorepropertyproperty">craftr.core.property.property</h1>
 <p><a id="craftr.core.property.property.on_property_set_value"></a></p>
@@ -174,38 +188,24 @@ The constructor will take care of initializing the properties.</p>
 </code></pre>
 <p>Collects all <a href="#craftr.core.property.property.Property"><code>Property</code></a> objects that are encountered when visiting the specified provider or
 all properties of a <a href="#craftr.core.property.property.HavingProperties"><code>HavingProperties</code></a> instance.</p>
-<p><a id="craftr.core.property.provider"></a></p>
-<h1 id="craftrcorepropertyprovider">craftr.core.property.provider</h1>
-<p><a id="craftr.core.property.provider.NoValueError"></a></p>
-<h2 id="novalueerror-objects">NoValueError Objects</h2>
-<pre><code class="language-python">class NoValueError(Exception)
+<p><a id="craftr.core.property.typechecking"></a></p>
+<h1 id="craftrcorepropertytypechecking">craftr.core.property.typechecking</h1>
+<p>Runtime type checking for properties based on type hints.</p>
+<p><a id="craftr.core.property.typechecking.TypeCheckingContext"></a></p>
+<h2 id="typecheckingcontext-objects">TypeCheckingContext Objects</h2>
+<pre><code class="language-python">class TypeCheckingContext(BaseContext)
 </code></pre>
-<p>Raised when a provider has no value.</p>
-<p><a id="craftr.core.property.provider.Provider"></a></p>
-<h2 id="provider-objects">Provider Objects</h2>
-<pre><code class="language-python">class Provider(t.Generic[T], metaclass=abc.ABCMeta)
+<p><a id="craftr.core.property.typechecking.TypeCheckingContext.type_error"></a></p>
+<h4 id="type_error">type_error</h4>
+<pre><code class="language-python"> | type_error(current_value: t.Any, expected_type: t.Any) -&gt; TypeCheckingError
 </code></pre>
-<p><a id="craftr.core.property.provider.Provider.get"></a></p>
-<h4 id="get">get</h4>
-<pre><code class="language-python"> | @abc.abstractmethod
- | get() -&gt; T
+<p>Constructs a <code>TypeError</code> with information from the context.</p>
+<p><a id="craftr.core.property.typechecking.check_type"></a></p>
+<h4 id="check_type">check_type</h4>
+<pre><code class="language-python">check_type(value: t.Any, context: TypeCheckingContext) -&gt; None
 </code></pre>
-<p>Get the value of the propery, or raise a <a href="#craftr.core.property.provider.NoValueError"><code>NoValueError</code></a>.</p>
-<p><a id="craftr.core.property.provider.Provider.or_else"></a></p>
-<h4 id="or_else">or_else</h4>
-<pre><code class="language-python"> | or_else(default: U) -&gt; t.Union[T, U]
-</code></pre>
-<p>Get the value of the property, or return <em>default</em>.</p>
-<p><a id="craftr.core.property.provider.Provider.or_else_get"></a></p>
-<h4 id="or_else_get">or_else_get</h4>
-<pre><code class="language-python"> | or_else_get(default_supplier: t.Callable[[], U]) -&gt; t.Union[T, U]
-</code></pre>
-<p>Get the value of the property, or return the value returned by <em>default_supplier</em>.</p>
-<p><a id="craftr.core.property.provider.Provider.or_none"></a></p>
-<h4 id="or_none">or_none</h4>
-<pre><code class="language-python"> | or_none() -&gt; t.Optional[T]
-</code></pre>
-<p>Get the value of the property, or return None.</p>
+<p>Checks if the type of <em>value</em> matches the specified <em>type_hint</em>. The check is performed
+recursively to exhaustively verify the value type.</p>
               
             </div>
           </div>
