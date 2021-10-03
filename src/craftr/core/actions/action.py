@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from craftr.core.property import Property
 from craftr.core.property.provider import NoValueError
-from craftr.core.task import Task
+from craftr.core.task import DefaultTask
 
 if t.TYPE_CHECKING:
   from craftr.core.project import Project
@@ -23,14 +23,14 @@ class Action(metaclass=abc.ABCMeta):
     pass
 
   @classmethod
-  def as_task(cls, project: 'Project', name: str) -> 'Task':
+  def as_task(cls, project: 'Project', name: str) -> 'DefaultTask':
     """
     Factory function to produce a task that contains exactly the properties of this action through
     the class annotations. The action will be created by passing a keyword argument for every
     populated property value.
     """
 
-    class ActionAsTask(Task):
+    class ActionAsTask(DefaultTask):
       __annotations__ = {k: Property[v] for k, v in t.get_type_hints(cls).items()}  # type: ignore
 
       def get_actions(self) -> t.List[Action]:

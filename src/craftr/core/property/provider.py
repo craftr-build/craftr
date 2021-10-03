@@ -73,7 +73,10 @@ class Provider(t.Generic[T], metaclass=abc.ABCMeta):
   def or_none(self) -> t.Optional[T]:
     """ Get the value of the property, or return None. """
 
-    return self.or_else(None)
+    try:
+      return self.get()
+    except NoValueError:
+      return None
 
   def visit(self, func: t.Callable[['Provider'], bool]) -> None:
     func(self)

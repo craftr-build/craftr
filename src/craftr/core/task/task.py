@@ -209,8 +209,7 @@ class DefaultTask(Task, HavingProperties):
 
     for prop in self.get_properties().values():
       if TaskPropertyType.Output not in prop.annotations:
-        dependencies.extend(p.origin for p in collect_properties(prop)
-            if isinstance(p.origin, Task))
+        dependencies.extend(t.cast(Task, p.origin) for p in collect_properties(prop) if isinstance(p.origin, Task))
 
     dependencies = list(unique(dependencies))
 
