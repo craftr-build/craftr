@@ -28,19 +28,23 @@ class TaskFactory(t.Generic[T_Task]):
     project.register_extension('myTaskType', TaskFactory(project, 'myTaskType', MyTaskType))
   ```
 
-  Inside a project, the task can then be instantiated with a configuration closure, and optionally
-  with a custom task name.
+  Inside a project, the task can then be instantiated in multiple ways:
 
   ```py
   myTaskType {
     # ...
   }
-  myTaskType('otherTaskName') {
+  assert 'myTaskType' in tasks
+
+  myTaskType 'otherTaskName' {
     # ...
   }
-
-  assert 'myTaskType' in tasks
   assert 'otherTaskName' in tasks
+
+  myTaskType name: 'otherTaskName2', configure: {
+    # ...
+  }
+  assert 'otherTaskName2' in tasks
   ```
   """
 
@@ -60,21 +64,28 @@ class TaskFactory(t.Generic[T_Task]):
   def type(self) -> t.Type[T_Task]:
     return self._task_type
 
-  def __call__(self, arg: t.Union[str, Closure], closure: t.Optional[Closure] = None) -> T_Task:
+  @t.overload
+  def __call__(self, configure: Closure) -> T_Task: ...
+
+  @t.overload
+  def __call__(self, name: str, configure: Closure) -> T_Task: ...
+
+  def __call__(
+    self,
+    name: t.Union[str, Closure],
+    configure: t.Optional[Closure] = None
+  ) -> T_Task:
     """
-    Create a new instance of the task type. If a string is specified, it will be used as the task
-    name. If a closure is specified, the default task name will be used and the task will be
-    configured with the closure.
+    Create a new instance of the task type.
     """
 
+    if not isinstance(name, str):
+      configure = name
+      name = None
+
     project = check_not_none(self._project(), 'lost project reference')
-    if isinstance(arg, str):
-      task = project.task(arg or self._default_name, self._task_type)
-      if closure is not None:
-        closure(task)
-    else:
-      task = project.task(self._default_name, self._task_type)
-      arg(task)
+    task = project.task(name or self._default_name, self._task_type)
+    task(configure)
     return task
 
 
