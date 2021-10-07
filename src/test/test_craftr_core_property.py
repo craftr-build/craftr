@@ -5,118 +5,99 @@ import typing as t
 from pathlib import Path
 import pytest
 import typing_extensions as te
-from craftr.core.property.property import Box, Property, HavingProperties
-from craftr.core.property.typechecking import TypeCheckingError
+from craftr.core.property import Box, ListProperty, Property, HavingProperties
 
 
 def test_having_properties_constructor():
 
-  my_annotation = object()
-
   class MyClass(HavingProperties):
-    a: Property[int]
-    b: te.Annotated[Property[str], my_annotation]
+    a = Property(int)
+    b = Property(str)
 
   assert MyClass().get_properties().keys() == set(['a', 'b'])
-  assert my_annotation in MyClass().b.annotations
 
   obj = MyClass()
-  obj.a = 42
-  obj.b = 'foo'
+  obj.a.set(42)
+  obj.b.set('foo')
 
   assert obj.a.get() == 42
   assert obj.b.get() == 'foo'
 
 
-def test_property_type_checking():
+def test_property_set_value_1():
 
   class MyClass(HavingProperties):
-    a: Property[int]
-    b: Property[t.List[str]]
+    a = Property(int)
+    b = ListProperty(str)
 
   obj = MyClass()
 
-  with pytest.raises(TypeCheckingError) as excinfo:
-    obj.a = 'foo'
-  assert str(excinfo.value) == "while setting property MyClass.a: at $: found str but expected int"
+  obj.a.set('bar')
+  assert obj.a.get() == 'bar'
 
-  obj.a = Box('foo')
-  with pytest.raises(TypeCheckingError) as excinfo:
-    obj.a.get()
-  assert str(excinfo.value) == "while getting property MyClass.a: at $: found str but expected int"
+  obj.a.set(Box('foo'))
+  assert obj.a.get() == 'foo'
 
 
 def test_property_annotation_in_value_hint():
 
   class MyClass(HavingProperties):
-    a: te.Annotated[Property[int], 42]
-    b: Property[te.Annotated[int, 42]]
-    c: te.Annotated[Property[te.Annotated[int, 42]], 90]
+    a = Property(int, default=42)
+    b = Property(str)
 
   obj = MyClass()
 
-  assert obj.get_properties()['a'].value_type == int
-  assert obj.get_properties()['a'].annotations == [42]
+  assert obj.get_properties()['a'].type == int
+  assert obj.get_properties()['a'].default == 42
 
-  assert obj.get_properties()['b'].value_type == int
-  assert obj.get_properties()['b'].annotations == [42]
-
-  assert obj.get_properties()['c'].value_type == int
-  assert obj.get_properties()['c'].annotations == [42, 90]
+  assert obj.get_properties()['b'].type == str
+  assert obj.get_properties()['b'].default is None
 
 
 def test_property_operators():
   # Test concatenation if the property value is populated.
-  prop1 = Property(t.List[str], [], 'prop1', None)
+  prop1 = ListProperty(str, name='prop1')
   prop1.set(['hello'])
   assert (prop1 + ['world']).get() == ['hello', 'world']
 
-  prop1 = Property(str, [], 'prop1', None)
+  prop1 = Property(str, name='prop1')
   prop1.set('hello')
   assert (prop1 + ' world').get() == 'hello world'
 
   # Concatenating an un-set property will fall back to an empty default.
-  prop1 = Property(t.List[str], [], 'prop1', None)
+  prop1 = ListProperty(str, name='prop1')
   assert (prop1 + ['value']).get() == ['value']
 
-  prop1 = Property(str, [], 'prop1', None)
+  prop1 = Property(str, name='prop1')
   assert (prop1 + 'value').get() == 'value'
 
 
 def test_property_nesting_1():
-  prop1 = Property(t.List[str], [], 'prop1', None)
-  prop2 = Property(str, [], 'prop2', None)
+  prop1 = ListProperty(str, name='prop1')
+  prop2 = Property(str, name='prop2')
   prop1.set(['hello', prop2])
   prop2.set('world')
   assert prop1.get() == ['hello', 'world']
-
-
-def test_property_nesting_2():
-  prop1 = Property(t.List[t.List[str]], [], 'prop1', None)
-  prop2 = Property(str, [], 'prop2', None)
-  prop1.set([['hello', prop2]])
-  prop2.set('world')
-  assert prop1.get() == [['hello', 'world']]
 
 
 def test_property_enum_coercion():
   class MyEnum(enum.Enum):
     ABC = enum.auto()
 
-  prop = Property(MyEnum, [], 'myprop', None)
+  prop = Property(MyEnum)
   prop.set('abc')
   assert prop.get() == MyEnum.ABC
 
-  prop = Property(t.List[MyEnum], [], 'myprop', None)
+  prop = ListProperty(MyEnum)
   prop.set(['abc'])
   assert prop.get() == [MyEnum.ABC]
 
 
 def test_property_path_coercion():
-  prop = Property(Path, [], 'pathprop', None)
+  prop = Property(Path)
   prop.set('hello/world.c')
   assert prop.get() == Path('hello/world.c')
 
-  prop = Property(t.List[Path], [], 'pathlistprop', None)
-  prop.set(['hello/world.c'])
+  prop = ListProperty(Path)
+  prop.set({'hello/world.c'})
   assert prop.get() == [Path('hello/world.c')]

@@ -2,7 +2,6 @@
 import abc
 import types
 import typing as t
-from craftr.core.property.typechecking import TypeCheckingContext, check_type
 from craftr.core.exceptions import NoValueError
 
 from nr.preconditions import check_instance_of
