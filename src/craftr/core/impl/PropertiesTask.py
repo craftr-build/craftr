@@ -38,10 +38,9 @@ class PropertiesTask(DefaultTask, HavingProperties):
     that are derived other properties.
     """
 
-    super().finalize()
+    assert not self.finalized
 
     for prop in self.get_properties().values():
-      prop.finalize()
       if not prop.is_output:
         tasks = (t.cast(Task, p.origin) for p in collect_properties(prop) if isinstance(p.origin, Task))
         self.depends_on(*tasks)
@@ -50,6 +49,8 @@ class PropertiesTask(DefaultTask, HavingProperties):
       self.dependencies.remove(self)
     except ValueError:
       pass
+
+    super().finalize()
 
   def is_outdated(self) -> bool:
     """
@@ -61,7 +62,8 @@ class PropertiesTask(DefaultTask, HavingProperties):
 
     # Check if any of the output file(s) don't exist.
     for prop in self.get_properties().values():
-      if prop.is_output and (files := unwrap_file_property(prop) is not None):
+      if prop.is_output and (files := unwrap_file_property(prop)) is not None:
+        print('@@', files)
         if any(not Path(f).exists() for f in files):
           return True
 

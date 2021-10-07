@@ -10,10 +10,10 @@ from nr.preconditions import check_instance_of, check_not_none
 
 from craftr.core.base import Task
 from craftr.core.util.namespace import Namespace
-from craftr.core.util.weak import WeakInstanceMethod
 
 if t.TYPE_CHECKING:
   from craftr.core.context import Context
+  from craftr.core.impl.DefaultTask import DefaultTask
 
 T_Task = t.TypeVar('T_Task', bound='Task')
 ProjectOnApplyCallback = t.Callable[['Project'], t.Any]
@@ -98,7 +98,7 @@ class Project:
     self._build_directory = Path(path)
 
   @t.overload
-  def task(self, name: str) -> 'Task': ...
+  def task(self, name: str) -> 'DefaultTask': ...
 
   @t.overload
   def task(self, name: str, task_class: t.Type[T_Task]) -> T_Task: ...
@@ -112,8 +112,8 @@ class Project:
     if name in self._tasks:
       raise ValueError(f'task name already used: {name!r}')
 
-    from craftr.core.task import Task
-    task = (task_class or Task)(self, name)
+    from craftr.core.impl.DefaultTask import DefaultTask
+    task = (task_class or DefaultTask)(self, name)
     self._tasks[name] = task
     return t.cast(T_Task, task)
 
@@ -191,8 +191,7 @@ class Project:
         raise TypeError('plugin_name and from_project should not be specified at the same time')
       check_instance_of(plugin_name, str, 'plugin_name')
       plugin = self.context.plugin_loader.load_plugin(plugin_name)
-      namespace = Namespace(self, plugin_name, Namespace.Type.PLUGIN)
-      plugin.apply(self, namespace)
+      plugin.apply(self)
 
     elif from_project is not None:
       from_project = self.subproject(from_project) if isinstance(from_project, str) else from_project
@@ -200,15 +199,10 @@ class Project:
       if not from_project._on_apply:
         raise ValueError(f'{from_project} has no on_apply handler')
       from_project._on_apply(self)
-      namespace = from_project.exports
+      from_project.exports.merge_into(self.extensions)
 
     else:
       raise TypeError('need plugin_name or from_project')
-
-    if merge:
-      namespace.merge_into(self.ext)
-
-    return namespace
 
   def file(self, sub_path: str) -> Path:
     return self.directory / sub_path
@@ -242,8 +236,13 @@ class TaskContainer:
   def __iter__(self):
     return iter(self._tasks.values())
 
-  def for_each(self, closure: 'Closure') -> None:
-    for task in self._tasks.values():
+  def all(self) -> t.Iterator['Task']:
+    yield from self.project.tasks
+    for subproject in self.project.subprojects():
+      yield from subproject.tasks.all()
+
+  def for_each(self, closure: t.Callable[['Project'], t.Any], all: bool = False) -> None:
+    for task in (self.all() if all else self._tasks.values()):
       task(closure)
 
   def resolve(self, selector: str, raise_empty: bool = True) -> t.Set['Task']:
@@ -261,8 +260,3 @@ class TaskContainer:
   def __getitem__(self, key: str) -> 'Task':
     return self._tasks[key]
 
-
-def all_tasks(project: Project) -> t.Iterator['Task']:
-  yield from project.tasks
-  for subproject in project.subprojects():
-    yield from all_tasks(subproject)

@@ -77,7 +77,8 @@ class ProjectLoader(abc.ABC):
   def load_project(self, context: 'Context', parent: t.Optional['Project'], path: Path) -> 'Project': ...
 
 
-class Plugin(abc.ABC):
+@t.runtime_checkable
+class Plugin(t.Protocol, metaclass=abc.ABCMeta):
 
   @abc.abstractmethod
   def apply(self, project: 'Project') -> t.Any: ...

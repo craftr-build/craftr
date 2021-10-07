@@ -79,7 +79,7 @@ class Settings(metaclass=abc.ABCMeta):
 
     class_ = load_class(fqn)
     try:
-      if isinstance(class_, LoadableFromSettings):
+      if issubclass(class_, LoadableFromSettings):
         instance = class_.from_settings(self)
       else:
         instance = class_()

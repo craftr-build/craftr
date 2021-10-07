@@ -75,5 +75,5 @@ class TaskFactory(t.Generic[T_Task]):
 
     project = check_not_none(self._project(), 'lost project reference')
     task = project.task(name or self._default_name, self._task_type)
-    task(configure)
+    configure(task)
     return task

@@ -5,10 +5,11 @@ import weakref
 
 from nr.preconditions import check_instance_of, check_not_none
 
-from craftr.core.base import Action, ActionContext, Project, Task
+from craftr.core.base import Action, ActionContext, Task
 from craftr.core.graph import Graph
 from craftr.core.impl.actions.LambdaAction import LambdaAction
 from craftr.core.impl.actions.NoopAction import NoopAction
+from craftr.core.project import Project
 
 TaskDoCallback = t.Callable[['DefaultTask', ActionContext], None]
 

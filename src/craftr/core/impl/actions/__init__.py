@@ -3,15 +3,19 @@ import typing as t
 
 from craftr.core.base import Action
 from craftr.core.exceptions import NoValueError
-from craftr.core.impl.DefaultTask import DefaultTask
 from craftr.core.project import Project
 
+if t.TYPE_CHECKING:
+  from craftr.core.impl.DefaultTask import DefaultTask
 
-def action_as_task(action_cls: t.Type[Action], project: Project, name: str) -> DefaultTask:
+
+def action_as_task(action_cls: t.Type[Action], project: Project, name: str) -> 'DefaultTask':
   """
   Factory function to produce a task that contains exactly the properties of this action through the class annotations.
   The action will be created by passing a keyword argument for every populated property value.
   """
+
+  from craftr.core.impl.DefaultTask import DefaultTask
 
   # TODO: How can we best identify which properties are inputs and which are outputs?
 

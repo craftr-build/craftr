@@ -21,7 +21,7 @@ class ChainingProjectLoader(ProjectLoader, LoadableFromSettings):
 
   log = logging.getLogger(__qualname__ + '.' + __name__)  # type: ignore
 
-  DEFAULT_DELEGATES = 'craftr.core.project.loader.default.DefaultProjectLoader,craftr.build.loader.DslProjectLoader?'
+  DEFAULT_DELEGATES = 'craftr.core.impl.DefaultProjectLoader:DefaultProjectLoader,craftr.build.loader:DslProjectLoader?'
 
   def __init__(self, delegates: t.List[ProjectLoader]) -> None:
     self.delegates = delegates
@@ -47,9 +47,9 @@ class ChainingProjectLoader(ProjectLoader, LoadableFromSettings):
         name = name[:-1]
       try:
         delegates.append(settings.create_instance(ProjectLoader, name))  # type: ignore
-      except ImportError:
+      except ImportError as exc:
         if ignore_unresolved:
-          cls.log.warn('unable to resolve delegate project loader "%s"', name)
+          cls.log.warn('unable to resolve delegate project loader "%s": %s', name, exc)
         else:
           raise
     return cls(delegates)

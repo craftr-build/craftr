@@ -25,29 +25,24 @@ def _hash_file(hasher: _IHasher, path: Path) -> None:
 
 
 def check_file_property(prop: Property) -> t.Tuple[bool, bool, bool]:
-  from .task import TaskPropertyType
-  item_type = unpack_type_hint(prop.value_type)[1]
-  is_sequence = item_type is not None and prop.value_type != Path
-  is_file_type = (prop.value_type == Path or (item_type and item_type[0] == Path))
-  is_input_file_property = (
-      TaskPropertyType.Input in prop.annotations and is_file_type
-      or TaskPropertyType.InputFile in prop.annotations)
-  is_output_file_property = (
-      TaskPropertyType.Output in prop.annotations and is_file_type
-      or TaskPropertyType.OutputFile in prop.annotations)
+  item_type = unpack_type_hint(prop.type)[1]
+  is_sequence = item_type is not None and prop.type != Path
+  is_file_type = (prop.type == Path or (item_type and item_type[0] == Path))
+  is_input_file_property = prop.is_input and is_file_type
+  is_output_file_property = prop.is_output and is_file_type
   return is_sequence, is_input_file_property, is_output_file_property
 
 
 def unwrap_file_property(prop: Property) -> t.Tuple[bool, bool, t.List[Path]]:
   is_sequence, is_input_file_property, is_output_file_property = check_file_property(prop)
   if not is_input_file_property and not is_output_file_property:
-    return False, False, []
+    return []
   value = prop.or_else(None)
   if value is None:
     result = []
   else:
     result = list(value if is_sequence else [value])
-  return is_input_file_property, is_output_file_property, result
+  return result
 
 
 def calculate_task_hash(task: 'DefaultTask', hash_algo: str = 'sha1') -> str:  # NOSONAR

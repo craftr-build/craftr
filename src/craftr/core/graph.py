@@ -69,7 +69,7 @@ class Graph(t.Generic[T_Node]):
     for node in nodes:
       if not self._contains(node):
         self._nodes[node.get_node_id()] = node
-      for dependency in node.get_dependencies():
+      for dependency in node.dependencies:
         self.add(dependency)
 
   def has(self, node: t.Union[str, T_Node]) -> bool:
@@ -104,7 +104,7 @@ class Graph(t.Generic[T_Node]):
       if task in seen:
         raise RuntimeError(f'cyclic dependency graph involving task {task.path!r}')
       seen.add(task)
-      for dep in task.get_dependencies():
+      for dep in task.dependencies:
         add(dep, seen)
       if task not in result:
         result.append(task)

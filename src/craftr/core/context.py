@@ -20,14 +20,14 @@ class Context:
   # Supported Settings
 
   * `core.build_directory` (no default)
-  * `core.executor` (defaults to `craftr.core.executor.simple.SimpleExecutor`)
-  * `core.task_selector` (defaults to `craftr.core.task.selector.default.DefaultTaskSelector`)
+  * `core.executor` (defaults to `craftr.core.impl.DefaultTaskGraphExecutor:DefaultTaskGraphExecutor`)
+  * `core.task_selector` (defaults to `craftr.core.impl.DefaultTaskSelector:DefaultTaskSelector`)
   """
 
-  DEFAULT_EXECUTOR = 'craftr.core.executor.default.DefaultExecutor'
-  DEFAULT_PLUGIN_LOADER = 'craftr.core.plugin.default.DefaultPluginLoader'
-  DEFAULT_SELECTOR = 'craftr.core.task.selector.default.DefaultTaskSelector'
-  DEFAULT_PROJECT_LOADER = 'craftr.core.project.loader.delegate.DelegateProjectLoader'
+  DEFAULT_EXECUTOR = 'craftr.core.impl.DefaultTaskGraphExecutor:DefaultTaskGraphExecutor'
+  DEFAULT_PLUGIN_LOADER = 'craftr.core.impl.DefaultPluginLoader:DefaultPluginLoader'
+  DEFAULT_SELECTOR = 'craftr.core.impl.DefaultTaskSelector:DefaultTaskSelector'
+  DEFAULT_PROJECT_LOADER = 'craftr.core.impl.ChainingProjectLoader:ChainingProjectLoader'
   CRAFTR_SETTINGS_FILE = Path('build.settings')
 
   def __init__(
@@ -46,13 +46,13 @@ class Context:
     self._root_project: t.Optional[Project] = None
     self.settings = settings
     self.executor = executor or settings.get_instance(
-        IExecutor, 'core.executor', self.DEFAULT_EXECUTOR)  # type: ignore
+        GraphExecutor, 'core.executor', self.DEFAULT_EXECUTOR)  # type: ignore
     self.plugin_loader = plugin_loader or settings.get_instance(
-        IPluginLoader, 'core.plugin.loader', self.DEFAULT_PLUGIN_LOADER)  # type: ignore
+        PluginLoader, 'core.plugin.loader', self.DEFAULT_PLUGIN_LOADER)  # type: ignore
     self.project_loader = project_loader or settings.get_instance(
-        IProjectLoader, 'core.project.loader', self.DEFAULT_PROJECT_LOADER)  # type: ignore
+        ProjectLoader, 'core.project.loader', self.DEFAULT_PROJECT_LOADER)  # type: ignore
     self.task_selector = self.settings.get_instance(
-        ITaskSelector, 'core.task_selector', self.DEFAULT_SELECTOR)  # type: ignore
+        TaskSelector, 'core.task_selector', self.DEFAULT_SELECTOR)  # type: ignore
     self.graph = Graph[Task]()
     self._metadata_store: t.Optional[NamespaceStore] = None
 
@@ -119,6 +119,6 @@ class Context:
         else:
           raise TypeError(f'expected str|Task, got {type(item).__name__}')
 
-    self.graph.add_tasks(selected_tasks)
+    self.graph.add(*selected_tasks)
     self.graph.ready()
     self.executor.execute(self.graph)

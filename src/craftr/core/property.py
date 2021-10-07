@@ -6,7 +6,7 @@ from pathlib import Path
 
 from nr.preconditions import check_not_none
 
-from craftr.core.util.typing import unpack_type_hint
+from craftr.core.util.typing import unpack_type_hint, type_repr
 from .provider import Box, NoValueError, Provider, T, visit_captured_providers
 
 
@@ -195,7 +195,7 @@ class Property(Provider[T]):
 
   def get(self) -> T:
     if self._finalized:
-      if self._finalized_value:
+      if self._finalized_value is None:
         raise NoValueError(self.fqn)
       return self._finalized_value.get()
 
@@ -237,11 +237,12 @@ class HavingProperties:
   def __init_subclass__(cls) -> None:
     cls.__properties: t.Dict[str, Property] = {}
 
-    for key, value in list(vars(cls).items()):
+    for key in dir(cls):
+      value = getattr(cls, key, None)
       if isinstance(value, Property):
         value.name = key
         cls.__properties[key] = value
-        delattr(cls, key)
+        #delattr(cls, key)
 
   def __init__(self) -> None:
     for key, value in self.__properties.items():
@@ -254,3 +255,4 @@ class HavingProperties:
 
   def get_properties(self) -> t.Dict[str, Property]:
     return self.__properties
+

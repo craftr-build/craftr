@@ -4,6 +4,9 @@ import typing_extensions as te
 import sys
 
 
+type_repr = t._type_repr  # type: ignore
+
+
 def get_type_hints(obj: t.Any) -> t.Dict[str, t.Any]:
   kwargs = {} if sys.version_info < (3, 9) else {'include_extras': True}
   return t.get_type_hints(obj, **kwargs)  # type: ignore
