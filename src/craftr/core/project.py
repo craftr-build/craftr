@@ -7,15 +7,16 @@ import weakref
 from pathlib import Path
 
 from nr.preconditions import check_instance_of, check_not_none
-from craftr.core.configurable import Closure
-from craftr.core.plugin.api import Namespace
+
+from craftr.core.base import Task
+from craftr.core.util.namespace import Namespace
 from craftr.core.util.weak import WeakInstanceMethod
 
 if t.TYPE_CHECKING:
-  from craftr.core.task import Task
   from craftr.core.context import Context
 
 T_Task = t.TypeVar('T_Task', bound='Task')
+ProjectOnApplyCallback = t.Callable[['Project'], t.Any]
 
 
 class Project:
@@ -46,14 +47,11 @@ class Project:
     self._build_directory: t.Optional[Path] = None
     self._tasks: t.Dict[str, 'Task'] = {}
     self._subprojects: t.Dict[Path, 'Project'] = {}
-    self._on_apply: t.Optional[Closure] = None
-    self.ext = Namespace(self, self.path, Namespace.Type.PROJECT_EXT)
-    self.exports = Namespace(self, self.path, Namespace.Type.PROJECT_EXPORTS)
+    self._on_apply: t.Optional[ProjectOnApplyCallback] = None
+    self.extensions = Namespace(self, 'extension')
+    self.exports = Namespace(self, 'exports')
 
-    self.ext.add('project', weakref.proxy(self))
-    self.ext.add('apply', WeakInstanceMethod(self.apply))
-    self.ext.add('exports', self.exports)
-
+    # For the non-DSL API, first project that gets created in the context becomes the root project.
     if not context._root_project:
       context._root_project = self
 
@@ -164,7 +162,7 @@ class Project:
       for subproject in self._subprojects.values():
         closure(subproject)
 
-  def on_apply(self, func: Closure) -> None:
+  def on_apply(self, func: ProjectOnApplyCallback) -> None:
     """
     Register a function to call when the project is applied using `apply from_project: <project>`.
     """

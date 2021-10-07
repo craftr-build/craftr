@@ -1,13 +1,13 @@
 
+import dataclasses
 import os
 import typing as t
-from dataclasses import dataclass
 from pathlib import Path
 
-from .action import Action, ActionContext
+from craftr.core.base import Action, ActionContext
 
 
-@dataclass
+@dataclasses.dataclass
 class WriteFileAction(Action):
 
   #: The path of the file to write to.

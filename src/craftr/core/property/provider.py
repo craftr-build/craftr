@@ -3,6 +3,7 @@ import abc
 import types
 import typing as t
 from craftr.core.property.typechecking import TypeCheckingContext, check_type
+from craftr.core.exceptions import NoValueError
 
 from nr.preconditions import check_instance_of
 
@@ -39,10 +40,6 @@ def _visit_nested(val: t.Any, callback: t.Callable[[t.Any], None]) -> None:
   elif isinstance(val, t.Mapping):
     for value in val.values():
       _visit_nested(value, callback)
-
-
-class NoValueError(Exception):
-  """ Raised when a provider has no value. """
 
 
 class Provider(t.Generic[T], metaclass=abc.ABCMeta):

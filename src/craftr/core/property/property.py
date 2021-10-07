@@ -62,26 +62,43 @@ def on_property_set_value(value_type: t.Any, value: t.Any) -> t.Any:
 
 class Property(Provider[T]):
   """
-  Properties are mutable providers that sit as attributes on objects of the #HavingProperties
-  base class. The type hint of a property is passed into it's construct when the annotation is
-  defined on the #HavingProperties class level.
+  Properties are mutable providers that sit as attributes on objects of the #HavingProperties base class. The property
+  value type hint is passed passed through the factory class that is returned on a subscript of the #Property class.
+  Property values may be used to represent a task output. The property carries the information which task produces its
+  value. When the property is attached to a task input, it allows Craftr to introduce a dependency. (This is heavily
+  inspired by Gradle).
 
-  Properties perform extensive runtime type checking when setting a bare value and after
-  evaluating it.
+  Properties only support native types. To represent a list of values, use the #ListProperty.
 
-  A property can be finalized in which case it's value is calculated and cached. Subsequent calls
-  to #get() will return the cached value and attempts to set the property value will result in a
-  #RuntimeError.
+  # Example
+
+  Properties must be used with a class that as #HavingProperties as its base class.
+
+  ```py
+  from craftr.core import HavingProperties, ListProperty, Property
+
+  class MyClass(HavingProperties):
+    input_file = Property[
+    output_file = Property[str]()
+  ```
   """
 
-  def __init__(self,
-    value_type: t.Any,
-    annotations: t.List[t.Any],
-    name: str,
-    origin: t.Optional['HavingProperties']
+  def __init__(
+    self, *,
+    name: t.Optional[str] = None,
+    default: t.Optional[T] = None,
+    type: t.Union[t.Type, t.Any, None] = None,
+    is_input: bool = False,
+    is_output: bool = False,
   ) -> None:
-    self.value_type = value_type
-    self.annotations = annotations
+
+    self.name = name
+    self.type = type
+    self.is_input = is_input
+    self.is_output = is_output
+
+    # self.value_type = value_type
+    # self.annotations = annotations
     self.name = name
     self._default: t.Optional[t.Callable[[], T]] = None
     self._origin = weakref.ref(origin) if origin is not None else None

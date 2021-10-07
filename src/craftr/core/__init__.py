@@ -2,11 +2,10 @@
 __author__ = 'Niklas Rosenstein <rosensteinniklas@gmail.com>'
 __version__ = '0.2.2'
 
-from craftr.core.actions import Action
-from craftr.core.configurable import Closure, Configurable
-from craftr.core.context import Context
-from craftr.core.plugin import IPlugin, IPluginLoader, Namespace, TaskFactory
-from craftr.core.project import Project
-from craftr.core.property import HavingProperties, Property
-from craftr.core.task import DefaultTask, Task
-from craftr.core.settings import Settings
+from .base import Action, ActionContext, Task, TaskSelector, GraphExecutor, ProjectLoader, Plugin, PluginLoader, \
+  LoadableFromSettings
+from .context import Context
+from .exceptions import BuildError, UnableToLoadProjectError, NoValueError, PluginNotFoundError
+from .graph import Graph
+from .project import Project
+from .settings import Settings

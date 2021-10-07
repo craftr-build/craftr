@@ -1,10 +1,10 @@
 
+import dataclasses
 import typing as t
-from dataclasses import dataclass
-from .action import Action, ActionContext
+from craftr.core.base import Action, ActionContext
 
 
-@dataclass
+@dataclasses.dataclass
 class LambdaAction(Action):
 
   delegate: t.Callable[[ActionContext], None]

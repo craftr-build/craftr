@@ -5,11 +5,10 @@ from pathlib import Path
 from nr.caching.api import NamespaceStore
 from nr.preconditions import check_not_none
 
-from craftr.core.executor import IExecutor, ExecutionGraph
-from craftr.core.plugin import IPluginLoader
-from craftr.core.project import IProjectLoader, Project
+from craftr.core.base import GraphExecutor, PluginLoader, ProjectLoader, Task, TaskSelector
+from craftr.core.graph import Graph
+from craftr.core.project import Project
 from craftr.core.settings import Settings
-from craftr.core.task import Task, ITaskSelector
 from craftr.core.util.caching import JsonDirectoryStore
 
 
@@ -34,9 +33,9 @@ class Context:
   def __init__(
     self, *,
     settings: t.Optional[Settings] = None,
-    executor: t.Optional[IExecutor] = None,
-    plugin_loader: t.Optional[IPluginLoader] = None,
-    project_loader: t.Optional[IProjectLoader] = None,
+    executor: t.Optional[GraphExecutor[Task]] = None,
+    plugin_loader: t.Optional[PluginLoader] = None,
+    project_loader: t.Optional[ProjectLoader] = None,
   ) -> None:
 
     if settings is None and self.CRAFTR_SETTINGS_FILE.exists():
@@ -54,7 +53,7 @@ class Context:
         IProjectLoader, 'core.project.loader', self.DEFAULT_PROJECT_LOADER)  # type: ignore
     self.task_selector = self.settings.get_instance(
         ITaskSelector, 'core.task_selector', self.DEFAULT_SELECTOR)  # type: ignore
-    self.graph = ExecutionGraph()
+    self.graph = Graph[Task]()
     self._metadata_store: t.Optional[NamespaceStore] = None
 
   @property

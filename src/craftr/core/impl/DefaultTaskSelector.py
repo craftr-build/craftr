@@ -1,24 +1,20 @@
 
 import typing as t
 
-from .api import ITaskSelector
-
-if t.TYPE_CHECKING:
-  from craftr.core.project import Project
-  from craftr.core.task import Task
+from craftr.core.base import Task, TaskSelector
+from craftr.core.project import Project
 
 
-class DefaultTaskSelector(ITaskSelector):
+class DefaultTaskSelector(TaskSelector):
   """
   The default task selector employs the following selector syntax:
 
       [:][subProject:]+[taskName]
 
-  If the selector is prefixed with a semi-colon (`:`), the task path must be exact and relative
-  to the current project. The `taskName` may refer to an individial task's name or a task group.
-
-  Without the `:` prefix, the path must only match exactly at the end of the path (e.g. `a:b`
-  matches both tasks with an absolute path `foo:a:b` and `egg:spam:a:b`).
+  If the selector is prefixed with a semi-colon (`:`), the task path must be exact and relative to the current project.
+  The `taskName` may refer to an individial task's name or a task group. Without the `:` prefix, the path must only
+  match exactly at the end of the path (e.g. `a:b` matches both tasks with an absolute path `foo:a:b` and
+  `egg:spam:a:b`).
   """
 
   def select_tasks(self, selection: str, project: 'Project') -> t.Collection['Task']:

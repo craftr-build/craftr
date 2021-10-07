@@ -1,13 +1,13 @@
 
+import dataclasses
 import shlex
 import subprocess as sp
 import typing as t
-from dataclasses import dataclass
 
-from .action import Action, ActionContext
+from craftr.core.base import Action, ActionContext
 
 
-@dataclass
+@dataclasses.dataclass
 class CommandAction(Action):
 
   #: A command line to execute.

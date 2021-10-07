@@ -5,6 +5,7 @@ from pathlib import Path
 
 from nr.preconditions import check_instance_of
 
+from craftr.core.base import LoadableFromSettings
 from craftr.core.util.pyimport import load_class
 
 T = t.TypeVar('T')
@@ -12,14 +13,6 @@ T = t.TypeVar('T')
 
 class ClassInstantiationError(Exception):
   pass
-
-
-@t.runtime_checkable
-class IHasFromSettings(t.Protocol):
-
-  @classmethod
-  def from_settings(cls: t.Type[T], settings: 'Settings') -> T:
-    raise NotImplementedError
 
 
 class Settings(metaclass=abc.ABCMeta):
@@ -81,12 +74,12 @@ class Settings(metaclass=abc.ABCMeta):
   def create_instance(self, type: t.Type[T], fqn: str, config_key: str = '<notset>') -> T:
     """
     Creates an instance of the specified type from a fully qualified name. If the class implements
-    the #IHasFromSettings protocol, the method will be called to create an instance.
+    the #LoadableFromSettings protocol, the method will be called to create an instance.
     """
 
     class_ = load_class(fqn)
     try:
-      if isinstance(class_, IHasFromSettings):
+      if isinstance(class_, LoadableFromSettings):
         instance = class_.from_settings(self)
       else:
         instance = class_()
