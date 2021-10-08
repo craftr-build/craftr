@@ -63,7 +63,6 @@ class PropertiesTask(DefaultTask, HavingProperties):
     # Check if any of the output file(s) don't exist.
     for prop in self.get_properties().values():
       if prop.is_output and (files := unwrap_file_property(prop)) is not None:
-        print('@@', files)
         if any(not Path(f).exists() for f in files):
           return True
 

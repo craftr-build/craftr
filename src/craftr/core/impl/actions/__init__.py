@@ -3,6 +3,7 @@ import typing as t
 
 from craftr.core.base import Action
 from craftr.core.exceptions import NoValueError
+from craftr.core.graph import Graph
 from craftr.core.project import Project
 
 if t.TYPE_CHECKING:
@@ -22,7 +23,7 @@ def action_as_task(action_cls: t.Type[Action], project: Project, name: str) -> '
   class _ActionTask(DefaultTask):
     __annotations__ = {k: Property[v] for k, v in t.get_type_hints(action_cls).items()}  # type: ignore
 
-    def get_actions(self) -> t.List[Action]:
+    def get_actions(self, graph: Graph[Action]) -> t.List[Action]:
       kwargs: t.Dict[str, t.Any] = {}
       for key, prop in self.get_properties().items():
         try:
@@ -32,7 +33,7 @@ def action_as_task(action_cls: t.Type[Action], project: Project, name: str) -> '
             kwargs[key] = getattr(action_cls, key)
           else:
             raise
-      return [action_cls(**kwargs)]  # type: ignore
+      graph.add(action_cls(**kwargs))  # type: ignore
 
   _ActionTask.__name__ = action_cls.__name__ + 'Task'
   _ActionTask.__qualname__ = _ActionTask.__qualname__.rpartition('.')[0] + '.' + _ActionTask.__name__

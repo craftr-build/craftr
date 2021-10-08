@@ -19,12 +19,17 @@ if t.TYPE_CHECKING:
 T = t.TypeVar('T')
 T_TaskOrAction = t.TypeVar('T_TaskOrAction', bound=t.Union['Action', 'Task'])
 
+
 @dataclasses.dataclass
 class ActionContext:
   verbose: bool
 
 
-class Action(Node['Action']):
+@dataclasses.dataclass
+class Action:
+
+  def __post_init__(self):
+    self.dependencies: t.List['Action'] = []
 
   @abc.abstractmethod
   def execute(self, context: ActionContext) -> None: ...

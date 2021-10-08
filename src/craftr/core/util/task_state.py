@@ -3,7 +3,7 @@ import hashlib
 import typing as t
 from pathlib import Path
 
-from craftr.core.property import Property
+from craftr.core.property import ListProperty, Property
 from craftr.core.util.typing import unpack_type_hint
 
 if t.TYPE_CHECKING:
@@ -26,7 +26,7 @@ def _hash_file(hasher: _IHasher, path: Path) -> None:
 
 def check_file_property(prop: Property) -> t.Tuple[bool, bool, bool]:
   item_type = unpack_type_hint(prop.type)[1]
-  is_sequence = item_type is not None and prop.type != Path
+  is_sequence = isinstance(prop, ListProperty)
   is_file_type = (prop.type == Path or (item_type and item_type[0] == Path))
   is_input_file_property = prop.is_input and is_file_type
   is_output_file_property = prop.is_output and is_file_type
@@ -62,8 +62,8 @@ def calculate_task_hash(task: 'DefaultTask', hash_algo: str = 'sha1') -> str:  #
     hasher.update(prop.name.encode(encoding))
     hasher.update(repr(prop.or_none()).encode(encoding))
 
-    is_input, _is_output, files = unwrap_file_property(prop)
-    if is_input:
+    if prop.is_input:
+      files = unwrap_file_property(prop)
       for path in map(Path, files):
         if path.is_file():
           _hash_file(hasher, path)
