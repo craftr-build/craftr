@@ -1,5 +1,0 @@
-changes:
-- type: fix
-  component: general
-  description: fix mypy
-release_date: '2021-09-28'

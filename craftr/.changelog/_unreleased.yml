@@ -1,4 +1,0 @@
-changes:
-- type: change
-  component: general
-  description: split `Task` class into `Task` and `DefaultTask`
