@@ -1,0 +1,19 @@
+changes:
+- type: change
+  component: general
+  description: '`astor` and `termcolor` are now optional dependencies'
+- type: feature
+  component: general
+  description: add `Grammar` class to configure `Rewriter` class, add support for
+    colon keyword arguments (enabled by default)
+- type: feature
+  component: general
+  description: add ability to pass function arguments without comma separation (enabled
+    by default)
+- type: feature
+  component: general
+  description: add `craftr.dsl.runtime` module and `TranspileOptions.closure_arglist_prefix`
+- type: fix
+  component: general
+  description: fix creation of `ast.Subscript` node in `NameRewriter`
+release_date: '2021-09-28'

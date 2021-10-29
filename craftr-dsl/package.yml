@@ -1,0 +1,25 @@
+name: craftr-dsl
+version: 0.6.0
+author: Niklas Rosenstein <rosensteinniklas@gmail.com>
+modulename: craftr.dsl
+description: Parser and transpiler for the Craftr DSL.
+url: https://github.com/craftr-build/craftr-dsl
+license: MIT
+typed: true
+requirements:
+- python ^3.8
+- nr.parsing.core ^2.0.2
+- nr.pylang.ast ~0.0.5
+- dataclasses ^0.6
+- nr.functional ^0.1.0
+extra-requirements:
+  colors:
+  - termcolor ^1.1.0
+  codegen:
+  - astor ^0.8.1
+test-drivers:
+- type: mypy
+- type: pytest
+test-requirements:
+- astor
+- types-termcolor

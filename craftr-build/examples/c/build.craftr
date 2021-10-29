@@ -1,0 +1,18 @@
+# type: ignore
+
+apply 'cxx'
+apply 'run'
+
+cxx 'lib' {
+  sources.set([project.file('src/hellosayer.c')])
+  produces.set 'static_library'
+}
+
+cxx 'main' {
+  sources.set ([project.file('src/main.c')])
+  dependencies.append project.tasks.lib
+}
+
+run {
+  dependencies.append project.tasks.main
+}

@@ -1,0 +1,7 @@
+# type: ignore
+
+apply 'haskell'
+
+haskellApplication {
+  srcs = ["Main.hs"]
+}

@@ -1,0 +1,5 @@
+changes:
+- type: feature
+  component: general
+  description: add `craftr.dsl.runtime.ChainContext`
+release_date: '2021-09-28'

@@ -1,54 +1,55 @@
-# craftr-core
+> Work in progress -- some functionality laid out in this readme may not be implemented yet.
 
-The `craftr-core` package provides the core build system functions for the Craftr build system.
+# Craftr
 
-## Concepts
+Craftr is a general purpose build system with an easy to use API and DSL.
 
-### Projects
+## Quickstart
 
-A project is the main unit that is used to represent a collection of tasks. A project has a collection
-of tasks and possibly other sub-projects. Every project has a name and unique ID (aka. path) inside the
-current build context.
+### C++
 
-### Tasks
+```py
+apply "@craftr/cpp"
+apply "@craftr/cpp/libraries/sfml"
 
-Tasks encapsulate the configuration and logic of an operation in a build. Examples include the compilation
-or generation of source files, copying or compressing files. Such operations are usually described using a
-sequence of Actions, see below. Dependencies between individual tasks describe a directed acyclic graph used
-for determining the order in which tasks need to be executed.
+cpp_application "main" {
+  sources [ "main.cpp" ]
+  run_cwd "."
+  dependencies { compile "@craftr/cpp/libraries/sfml:sfml" }
+}
+```
 
-A task has a set of input and output files. If an input files changes or an output file does not exist, a
-task is considered outdated and will be executed again. There are also tasks that are not executed by
-default unless depended on by another tasks that is executed or explicitly specified as to be executed in
-a given execution of the build graph.
+### Java
 
-### Actions
+```py
+apply "@craftr/java"
 
-An action is a concrete unit of work that can be executed as part of a build. A task is usually described
-by one or more actions. Dependencies between actions express the order in which they are to be executed
-relative to the other actions produced by the same task.
+java_library "lib" {
+  source_directory "src"
+  dependencies { compile "org.tensorflow:tensorflow:1.4.0" }
+}
 
-### Plugins
+java_application_bundle "app" {
+  source_directory "src"
+  main_class "Main"
+  bundle_method "merge"
+  dependencies { compile ":app" }
+}
+```
 
-Plugins are reusable pieces of build logic that can be applied to projects. A plugin usually registers
-a new task or task factory in the project which is subsequently accessible via the `project.ext` object
-or from the namespace object returned by `Project.apply()`.
+### Python
 
-### Settings
+```py
+apply "@craftr/python"
 
-Craftr settings are files in a line-based `key=value` format. There are a bunch of settings that control
-the behaviour of the Craftr core components. No settings file is loaded implicitly by the `Context` class.
-
-| Option                         | Default value |
-| ------------------------------ | ------------- |
-| `core.build_directory`         | `.build`
-| `core.executor`                | `craftr.core.executor.default.DefaultExecutor`
-| `core.plugin.loader`           | `craftr.core.plugin.default.DefaultPluginLoader`
-| `core.plugin.loader.delegates` | `craftr.core.project.loader.default.DefaultProjectLoader,craftr.build.loader.DslProjectLoader?`
-| `core.plugin.entrypoint`       | `craftr.plugins`
-| `core.project.loader`          | `craftr.core.project.loader.delegate.DelegateProjectLoader`
-| `core.verbose`                 | `False`
-| `core.task_selector`           | `craftr.core.task.selector.default.DefaultTaskSelector`
+python_setupfiles "my_package" !yml
+  version: "1.0.0"
+  typed: true
+  description: "My first Python package with Craftr."
+  entrypoints:
+    console_scripts:
+      - craftr = craftr.__main__:main
+```
 
 ---
 

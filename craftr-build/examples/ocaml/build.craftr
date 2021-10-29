@@ -1,0 +1,7 @@
+# type: ignore
+
+apply "ocaml"
+
+ocamlApplication {
+  srcs = ["Main.ml"]
+}

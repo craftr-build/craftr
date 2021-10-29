@@ -1,0 +1,8 @@
+changes:
+- type: fix
+  component: general
+  description: add `Closure.__setitem__()` and `Closure.__delitem__()`
+- type: feature
+  component: general
+  description: add `Closure.run_code()` method
+release_date: '2021-09-28'
