@@ -22,3 +22,6 @@ test-drivers:
 - type: pytest
 test-requirements:
 - types-termcolor
+entrypoints:
+  console_scripts:
+    - craftr = craftr.__main__:main

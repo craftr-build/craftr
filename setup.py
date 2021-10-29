@@ -50,7 +50,11 @@ setuptools.setup(
   tests_require = test_requirements,
   python_requires = '>=3.8.0,<4.0.0',
   data_files = [],
-  entry_points = {},
+  entry_points = {
+    'console_scripts': [
+      'craftr = craftr.__main__:main',
+    ]
+  },
   cmdclass = {},
   keywords = [],
   classifiers = [],
