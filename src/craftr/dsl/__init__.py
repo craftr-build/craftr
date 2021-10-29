@@ -3,9 +3,6 @@
 This package implements the Craftr DSL laguage.
 """
 
-__author__ = 'Niklas Rosenstein <rosensteinniklas@gmail.com>'
-__version__ = '0.6.0'
-
 import typing as t
 from .rewrite import SyntaxError
 from .transpiler import TranspileOptions, transpile_to_ast, transpile_to_source

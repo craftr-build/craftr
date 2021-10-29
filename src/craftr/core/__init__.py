@@ -1,7 +1,4 @@
 
-__author__ = 'Niklas Rosenstein <rosensteinniklas@gmail.com>'
-__version__ = '0.2.2'
-
 from .base import Action, ActionContext, Task, TaskSelector, GraphExecutor, ProjectLoader, Plugin, PluginLoader, \
   LoadableFromSettings
 from .context import Context

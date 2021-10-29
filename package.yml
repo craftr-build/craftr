@@ -1,4 +1,5 @@
 name: craftr-build
+modulename: craftr
 version: 5.0.0
 author: Niklas Rosenstein <rosensteinniklas@gmail.com>
 description: General purpose build system with an easy to use API and DSL.
