@@ -32,8 +32,8 @@ class HasProperties(abc.ABC):
         value._name = key
         cls.__properties__[key] = value
     for key, value in cls.__annotations__.items():
-      if (isinstance(value, _GenericAlias) and issubclass(value.__origin__, Property)) or \
-          issubclass(value, Property):
+      origin = value.__origin__ if isinstance(value, _GenericAlias) else value
+      if (isinstance(origin, type) and issubclass(origin, Property)):
         cls.__properties__[key] = value()
 
   def __init__(self) -> None:
