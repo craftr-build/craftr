@@ -1,0 +1,11 @@
+=== TEST task_do_closure ===
+task "hello_world" do: {
+  print "Hello, World!"
+}
+=== EXPECTS ===
+def _closure_1(self, *arguments, **kwarguments):
+    print('Hello, World!')
+
+
+task('hello_world', do=_closure_1)
+=== END ===
