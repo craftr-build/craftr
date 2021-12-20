@@ -7,6 +7,7 @@ from craftr.utils.imports import load_class
 from nr.preconditions import check_instance_of
 
 T = t.TypeVar('T')
+T_LoadableFromSettings = t.TypeVar('T_LoadableFromSettings', bound='LoadableFromSettings')
 
 
 class ClassInstantiationError(Exception):
@@ -20,8 +21,9 @@ class LoadableFromSettings(abc.ABC):
   Interface for classes that can be loaded from a {@link Settings} object.
   """
 
+  @classmethod
   @abc.abstractclassmethod
-  def from_settings(cls: t.Type[T], settings: 'Settings') -> T: ...
+  def from_settings(cls: t.Type[T_LoadableFromSettings], settings: 'Settings') -> T_LoadableFromSettings: ...
 
 
 class Settings(abc.ABC):
@@ -88,7 +90,7 @@ class Settings(abc.ABC):
     class_ = load_class(fqn)
     try:
       if hasattr(class_, 'from_settings'):
-        instance = t.cast(LoadableFromSettings, class_).from_settings(self)
+        instance = t.cast(T, t.cast(LoadableFromSettings, class_).from_settings(self))
       else:
         instance = class_()
     except Exception:
