@@ -216,8 +216,7 @@ class Closure(Context):
       scope = {}
     assert options.closure_target
     scope[options.closure_target] = self
-
-    (module, scope)
+    exec(module, scope)
 
   def __getitem__(self, key: str) -> t.Any:
     frame = self.frame
