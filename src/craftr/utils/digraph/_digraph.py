@@ -23,8 +23,8 @@ class DiGraph(t.Generic[K, N, E]):
     """
 
     self._nodes: dict[K, '_Node[K, N]'] = {}
-    self._roots: set[K] = set()
-    self._leafs: set[K] = set()
+    self._roots: dict[K, None] = {}
+    self._leafs: dict[K, None] = {}
     self._edges: dict[tuple[K, K], E] = {}
     self._nodesview = NodesView(self._nodes)
     self._edgesview = EdgesView(self._edges)
@@ -50,9 +50,9 @@ class DiGraph(t.Generic[K, N, E]):
     else:
       existing_node = self._nodes.get(node_id, NotSet.Value)
       if existing_node is NotSet.Value:
-        predecessors, successors = set(), set()
-        self._roots.add(node_id)
-        self._leafs.add(node_id)
+        predecessors, successors = {}, {}
+        self._roots[node_id] = None
+        self._leafs[node_id] = None
       else:
         predecessors, successors = existing_node.predecessors, existing_node.successors
       self._nodes[node_id] = _Node(value, predecessors, successors)
@@ -84,10 +84,10 @@ class DiGraph(t.Generic[K, N, E]):
     else:
       node1, node2 = self._get_node(node_id1), self._get_node(node_id2)
       self._edges[key] = value
-      node1.successors.add(node_id2)
-      node2.predecessors.add(node_id1)
-      self._leafs.discard(node_id1)
-      self._roots.discard(node_id2)
+      node1.successors[node_id2] = None
+      node2.predecessors[node_id1] = None
+      self._leafs.pop(node_id1, None)
+      self._roots.pop(node_id2, None)
 
   @property
   def nodes(self) -> 'NodesView[K, N]':
@@ -106,38 +106,38 @@ class DiGraph(t.Generic[K, N, E]):
     return self._edgesview
 
   @property
-  def roots(self) -> set[K]:
+  def roots(self) -> t.KeysView[K]:
     """
     Return the nodes of the graph that have no predecessors.
     """
 
-    return self._roots
+    return self._roots.keys()
 
   @property
-  def leafs(self) -> set[K]:
+  def leafs(self) -> t.KeysView[K]:
     """
     Return the nodes of the graph that have no successors.
     """
 
-    return self._leafs
+    return self._leafs.keys()
 
-  def predecessors(self, node_id: K) -> set[K]:
+  def predecessors(self, node_id: K) -> t.KeysView[K]:
     """
     Returns a sequence of the given node's predecessor node IDs.
 
     @raises UnknownNodeError: If the node does not exist.
     """
 
-    return self._get_node(node_id).predecessors
+    return self._get_node(node_id).predecessors.keys()
 
-  def successors(self, node_id: K) -> set[K]:
+  def successors(self, node_id: K) -> t.KeysView[K]:
     """
     Returns a sequence of the given node's successor node IDs.
 
     @raises UnknownNodeError: If the node does not exist.
     """
 
-    return self._get_node(node_id).successors
+    return self._get_node(node_id).successors.keys()
 
   # Internal
 
@@ -151,8 +151,8 @@ class DiGraph(t.Generic[K, N, E]):
 @dataclasses.dataclass
 class _Node(t.Generic[K, N]):
   value: N
-  predecessors: set[K]
-  successors: set[K]
+  predecessors: dict[K, None]
+  successors: dict[K, None]
 
 
 class NodesView(t.Generic[K, N]):

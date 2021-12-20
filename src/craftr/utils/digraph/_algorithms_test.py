@@ -6,7 +6,7 @@ from ._digraph_test import diamond_graph
 
 
 def test_topological_sort(diamond_graph: DiGraph):
-  assert list(topological_sort(diamond_graph)) == ['a', 'c', 'b', 'd']
+  assert list(topological_sort(diamond_graph)) == ['a', 'b', 'c', 'd']
 
 
 def test_topological_sort_cycle(diamond_graph: DiGraph):
