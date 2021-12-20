@@ -52,6 +52,7 @@ class Property(t.Generic[T]):
     self, *,
     default: t.Union[T, NotSet] = NotSet.Value,
     base_type: t.Union[TypeHint, None] = None,
+    **kwargs,
   ) -> None:
     """
     Create a new property.
@@ -60,6 +61,8 @@ class Property(t.Generic[T]):
     @param base_type: The type of the values that the property should hold. When setting the value of a
       property, its type will be validated using {@link beartype}.
     """
+
+    super().__init__(**kwargs)
 
     self._default = default
     self._base_type = base_type

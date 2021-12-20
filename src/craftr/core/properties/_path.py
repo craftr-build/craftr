@@ -4,12 +4,18 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from ._base import Property
-from craftr.utils.beartype import beartype_check, beartype_validator
+from craftr.utils.beartype import beartype_check
 
 PathLike = t.Union[str, Path]
 
 
-class PathProperty(Property[Path]):
+class _HasOutputAttribute:
+
+  def __init__(self, is_output: bool = False) -> None:
+    self.is_output = is_output
+
+
+class PathProperty(Property[Path], _HasOutputAttribute):
   """
   A special property type for paths.
   """
@@ -21,7 +27,7 @@ class PathProperty(Property[Path]):
     self._value_adapters.append(lambda x, r: Path(t.cast(PathLike, x)))
 
 
-class PathListProperty(Property[list[Path]]):
+class PathListProperty(Property[list[Path]], _HasOutputAttribute):
   """
   A special property type for a list of paths.
   """
