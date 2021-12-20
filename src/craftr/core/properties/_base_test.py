@@ -1,7 +1,8 @@
 
 import pytest
+from pathlib import Path
 from beartype.roar import BeartypeCallHintPepParamException
-from ._base import Property, NoValueError
+from ._base import HasProperties, Property, NoValueError
 
 
 def test_property_get_set():
@@ -25,3 +26,18 @@ def test_property_beartype_check():
   p1 = Property[int]()
   with pytest.raises(BeartypeCallHintPepParamException):
     p1.set('foobar')  # type: ignore
+
+  p2 = Property[Path]()
+  with pytest.raises(BeartypeCallHintPepParamException):
+    p2.set('foo/bar')  # type: ignore
+
+
+def test_has_properties():
+
+  class SomeClass(HasProperties):
+    a: Property[str]
+    b: Property[str]
+
+  o = SomeClass()
+  assert isinstance(o.a, Property)
+  assert o.a._base_type is str

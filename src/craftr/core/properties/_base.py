@@ -9,6 +9,7 @@ from nr.pylang.utils.singletons import NotSet
 
 T = t.TypeVar('T')
 T_Property = t.TypeVar('T_Property', bound='Property')
+_GenericAlias = t._GenericAlias  # type: ignore
 
 
 class HasProperties(abc.ABC):
@@ -17,16 +18,23 @@ class HasProperties(abc.ABC):
   is created, its properties will be copied and bound to the instance.
   """
 
-  __properties__: t.ClassVar[dict[str, 'Property']]
+  __properties__: t.ClassVar[dict[str, 'Property']] = {}
 
   def __init_subclass__(cls) -> None:
     cls.__properties__ = {}
+    for base in cls.__bases__:
+      if issubclass(base, HasProperties):
+        cls.__properties__.update(base.__properties__)
     for key in dir(cls):
-      value = getattr(cls, key)
+      value = getattr(cls, key, None)
       if isinstance(value, Property):
         assert value._name is None or value._name == key, (key, value)
         value._name = key
         cls.__properties__[key] = value
+    for key, value in cls.__annotations__.items():
+      if (isinstance(value, _GenericAlias) and issubclass(value.__origin__, Property)) or \
+          issubclass(value, Property):
+        cls.__properties__[key] = value()
 
   def __init__(self) -> None:
     super().__init__()
@@ -36,27 +44,39 @@ class HasProperties(abc.ABC):
 
 class Property(t.Generic[T]):
   """
-  The base class for properties on tasks. Properties are the preferred way to make task implementation configurable
-  as they make tracking dependencies between tasks easier. Properties
+  The base class for properties on tasks. Properties are the preferred way to make task implementation
+  configurable as they make tracking dependencies between tasks easier.
   """
-
-  _base_type: t.Optional[TypeHint] = None
 
   def __init__(
     self, *,
     default: t.Union[T, NotSet] = NotSet.Value,
-    base_type: t.Union[TypeHint, None, NotSet] = NotSet.Value,
+    base_type: t.Union[TypeHint, None] = None,
   ) -> None:
+    """
+    Create a new property.
+
+    @param default: The default value of the property.
+    @param base_type: The type of the values that the property should hold. When setting the value of a
+      property, its type will be validated using {@link beartype}.
+    """
+
     self._default = default
-    self._value: t.Union[T, NotSet] = default
+    self._base_type = base_type
+    self._value: t.Union[T, NotSet] = NotSet.Value
     self._name: t.Optional[str] = None
     self._owner: t.Optional[weakref.ReferenceType] = None
-    self._references: list['Property[T]'] = []
-    if base_type is not NotSet.Value:
-      self._base_type = base_type
+    self._references: list['Property'] = []
+    self._value_adapters: list[t.Callable[[object, list[Property]], object]] = []
+    self.__post_init__()
+    if default is not NotSet.Value:
+      self.set(default)
+
+  def __post_init__(self) -> None:
+    pass
 
   def __class_getitem__(cls, type_hint: t.Type[T]) -> t.Type['Property[T]']:
-    return _PropertyGenericAlias(cls, type_hint)  # type: ignore
+    return _PropertyGenericAlias(cls, (type_hint,))  # type: ignore
 
   def __repr__(self) -> str:
     return f'{type(self).__name__}(name={self._name!r})'
@@ -78,13 +98,16 @@ class Property(t.Generic[T]):
 
   def set(self, value: t.Union[T, 'Property[T]']) -> None:
     if isinstance(value, Property):
-      self._references = [value]
+      references = [value]
       value = value.get()
     else:
-      self._references = []
+      references = []
+    for adapter in self._value_adapters:
+      value = adapter(value, references)  # type: ignore
     if self._base_type is not None:
-      beartype_check(value, self._base_type)
+      beartype_check(self._base_type, value)
     self._value = value
+    self._references = references
 
   @property
   def name(self) -> str:
@@ -101,7 +124,7 @@ class Property(t.Generic[T]):
     return None
 
   @property
-  def references(self) -> list['Property[T]']:
+  def references(self) -> list['Property']:
     return self._references
 
 
@@ -109,11 +132,11 @@ class NoValueError(Exception):
   pass
 
 
-class _PropertyGenericAlias:
-
-  def __init__(self, property_cls: t.Type[Property], type_hint: TypeHint) -> None:
-    self._property_cls = property_cls
-    self._type_hint = type_hint
+class _PropertyGenericAlias(_GenericAlias, _root=True):  # type: ignore
+  """
+  Special implementation of {@link typing._GenericAlias} for the {@link Property} class such that it
+  captures the type argument and passes it to the `base_type` argument of the Property constructor.
+  """
 
   def __call__(self, *args, **kwargs) -> Property:
-    return Property(*args, **kwargs, base_type=self._type_hint)
+    return self.__origin__(*args, **kwargs, base_type=self.__args__[0])
