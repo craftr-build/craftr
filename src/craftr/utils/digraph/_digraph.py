@@ -1,7 +1,7 @@
 
-import abc
 import dataclasses
 import typing as t
+from collections.abc import Mapping
 from nr.pylang.utils.singletons import NotSet
 
 K = t.TypeVar('K', bound=t.Hashable)
@@ -155,7 +155,7 @@ class _Node(t.Generic[K, N]):
   successors: dict[K, None]
 
 
-class NodesView(t.Generic[K, N]):
+class NodesView(Mapping[K, N]):
 
   def __init__(self, nodes: dict[K, _Node[K, N]]) -> None:
     self._nodes = nodes
@@ -163,7 +163,7 @@ class NodesView(t.Generic[K, N]):
   def __repr__(self) -> str:
     return f'<NodesView count={len(self)}>'
 
-  def __contains__(self, node_id: K) -> bool:
+  def __contains__(self, node_id: object) -> bool:
     return node_id in self._nodes
 
   def __len__(self) -> int:
@@ -172,8 +172,11 @@ class NodesView(t.Generic[K, N]):
   def __iter__(self) -> t.Iterator[K]:
     return iter(self._nodes)
 
+  def __getitem__(self, key: K) -> N:
+    return self._nodes[key].value
 
-class EdgesView(t.Generic[K, E]):
+
+class EdgesView(Mapping[tuple[K, K], E]):
 
   def __init__(self, edges: dict[tuple[K, K], E]) -> None:
     self._edges = edges
@@ -181,7 +184,7 @@ class EdgesView(t.Generic[K, E]):
   def __repr__(self) -> str:
     return f'<EdgesView count={len(self)}>'
 
-  def __contains__(self, edge: tuple[K, K]) -> bool:
+  def __contains__(self, edge: object) -> bool:
     return edge in self._edges
 
   def __len__(self) -> int:
@@ -189,6 +192,9 @@ class EdgesView(t.Generic[K, E]):
 
   def __iter__(self) -> t.Iterator[tuple[K, K]]:
     return iter(self._edges)
+
+  def __getitem__(self, key: tuple[K, K]) -> E:
+    return self._edges[key]
 
 
 class UnknownNodeError(KeyError):

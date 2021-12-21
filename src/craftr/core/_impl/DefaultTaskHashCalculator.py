@@ -32,7 +32,7 @@ class DefaultTaskHashCalculator(TaskHashCalculator):
 
     for property in sorted(task.get_properties().values(), key=lambda p: p.name):
       hasher.update(property.name.encode(encoding))
-      hasher.update(repr(property.or_none()).encode(encoding))
+      hasher.update(repr(property.get(None)).encode(encoding))
 
       if isinstance(property, (PathProperty, PathListProperty)) and not property.is_output:
         for f in PathListProperty.extract(property):

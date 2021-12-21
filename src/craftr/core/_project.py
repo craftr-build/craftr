@@ -5,6 +5,7 @@ import string
 import types
 import typing as t
 import weakref
+from collections.abc import Callable
 from pathlib import Path
 
 from nr.preconditions import check_not_none
@@ -12,6 +13,8 @@ from nr.preconditions import check_not_none
 if t.TYPE_CHECKING:
   from ._context import Context
   from ._tasks import Task
+
+T_Task = t.TypeVar('T_Task', bound='Task')
 
 
 class Project:
@@ -22,17 +25,14 @@ class Project:
 
   def __init__(self,
     context: 'Context',
-    parent: t.Optional['Project'] = None,
-    directory: t.Union[None, str, Path] = None,
+    parent: t.Optional['Project'],
+    directory: t.Union[str, Path],
   ) -> None:
     """
     Create a new project. If no *directory* is specified, it will default to the parent directory
     of the caller. If the given *context* does not have a root project defined yet, the project
     will be promoted to the root project.
     """
-
-    if directory is None:
-      directory = Path(sys._getframe(1).f_code.co_filename).parent
 
     self._context = weakref.ref(context)
     self._parent = weakref.ref(parent) if parent is not None else parent
@@ -42,7 +42,7 @@ class Project:
     self._tasks: t.Dict[str, 'Task'] = {}
     self._subprojects: t.Dict[Path, 'Project'] = {}
     # self._on_apply: t.Optional[ProjectOnApplyCallback] = None
-    # self.extensions = Namespace(self, 'extension')
+    self.extensions = types.SimpleNamespace()
     # self.exports = Namespace(self, 'exports')
 
   def __repr__(self) -> str:
@@ -92,43 +92,43 @@ class Project:
   def build_directory(self, path: t.Union[str, Path]) -> None:
     self._build_directory = Path(path)
 
-  # @t.overload
-  # def task(self, name: str) -> 'DefaultTask': ...
+  @t.overload
+  def task(self, name: str) -> 'Task': ...
 
-  # @t.overload
-  # def task(self, name: str, task_class: t.Type[T_Task]) -> T_Task: ...
+  @t.overload
+  def task(self, name: str, task_class: t.Type[T_Task]) -> T_Task: ...
 
-  # def task(self, name: str, task_class: t.Optional[t.Type[T_Task]] = None) -> T_Task:
-  #   """
-  #   Create a new task of type *task_class* (defaulting to #Task) and add it to the project. The
-  #   task name must be unique within the project.
-  #   """
+  def task(self, name: str, task_class: t.Optional[t.Type[T_Task]] = None) -> T_Task:
+    """
+    Create a new task of type *task_class* (defaulting to #Task) and add it to the project. The
+    task name must be unique within the project.
+    """
 
-  #   if name in self._tasks:
-  #     raise ValueError(f'task name already used: {name!r}')
+    if name in self._tasks:
+      raise ValueError(f'task name already used: {name!r}')
 
-  #   from craftr.core.impl.DefaultTask import DefaultTask
-  #   task = (task_class or DefaultTask)(self, name)
-  #   self._tasks[name] = task
-  #   return t.cast(T_Task, task)
+    from ._tasks import Task
+    task = (task_class or Task)(self, name)
+    self._tasks[name] = task
+    return t.cast(T_Task, task)
 
-  # @property
-  # def tasks(self) -> 'TaskContainer':
-  #   """ Returns the #TaskContainer object for this project. """
+  @property
+  def tasks(self) -> 'ProjectTasks':
+    """ Returns the {@link ProjectTasks} object for this project. """
 
-  #   return TaskContainer(self, self._tasks)
+    return ProjectTasks(self, self._tasks)
 
-  # def subproject(self, directory: str) -> 'Project':
-  #   """
-  #   Reference a subproject by a path relative to the project directory. If the project has not
-  #   been loaded yet, it will be created and initialized.
-  #   """
+  def subproject(self, directory: str) -> 'Project':
+    """
+    Reference a subproject by a path relative to the project directory. If the project has not
+    been loaded yet, it will be created and initialized.
+    """
 
-  #   path = (self.directory / directory).resolve()
-  #   if path not in self._subprojects:
-  #     project = self.context.project_loader.load_project(self.context, self, path)
-  #     self._subprojects[path] = project
-  #   return self._subprojects[path]
+    path = (self.directory / directory).resolve()
+    if path not in self._subprojects:
+      project = self.context.project_loader.load_project(self.context, self, path)
+      self._subprojects[path] = project
+    return self._subprojects[path]
 
   def get_subproject_by_name(self, name: str) -> 'Project':
     """
@@ -143,11 +143,11 @@ class Project:
     raise ValueError(f'project {self.path}:{name} does not exist')
 
   @t.overload
-  def subprojects(self) -> t.List['Project']:
+  def subprojects(self) -> list['Project']:
     """ Returns a list of the project's loaded subprojects. """
 
   @t.overload
-  def subprojects(self, closure: t.Callable[['Project'], None]) -> None:
+  def subprojects(self, closure: Callable[['Project'], None]) -> None:
     """ Call *closure* for every subproject currently loaded in the project.. """
 
   def subprojects(self, closure = None):
@@ -202,7 +202,7 @@ class Project:
   # def file(self, sub_path: str) -> Path:
   #   return self.directory / sub_path
 
-  # def glob(self, pattern: str) -> t.List[Path]:
+  # def glob(self, pattern: str) -> list[Path]:
   #   """
   #   Apply the specified glob pattern relative to the project directory and return a list of the
   #   matched files.
@@ -210,12 +210,12 @@ class Project:
 
   #   return [Path(f) for f in glob.glob(str(self.directory / pattern))]
 
-  # def finalize(self) -> None:
-  #   for task in self.tasks:
-  #     if not task.finalized:
-  #       task.finalize()
-  #   for project in self.subprojects():
-  #     project.finalize()
+  def finalize(self) -> None:
+    for task in self.tasks:
+      if not task.finalized:
+        task.finalize()
+    for project in self.subprojects():
+      project.finalize()
 
 
 class ProjectLoader(abc.ABC):
@@ -233,3 +233,45 @@ class UnableToLoadProjectError(Exception):
   context: 'Context'
   parent: t.Optional['Project']
   path: Path
+
+
+
+class ProjectTasks:
+  """
+  Helper class to access tasks in a project.
+  """
+
+  def __init__(self, project: 'Project', tasks: t.Dict[str, 'Task']) -> None:
+    self._project = weakref.ref(project)
+    self._tasks = tasks
+
+  @property
+  def project(self) -> 'Project':
+    return check_not_none(self._project(), 'lost reference to project')
+
+  def __iter__(self):
+    return iter(self._tasks.values())
+
+  def all(self) -> t.Iterator['Task']:
+    yield from self.project.tasks
+    for subproject in self.project.subprojects():
+      yield from subproject.tasks.all()
+
+  def for_each(self, closure: Callable[['Task'], object], all: bool = False) -> None:
+    for task in (self.all() if all else self._tasks.values()):
+      task(closure)
+
+  def resolve(self, selector: str, raise_empty: bool = True) -> set['Task']:
+    tasks = self.project.context.task_selector.select_tasks(selector, self.project)
+    if not tasks and raise_empty:
+      raise ValueError(f'no task matched selector {selector!r} in project {self.project}')
+    return set(tasks)
+
+  def __getattr__(self, key: str) -> 'Task':
+    try:
+      return self[key]
+    except KeyError:
+      raise AttributeError(key)
+
+  def __getitem__(self, key: str) -> 'Task':
+    return self._tasks[key]

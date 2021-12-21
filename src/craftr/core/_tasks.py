@@ -3,14 +3,11 @@ import abc
 import dataclasses
 import typing as t
 import weakref
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 
 from beartype import beartype
 from nr.preconditions import check_not_none
 from .properties import HasProperties, PathProperty, PathListProperty
-
-if t.TYPE_CHECKING:
-  from ._project import Project
 
 _HASHES_KEY = 'tasks.hashes'
 _ActionCallable = Callable[['Task', 'ActionContext'], object]
@@ -31,7 +28,7 @@ class Action(abc.ABC):
 
 class LambdaAction(Action):
 
-  def __init__(self, func: _ActionCallable) -> None:
+  def __init__(self, func: Callable[[ActionContext], object]) -> None:
     self._func = func
 
   def execute(self, ctx: ActionContext) -> None:
@@ -186,7 +183,7 @@ class Task(HasProperties):
 
     if not self.always_outdated:
       ctx = self.project.context
-      hash_value = ctx.task_hash_calculator.calculate_hash(self).encode()
+      hash_value = ctx.task_hash_calculator.calculate_hash(self)
       ctx.task_hash_store[self.path] = hash_value
 
   @beartype
@@ -205,21 +202,21 @@ class Task(HasProperties):
   def do(self, action: t.Union['Action', _ActionCallable]) -> None:
     if callable(action):
       closure = action
-      action = LambdaAction(lambda context: closure(self, context).apply(self))
+      action = LambdaAction(lambda context: closure(self, context))
     self.actions.main.append(action)
 
   @beartype
   def do_first(self, action: t.Union['Action', _ActionCallable]) -> None:
     if callable(action):
       closure = action
-      action = LambdaAction(lambda context: closure(self, context).apply(self))
+      action = LambdaAction(lambda context: closure(self, context))
     self.actions.pre_run.append(action)
 
   @beartype
   def do_last(self, action: t.Union['Action', _ActionCallable]) -> None:
     if callable(action):
       closure = action
-      action = LambdaAction(lambda context: closure(self, context).apply(self))
+      action = LambdaAction(lambda context: closure(self, context))
     self.actions.post_run.append(action)
 
   def __call__(self, closure: _TaskConfigurator) -> 'Task':
@@ -236,3 +233,44 @@ class TaskHashCalculator(abc.ABC):
   @abc.abstractmethod
   def calculate_hash(self, task: Task) -> str:
     ...
+
+
+class TaskSelector(abc.ABC):
+
+  @abc.abstractmethod
+  def select_tasks(self, selection: str, project: 'Project') -> Collection[Task]: ...
+
+  @abc.abstractmethod
+  def select_default(self, project: 'Project') -> Collection[Task]: ...
+
+
+TaskSelection =  t.Union[None, str, Task, list[t.Union[str, Task]]]
+
+
+@beartype
+def select_tasks(selector: TaskSelector, project: 'Project', tasks: TaskSelection) -> set[Task]:
+  """
+  A helper function to select tasks using the given {@link TaskSelector} and a selection of tasks
+  that can be either explicit, or strings to expand into existing tasks in the context.
+  """
+
+  result = set[Task]()
+
+  if tasks is None:
+    result.update(selector.select_default(project))
+  else:
+    if isinstance(tasks, (str, Task)):
+      tasks = t.cast(list[t.Union[str, Task]], [tasks])
+    for item in tasks:
+      if isinstance(item, Task):
+        result.add(item)
+      elif isinstance(item, str):
+        result_set = selector.select_tasks(item, project)
+        if not result_set:
+          raise ValueError(f'selector matched no tasks: {item!r}')
+        result.update(result_set)
+
+  return result
+
+
+from ._project import Project  # Can't use TYPE_CHECKING guard because of beartype

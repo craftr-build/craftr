@@ -9,6 +9,7 @@ from nr.pylang.utils.singletons import NotSet
 
 T = t.TypeVar('T')
 T_Property = t.TypeVar('T_Property', bound='Property')
+R = t.TypeVar('R')
 _GenericAlias = t._GenericAlias  # type: ignore
 
 
@@ -97,9 +98,17 @@ class Property(t.Generic[T]):
   def is_set(self) -> bool:
     return self._value is not NotSet.Value
 
-  def get(self) -> T:
+  @t.overload
+  def get(self) -> T: ...
+
+  @t.overload
+  def get(self, default: R) -> t.Union[T, R]: ...
+
+  def get(self, default=NotSet.Value):
     if self._value is NotSet.Value:
-      raise NoValueError(f'property {self._name!r} has no value set')
+      if default is NotSet.Value:
+        raise NoValueError(f'property {self._name!r} has no value set')
+      return default
     return self._value
 
   def set(self, value: t.Union[T, 'Property[T]']) -> None:
