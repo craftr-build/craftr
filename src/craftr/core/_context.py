@@ -1,36 +1,34 @@
 
 import typing as t
+from collections.abc import Mapping
 from pathlib import Path
 
+from nr.caching.adapters.mapping import MappingAdapter
 from nr.caching.api import NamespaceStore
-from craftr.utils.caching import JsonDirectoryStore
-from ._tasks import TaskHashCalculator, DefaultTaskHashCalculator
+from nr.caching.stores.sqlite import SqliteStore
+from ._tasks import TaskHashCalculator
+from ._project import Project, ProjectLoader
+from ._impl import ChainingProjectLoader, CraftrDslProjectLoader, DefaultTaskHashCalculator, DefaultProjectLoader
+from ._settings import Settings
 
 
 class Context:
 
+  settings: Settings
+  root_project: Project
+  kvstore: NamespaceStore
+  project_loader: ProjectLoader
   task_hash_calculator: TaskHashCalculator
+  task_hash_store: Mapping[str, str]
 
-  def __init__(self) -> None:
+  def __init__(self, directory: t.Union[str, Path, None] = None, settings: t.Optional[Settings] = None) -> None:
+    directory = Path(directory or Path.cwd())
+    if settings is None:
+      settings = Settings.from_file(directory / '.craftr.settings')
+    self.settings = settings
+    self.root_project = Project(self, None, directory)
+    self.root_project.build_directory.mkdir(exist_ok=True)
+    self.kvstore = SqliteStore(str(self.root_project.build_directory / '.craftr.sqlite'))
+    self.project_loader = ChainingProjectLoader([DefaultProjectLoader(), CraftrDslProjectLoader()])
     self.task_hash_calculator = DefaultTaskHashCalculator()
-    self._metadata_store: t.Optional[MetadataStore] = None
-
-  @property
-  def metadata_store(self) -> 'MetadataStore':
-    if self._metadata_store is None:
-      path = self.get_default_build_directory(self.root_project) / '.craftr-metadata'
-      self._metadata_store = MetadataStore(path)
-    return self._metadata_store
-
-
-class MetadataStore:
-
-  def __init__(self, path: Path) -> None:
-    self._store = JsonDirectoryStore(str(path), create_dir=True)
-
-  def load(self, namespace: str, key: str) -> bytes:
-    return self._store.namespace(namespace).load(key)
-
-  def store(self, namespace: str, key: str, value: bytes) -> bytes:
-    return self._store.namespace(namespace).store(key, value)
-
+    self.task_hash_store = MappingAdapter(self.kvstore.namespace('task_hashes'), str)

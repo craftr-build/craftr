@@ -1,13 +1,11 @@
 
 import abc
 import dataclasses
-import hashlib
 import typing as t
 import weakref
-from pathlib import Path
+from collections.abc import Callable
 
 from beartype import beartype
-from nr.caching.api import KeyDoesNotExist
 from nr.preconditions import check_not_none
 from .properties import HasProperties, PathProperty, PathListProperty
 
@@ -15,6 +13,8 @@ if t.TYPE_CHECKING:
   from ._project import Project
 
 _HASHES_KEY = 'tasks.hashes'
+_ActionCallable = Callable[['Task', 'ActionContext'], object]
+_TaskConfigurator = Callable[['Task'], object]
 
 
 @dataclasses.dataclass
@@ -31,7 +31,7 @@ class Action(abc.ABC):
 
 class LambdaAction(Action):
 
-  def __init__(self, func: t.Callable[[ActionContext], None]) -> None:
+  def __init__(self, func: _ActionCallable) -> None:
     self._func = func
 
   def execute(self, ctx: ActionContext) -> None:
@@ -51,7 +51,7 @@ class Actions:
   teardown: list[Action] = dataclasses.field(default_factory=list)
 
 
-class Task(HasProperties, abc.ABC):
+class Task(HasProperties):
   """
   The base class for a logical unit of work that is composed of individual actions (see {@link Action}). The
   most common subclass is the {@link DefaultTask}.
@@ -173,13 +173,8 @@ class Task(HasProperties, abc.ABC):
       return False
 
     ctx = self.project.context
-    hasher = ctx.task_hash_calculator
-    hash_value = hasher.calculate_hash(self)
-
-    try:
-      stored_hash: t.Optional[str] = ctx.metadata_store.load(_HASHES_KEY, self.path).decode()
-    except KeyDoesNotExist:
-      stored_hash = None
+    hash_value = ctx.task_hash_calculator.calculate_hash(self)
+    stored_hash = ctx.task_hash_store.get(self.path)
 
     # TODO (@nrosenstein): Log that the hashes are different.
     return hash_value != stored_hash
@@ -191,9 +186,8 @@ class Task(HasProperties, abc.ABC):
 
     if not self.always_outdated:
       ctx = self.project.context
-      hasher = ctx.task_hash_calculator
-      hash_value = hasher.calculate_hash(self).encode()
-      self.project.context.metadata_store.store(_HASHES_KEY, self.path, hash_value)
+      hash_value = ctx.task_hash_calculator.calculate_hash(self).encode()
+      ctx.task_hash_store[self.path] = hash_value
 
   @beartype
   def depends_on(self, *tasks: t.Union[str, 'Task']) -> None:
@@ -201,27 +195,34 @@ class Task(HasProperties, abc.ABC):
     Specify that the task dependends on the specified other tasks. Strings are resolved from the tasks own project.
     """
 
-    for index, item in enumerate(tasks):
+    for item in tasks:
       if isinstance(item, str):
         self.dependencies += self.project.tasks.resolve(item)
       elif isinstance(item, Task):
         self.dependencies.append(item)
 
   @beartype
-  def do_first(self, action: t.Union['Action', t.Callable]) -> None:
+  def do(self, action: t.Union['Action', _ActionCallable]) -> None:
+    if callable(action):
+      closure = action
+      action = LambdaAction(lambda context: closure(self, context).apply(self))
+    self.actions.main.append(action)
+
+  @beartype
+  def do_first(self, action: t.Union['Action', _ActionCallable]) -> None:
     if callable(action):
       closure = action
       action = LambdaAction(lambda context: closure(self, context).apply(self))
     self.actions.pre_run.append(action)
 
   @beartype
-  def do_last(self, action: t.Union['Action', t.Callable]) -> None:
+  def do_last(self, action: t.Union['Action', _ActionCallable]) -> None:
     if callable(action):
       closure = action
       action = LambdaAction(lambda context: closure(self, context).apply(self))
     self.actions.post_run.append(action)
 
-  def __call__(self, closure: t.Callable) -> 'Task':
+  def __call__(self, closure: _TaskConfigurator) -> 'Task':
     """
     Allows the task to be configured using a closure in Craftr DSL land.
     """
@@ -235,40 +236,3 @@ class TaskHashCalculator(abc.ABC):
   @abc.abstractmethod
   def calculate_hash(self, task: Task) -> str:
     ...
-
-
-class DefaultTaskHashCalculator(TaskHashCalculator):
-  """
-  Calculates a hash for the task that represents the state of it's inputs (property values and input file contents).
-  That hash is used to determine if the task is up to date with it's previous execution or if it needs to be executed.
-
-  > Implementation detail: Expects that all important information of a property value is
-  > included in it's #repr(), and that the #repr() is consistent.
-  """
-
-  def __init__(self, hash_algo: str = 'sha1') -> None:
-    self._hash_algo = hash_algo
-
-  @staticmethod
-  def _hash_file(hasher: 'hashlib._Hash', path: Path) -> None:
-    with path.open('rb') as fp:
-      while True:
-        chunk = fp.read(8048)
-        hasher.update(chunk)
-        if not chunk:
-          break
-
-  def calculate_hash(self, task: Task) -> str:
-    hasher = hashlib.new(self._hash_algo)
-    encoding = 'utf-8'
-
-    for property in sorted(task.get_properties().values(), key=lambda p: p.name):
-      hasher.update(property.name.encode(encoding))
-      hasher.update(repr(property.or_none()).encode(encoding))
-
-      if isinstance(property, (PathProperty, PathListProperty)) and not property.is_output:
-        for f in PathListProperty.extract(property):
-          if f.is_file():
-            self._hash_file(hasher, f)
-
-    return hasher.hexdigest()
