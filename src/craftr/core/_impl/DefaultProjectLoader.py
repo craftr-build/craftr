@@ -21,7 +21,6 @@ class DefaultProjectLoader(ProjectLoader):
     return f'{type(self).__name__}()'
 
   def load_project(self, context: 'Context', parent: t.Optional[Project], path: Path) -> Project:
-    print(path, path /BUILD_SCRIPT_FILENAME)
     if (filename := path / BUILD_SCRIPT_FILENAME).exists():
       project = Project(context, parent, path)
       context.init_project(project)
