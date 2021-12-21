@@ -1,18 +1,18 @@
 
 import typing as t
-from collections.abc import Collection, MutableMapping
+from collections.abc import MutableMapping
 from pathlib import Path
 
 from nr.caching.adapters.mapping import MappingAdapter
 from nr.caching.api import NamespaceStore
 from nr.caching.stores.sqlite import SqliteStore
 
-from craftr.utils.digraph import DiGraph, topological_sort
-from ._tasks import Task, TaskHashCalculator, TaskSelector, TaskSelection, select_tasks
-from ._project import Project, ProjectLoader
-from ._impl import (ChainingProjectLoader, CraftrDslProjectLoader, DefaultTaskHashCalculator,
+from ._execute import BuildGraph, Executor
+from ._impl import (ChainingProjectLoader, CraftrDslProjectLoader, DefaultExecutor, DefaultTaskHashCalculator,
   DefaultProjectLoader, DefaultTaskSelector)
+from ._project import Project, ProjectLoader
 from ._settings import Settings
+from ._tasks import TaskHashCalculator, TaskSelector, TaskSelection, select_tasks
 
 
 class Context:
@@ -24,7 +24,8 @@ class Context:
   task_hash_calculator: TaskHashCalculator
   task_hash_store: MutableMapping[str, str]
   task_selector: TaskSelector
-  graph: 'BuildGraph'
+  graph: BuildGraph
+  executor: Executor
 
   CRAFTR_SETTINGS_FILE = '.craftr.settings'
 
@@ -37,6 +38,7 @@ class Context:
     self.task_hash_calculator = DefaultTaskHashCalculator()
     self.task_selector = DefaultTaskSelector()
     self.graph = BuildGraph()
+    self.executor = DefaultExecutor()
 
   def init_project(self, project: Project) -> None:
     """ Must be called by a project loader to initialize the project, before it is executed. """
@@ -61,25 +63,4 @@ class Context:
     tasks = select_tasks(self.task_selector, self.root_project, selection)
     assert all(t.finalized for t in tasks), 'some tasks not finalized?'
     self.graph.add_tasks(tasks)
-
-
-class BuildGraph(DiGraph[str, Task, None]):
-
-  def __init__(self) -> None:
-    super().__init__()
-
-  def add_tasks(self, tasks: Collection[Task], *, seen: t.Optional[set[Task]] = None) -> None:
-    if seen is None:
-      seen = set()
-    for task in set(tasks):
-      if task in seen:
-        raise RuntimeError('cyclic dependency')
-      seen.add(task)
-      self.node(task.path, task)
-      for dep in task.dependencies:
-        self.node(dep.path, dep)
-        self.edge(dep.path, task.path, None)
-      self.add_tasks(task.dependencies, seen=seen)
-
-  def execution_order(self) -> list[Task]:
-    return [self.nodes[k] for k in topological_sort(self)]
+    self.executor.execute(self, self.graph)

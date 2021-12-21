@@ -12,7 +12,7 @@ from nr.preconditions import check_not_none
 
 if t.TYPE_CHECKING:
   from ._context import Context
-  from ._tasks import Task
+  from ._tasks import Task, _TaskConfigurator, _ActionCallable
 
 T_Task = t.TypeVar('T_Task', bound='Task')
 
@@ -93,12 +93,26 @@ class Project:
     self._build_directory = Path(path)
 
   @t.overload
-  def task(self, name: str) -> 'Task': ...
+  def task(
+    self,
+    name: str,
+    configure: t.Optional['_TaskConfigurator'] = None, /, *,
+    do: t.Optional['_ActionCallable'] = None,
+  ) -> 'Task': ...
 
   @t.overload
-  def task(self, name: str, task_class: t.Type[T_Task]) -> T_Task: ...
+  def task(
+    self,
+    name: str,
+    task_class: type[T_Task], /,
+  ) -> T_Task: ...
 
-  def task(self, name: str, task_class: t.Optional[t.Type[T_Task]] = None) -> T_Task:
+  def task(
+    self,
+    name: str,
+    task_class: t.Union[t.Optional['_TaskConfigurator'], type['Task']] = None, /, *,
+    do: t.Optional['_ActionCallable'] = None,
+  ) -> 'Task':
     """
     Create a new task of type *task_class* (defaulting to #Task) and add it to the project. The
     task name must be unique within the project.
@@ -107,10 +121,20 @@ class Project:
     if name in self._tasks:
       raise ValueError(f'task name already used: {name!r}')
 
-    from ._tasks import Task
-    task = (task_class or Task)(self, name)
+    configure: t.Optional['_TaskConfigurator'] = None
+    if task_class is None or not isinstance(task_class, type):
+      configure = task_class
+      task_class = Task
+
+    task = task_class(self, name)
     self._tasks[name] = task
-    return t.cast(T_Task, task)
+
+    if do:
+      task.do(do)
+    if configure is not None:
+      configure(task)
+
+    return task
 
   @property
   def tasks(self) -> 'ProjectTasks':
@@ -275,3 +299,6 @@ class ProjectTasks:
 
   def __getitem__(self, key: str) -> 'Task':
     return self._tasks[key]
+
+
+from ._tasks import Task

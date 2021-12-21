@@ -1,6 +1,7 @@
 
 from .ChainingProjectLoader import ChainingProjectLoader
 from .CraftrDslProjectLoader import CraftrDslProjectLoader
+from .DefaultExecutor import DefaultExecutor
 from .DefaultProjectLoader import DefaultProjectLoader
 from .DefaultTaskHashCalculator import DefaultTaskHashCalculator
 from .DefaultTaskSelector import DefaultTaskSelector

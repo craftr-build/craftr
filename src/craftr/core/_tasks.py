@@ -167,7 +167,7 @@ class Task(HasProperties):
 
     if not has_output_properties:
       # A task with no output properties is always outdated; a task that is never outdated doesn't make sense.
-      return False
+      return True
 
     ctx = self.project.context
     hash_value = ctx.task_hash_calculator.calculate_hash(self)
