@@ -3,8 +3,9 @@ import typing as t
 from collections.abc import Sequence
 from pathlib import Path
 
-from ._base import Property
+from beartype import beartype
 from craftr.utils.beartype import beartype_check
+from ._base import Property
 
 PathLike = t.Union[str, Path]
 
@@ -71,3 +72,13 @@ class PathListProperty(Property[list[Path]], _HasOutputAttribute):
 
   def clear(self) -> None:
     self.set([])
+
+  @staticmethod
+  @beartype
+  def extract(value: t.Union[PathProperty, 'PathListProperty']) -> list[Path]:
+    if isinstance(value, PathProperty):
+      return [value.get()]
+    elif isinstance(value, PathListProperty):
+      return value.get()
+    else:
+      assert False

@@ -41,6 +41,9 @@ class HasProperties(abc.ABC):
     for key, value in self.__properties__.items():
       setattr(self, key, value._bound_copy(self))
 
+  def get_properties(self) -> t.Dict[str, 'Property']:
+    return {k: getattr(self, k) for k in self.__properties__}
+
 
 class Property(t.Generic[T]):
   """
