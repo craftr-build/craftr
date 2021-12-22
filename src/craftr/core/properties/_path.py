@@ -12,12 +12,12 @@ PathLike = t.Union[str, Path]
 
 _PathPropertyBase = BaseProperty[
   Path,
-  t.Union[PathLike, BaseProperty[Path, object]]
+  t.Union[PathLike, BaseProperty[Path, t.Any]]
 ]
 
 _PathListPropertyBase = BaseProperty[
   list[Path],
-  t.Union[PathLike, BaseProperty[Path, object], Sequence[t.Union[PathLike, BaseProperty[Path, object]]]]
+  t.Union[PathLike, BaseProperty[Path, t.Any], Sequence[t.Union[PathLike, BaseProperty[Path, t.Any]]]]
 ]
 
 
@@ -56,7 +56,7 @@ class PathListProperty(_PathListPropertyBase, _HasOutputAttribute):
     self._value_adapters.append(lambda l, r: [Path(x) for x in t.cast(Sequence[PathLike], l)])
 
   @staticmethod
-  def _unpack_nested_properties(value: object, references: list[BaseProperty]) -> object:
+  def _unpack_nested_properties(value: t.Any, references: list[BaseProperty]) -> t.Any:
     if not isinstance(value, t.Sequence):
       return value
     copy = False

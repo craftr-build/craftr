@@ -27,6 +27,8 @@ requirements = [
   'typing-extensions >=3.10.0.0,<4.0.0',
   'nr.pylang.utils >=0.1.3,<1.0.0',
   'beartype >=0.9.1,<1.0.0',
+  'loguru >=0.5.3,<1.0.0',
+  'localimport >=1.7.3,<2.0.0',
 ]
 test_requirements = [
   'types-termcolor',

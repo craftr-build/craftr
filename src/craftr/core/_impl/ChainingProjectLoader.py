@@ -29,13 +29,13 @@ class ChainingProjectLoader(ProjectLoader, LoadableFromSettings):
   def __repr__(self) -> str:
     return f'{type(self).__name__}(delegates={self.delegates!r})'
 
-  def load_project(self, context: 'Context', parent: t.Optional['Project'], path: Path) -> 'Project':
+  def load_project(self, project: Project) -> None:
     for delegate in self.delegates:
       try:
-        return delegate.load_project(context, parent, path)
+        return delegate.load_project(project)
       except UnableToLoadProjectError:
         pass
-    raise UnableToLoadProjectError(self, context, parent, path)
+    raise UnableToLoadProjectError(self, project)
 
   @classmethod
   def from_settings(cls, settings: 'Settings') -> 'ChainingProjectLoader':

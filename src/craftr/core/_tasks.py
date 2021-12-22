@@ -10,8 +10,8 @@ from nr.preconditions import check_not_none
 from .properties import HasProperties, is_path_property, get_path_property_paths
 
 _HASHES_KEY = 'tasks.hashes'
-_ActionCallable = Callable[['Task', 'ActionContext'], object]
-_TaskConfigurator = Callable[['Task'], object]
+_ActionCallable = Callable[['Task', 'ActionContext'], t.Any]
+_TaskConfigurator = Callable[['Task'], t.Any]
 
 
 @dataclasses.dataclass
@@ -28,7 +28,7 @@ class Action(abc.ABC):
 
 class LambdaAction(Action):
 
-  def __init__(self, func: Callable[[ActionContext], object]) -> None:
+  def __init__(self, func: Callable[[ActionContext], t.Any]) -> None:
     self._func = func
 
   def execute(self, ctx: ActionContext) -> None:

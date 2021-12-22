@@ -82,7 +82,7 @@ class BaseProperty(t.Generic[T, A]):
     self._name: t.Optional[str] = None
     self._owner: t.Optional[weakref.ReferenceType] = None
     self._references: list['BaseProperty'] = []
-    self._value_adapters: list[t.Callable[[object, list[BaseProperty]], object]] = []
+    self._value_adapters: list[t.Callable[[t.Any, list[BaseProperty]], t.Any]] = []
     self.__post_init__()
     if default is not NotSet.Value:
       self.set(default)
@@ -97,7 +97,7 @@ class BaseProperty(t.Generic[T, A]):
   def __repr__(self) -> str:
     return f'{type(self).__name__}(name={self._name!r})'
 
-  def _bound_copy(self: T_BaseProperty, owner: object) -> T_BaseProperty:
+  def _bound_copy(self: T_BaseProperty, owner: t.Any) -> T_BaseProperty:
     new_self = copy.copy(self)
     new_self._owner = weakref.ref(owner)
     if self._default is not NotSet.Value:
@@ -120,7 +120,7 @@ class BaseProperty(t.Generic[T, A]):
       return default
     return self._value
 
-  def set(self, value: t.Union[T, A, 'BaseProperty[T, object]', 'BaseProperty[A, object]']) -> None:
+  def set(self, value: t.Union[T, A, 'BaseProperty[T, t.Any]', 'BaseProperty[A, t.Any]']) -> None:
     if isinstance(value, BaseProperty):
       references = [value]
       value = value.get()
@@ -139,7 +139,7 @@ class BaseProperty(t.Generic[T, A]):
     return self._name
 
   @property
-  def owner(self) -> object:
+  def owner(self) -> t.Any:
     if self._owner:
       value = self._owner()
       if value is None:

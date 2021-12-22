@@ -19,6 +19,8 @@ requirements:
 - typing-extensions ^3.10.0.0
 - nr.pylang.utils ^0.1.3
 - beartype ^0.9.1
+- loguru ^0.5.3
+- localimport ^1.7.3
 test-requirements:
 - types-termcolor
 entrypoints:

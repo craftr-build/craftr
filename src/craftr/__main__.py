@@ -18,19 +18,20 @@ parser.add_argument('-l', '--list', action='store_true', help='List all tasks.')
 def main():
   args = parser.parse_args()
 
-  ctx = Context(settings=Settings.from_file(args.settings_file))
+  ctx = Context(Path.cwd(), settings=Settings.from_file(args.settings_file))
   ctx.settings.update(Settings.parse(args.option))
   if args.verbose:
     ctx.settings.set('craftr.core.verbose', True)
 
-  ctx.load_project(Path.cwd())
+  with ctx.localimport:
+    ctx.load_project()
 
-  if args.list:
-    for task in ctx.root_project.tasks.all():
-      print(task.path)
-    return
+    if args.list:
+      for task in ctx.root_project.tasks.all():
+        print(task.path)
+      return
 
-  ctx.execute(args.tasks or None)
+    ctx.execute(args.tasks or None)
 
 
 if __name__ == '__main__':

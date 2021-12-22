@@ -1,6 +1,8 @@
 
 import abc
 import dataclasses
+import hashlib
+import json
 import string
 import types
 import typing as t
@@ -41,9 +43,12 @@ class Project:
     self._build_directory: t.Optional[Path] = None
     self._tasks: t.Dict[str, 'Task'] = {}
     self._subprojects: t.Dict[Path, 'Project'] = {}
+    self.buildscript = BuildScriptConfig(weakref.ref(self))
     # self._on_apply: t.Optional[ProjectOnApplyCallback] = None
     self.extensions = types.SimpleNamespace()
     # self.exports = Namespace(self, 'exports')
+
+    context.init_project(self)
 
   def __repr__(self) -> str:
     return f'Project("{self.path}")'
@@ -150,7 +155,8 @@ class Project:
 
     path = (self.directory / directory).resolve()
     if path not in self._subprojects:
-      project = self.context.project_loader.load_project(self.context, self, path)
+      project = Project(self.context, self, path)
+      self.context.project_loader.load_project(project)
       self._subprojects[path] = project
     return self._subprojects[path]
 
@@ -241,23 +247,27 @@ class Project:
     for project in self.subprojects():
       project.finalize()
 
+  def _buildscript_done(self) -> None:
+    """
+    Internal. Called after the buildscript was configured.
+    """
+
+    self.context.buildscript_config_apply(self.buildscript)
+
 
 class ProjectLoader(abc.ABC):
   """
-  Interface for loading projects from a directory on the filesystem.
+  Interface for loading/initialize projects from a directory on the filesystem.
   """
 
   @abc.abstractmethod
-  def load_project(self, context: 'Context', parent: t.Optional['Project'], path: Path) -> 'Project': ...
+  def load_project(self, project: 'Project') -> None: ...
 
 
 @dataclasses.dataclass
 class UnableToLoadProjectError(Exception):
   loader: 'ProjectLoader'
-  context: 'Context'
-  parent: t.Optional['Project']
-  path: Path
-
+  project: 'Project'
 
 
 class ProjectTasks:
@@ -281,7 +291,7 @@ class ProjectTasks:
     for subproject in self.project.subprojects():
       yield from subproject.tasks.all()
 
-  def for_each(self, closure: Callable[['Task'], object], all: bool = False) -> None:
+  def for_each(self, closure: Callable[['Task'], t.Any], all: bool = False) -> None:
     for task in (self.all() if all else self._tasks.values()):
       task(closure)
 
@@ -299,6 +309,85 @@ class ProjectTasks:
 
   def __getitem__(self, key: str) -> 'Task':
     return self._tasks[key]
+
+
+@dataclasses.dataclass
+class BuildScriptConfig:
+  """
+  This class is used to describe metadata in a buildscript, such as Python package dependencies.
+  """
+
+  _project: weakref.ReferenceType[Project] = dataclasses.field(repr=False)
+  requirements: list[str] = dataclasses.field(default_factory=list)
+  index_url: t.Optional[str] = None
+  extra_index_urls: list[str] = dataclasses.field(default_factory=list)
+
+  @property
+  def project(self) -> Project:
+    return check_not_none(self._project(), 'lost reference to project')
+
+  def hash(self) -> str:
+    """ Calculates a SHA1 hash for the state of the object. """
+
+    return hashlib.sha1(json.dumps({
+      'project': self.project.path,
+      'requirements': self.requirements,
+      'index_url': self.index_url,
+      'extra_index_urls': self.extra_index_urls,
+    }).encode('utf8')).hexdigest()
+
+  @t.overload
+  def requires(self, package: str, *, version: t.Optional[str] = None) -> None: ...
+
+  @t.overload
+  def requires(self, package: str, *packages: str) -> None: ...
+
+  def requires(self, package: str, *packages: str, version: t.Optional[str] = None) -> None:
+    for package in (package,) + packages:
+      self.requirements.append(f'{package} {version or ""}'.strip())
+
+  def extra_index_url(self, *urls: str) -> None:
+    self.extra_index_urls += urls
+
+  def done(self) -> None:
+    """
+    When not using {@link #__call__()} to configure the build script; call this method to mark that
+    the configuration is done.
+    """
+
+    self.project._buildscript_done()
+
+  def __call__(self, configurator: Callable[['BuildScriptConfig'], t.Any]) -> None:
+    configurator(self)
+    self.done()
+
+
+class BuildScriptConfigApplier(abc.ABC):
+  """
+  Interface for applying a buildscript configuration.
+  """
+
+  @abc.abstractmethod
+  def apply(
+    self,
+    config: BuildScriptConfig,
+    packages_root: Path,
+    state: dict[str, t.Any],
+    persist: t.Callable[[], None],
+  ) -> None:
+    """
+    Apply the buildscript configuration and install packages into the {@param packages_root}. The method may be called
+    multiple times by different projects in the same build.
+
+    @param config: The configuration to apply.
+    @param packages_root: The directory where packages should be installed to.
+    @param state: A JSON serializable dictionary that can be used to carry state information to the next call.
+    @param persist: A function to explicitly persist a state; should only be called before an exception is about
+      to be raised as otherwise the mutated {@param state} will be persisted automatically.
+    """
+
+  @abc.abstractmethod
+  def get_additional_search_paths(self, packages_root: Path) -> list[Path]: ...
 
 
 from ._tasks import Task
