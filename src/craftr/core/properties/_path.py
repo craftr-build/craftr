@@ -31,7 +31,13 @@ class PathProperty(BaseProperty[Path, PathLike], _HasOutputAttribute):
     self._value_adapters.append(lambda x, r: Path(t.cast(PathLike, x)))
 
 
-class PathListProperty(BaseProperty[list[Path], t.Union[PathLike, Sequence[PathLike]]], _HasOutputAttribute):
+_PathListPropertyBase = BaseProperty[
+  list[Path],
+  t.Union[PathLike, PathProperty, Sequence[t.Union[PathLike, PathProperty]]]
+]
+
+
+class PathListProperty(_PathListPropertyBase, _HasOutputAttribute):
   """
   A special property type for a list of paths.
   """

@@ -62,7 +62,7 @@ class BaseProperty(t.Generic[T, A]):
 
   def __init__(
     self, *,
-    default: t.Union[T, NotSet] = NotSet.Value,
+    default: t.Union[T, A, NotSet] = NotSet.Value,
     base_type: t.Union[TypeHint, None] = None,
     **kwargs,
   ) -> None:
