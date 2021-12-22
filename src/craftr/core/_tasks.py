@@ -7,7 +7,7 @@ from collections.abc import Callable, Collection
 
 from beartype import beartype
 from nr.preconditions import check_not_none
-from .properties import HasProperties, PathProperty, PathListProperty
+from .properties import HasProperties, is_path_property, get_path_property_paths
 
 _HASHES_KEY = 'tasks.hashes'
 _ActionCallable = Callable[['Task', 'ActionContext'], object]
@@ -155,11 +155,9 @@ class Task(HasProperties):
     missing_output_files = []
     has_output_properties = False
     for property in self.get_properties().values():
-      if isinstance(property, (PathProperty, PathListProperty)) and property.is_output:
+      if is_path_property(property) and property.is_output:
         has_output_properties = True
-        for f in PathListProperty.extract(property):
-          if not f.exists():
-            missing_output_files.append(f)
+        missing_output_files += [f for f in get_path_property_paths(property) if not f.exists()]
 
     if missing_output_files:
       # TODO (@nrosenstein): Log missing output files

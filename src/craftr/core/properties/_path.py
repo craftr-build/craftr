@@ -1,5 +1,6 @@
 
 import typing as t
+import typing_extensions as te
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -9,6 +10,16 @@ from ._base import BaseProperty
 
 PathLike = t.Union[str, Path]
 
+_PathPropertyBase = BaseProperty[
+  Path,
+  t.Union[PathLike, BaseProperty[Path, object]]
+]
+
+_PathListPropertyBase = BaseProperty[
+  list[Path],
+  t.Union[PathLike, BaseProperty[Path, object], Sequence[t.Union[PathLike, BaseProperty[Path, object]]]]
+]
+
 
 class _HasOutputAttribute:
 
@@ -16,7 +27,7 @@ class _HasOutputAttribute:
     self.is_output = is_output
 
 
-class PathProperty(BaseProperty[Path, PathLike], _HasOutputAttribute):
+class PathProperty(_PathPropertyBase, _HasOutputAttribute):
   """
   A special property type for paths.
   """
@@ -29,12 +40,6 @@ class PathProperty(BaseProperty[Path, PathLike], _HasOutputAttribute):
     validator = beartype_validator(PathLike)
     self._value_adapters.append(lambda x, r: validator(x))
     self._value_adapters.append(lambda x, r: Path(t.cast(PathLike, x)))
-
-
-_PathListPropertyBase = BaseProperty[
-  list[Path],
-  t.Union[PathLike, PathProperty, Sequence[t.Union[PathLike, PathProperty]]]
-]
 
 
 class PathListProperty(_PathListPropertyBase, _HasOutputAttribute):
@@ -83,12 +88,15 @@ class PathListProperty(_PathListPropertyBase, _HasOutputAttribute):
   def clear(self) -> None:
     self.set([])
 
-  @staticmethod
-  @beartype
-  def extract(value: t.Union[PathProperty, 'PathListProperty']) -> list[Path]:
-    if isinstance(value, PathProperty):
-      return [value.get()]
-    elif isinstance(value, PathListProperty):
-      return value.get()
-    else:
-      assert False
+
+def is_path_property(property: BaseProperty) -> te.TypeGuard[t.Union[PathProperty, PathListProperty]]:
+  return isinstance(property, (PathProperty, PathListProperty))
+
+
+def get_path_property_paths(property: t.Union[PathProperty, PathListProperty]) -> list[Path]:
+  if isinstance(property, PathProperty):
+    return [property.get()]
+  elif isinstance(property, PathListProperty):
+    return property.get()
+  else:
+    assert False

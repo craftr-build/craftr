@@ -1,7 +1,7 @@
 
 import hashlib
 from pathlib import Path
-from ..properties import PathProperty, PathListProperty
+from ..properties import is_path_property, get_path_property_paths
 from .._tasks import TaskHashCalculator, Task
 
 
@@ -34,9 +34,7 @@ class DefaultTaskHashCalculator(TaskHashCalculator):
       hasher.update(property.name.encode(encoding))
       hasher.update(repr(property.get(None)).encode(encoding))
 
-      if isinstance(property, (PathProperty, PathListProperty)) and not property.is_output:
-        for f in PathListProperty.extract(property):
-          if f.is_file():
-            self._hash_file(hasher, f)
+      if is_path_property(property) and not property.is_output:
+        [self._hash_file(hasher, f) for f in get_path_property_paths(property) if f.is_file()]
 
     return hasher.hexdigest()
