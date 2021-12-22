@@ -25,6 +25,8 @@ requirements = [
   'nr.pylang.ast >=0.0.5,<0.1.0',
   'termcolor >=1.1.0,<2.0.0',
   'typing-extensions >=3.10.0.0,<4.0.0',
+  'nr.pylang.utils >=0.1.3,<1.0.0',
+  'beartype >=0.9.1,<1.0.0',
 ]
 test_requirements = [
   'types-termcolor',
