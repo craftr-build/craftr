@@ -7,9 +7,10 @@ import weakref
 from craftr.utils.beartype import beartype_check, TypeHint
 from nr.pylang.utils.singletons import NotSet
 
+A = t.TypeVar('A', covariant=True)
 T = t.TypeVar('T')
-T_Property = t.TypeVar('T_Property', bound='Property')
 R = t.TypeVar('R')
+T_BaseProperty = t.TypeVar('T_BaseProperty', bound='BaseProperty')
 _GenericAlias = t._GenericAlias  # type: ignore
 
 
@@ -19,7 +20,7 @@ class HasProperties(abc.ABC):
   is created, its properties will be copied and bound to the instance.
   """
 
-  __properties__: t.ClassVar[dict[str, 'Property']] = {}
+  __properties__: t.ClassVar[dict[str, 'BaseProperty']] = {}
 
   def __init_subclass__(cls) -> None:
     cls.__properties__ = {}
@@ -28,13 +29,13 @@ class HasProperties(abc.ABC):
         cls.__properties__.update(base.__properties__)
     for key in dir(cls):
       value = getattr(cls, key, None)
-      if isinstance(value, Property):
+      if isinstance(value, BaseProperty):
         assert value._name is None or value._name == key, (key, value)
         value._name = key
         cls.__properties__[key] = value
     for key, value in cls.__annotations__.items():
       origin = value.__origin__ if isinstance(value, _GenericAlias) else value
-      if (isinstance(origin, type) and issubclass(origin, Property)):
+      if (isinstance(origin, type) and issubclass(origin, BaseProperty)):
         cls.__properties__[key] = value()
 
   def __init__(self) -> None:
@@ -42,14 +43,21 @@ class HasProperties(abc.ABC):
     for key, value in self.__properties__.items():
       setattr(self, key, value._bound_copy(self))
 
-  def get_properties(self) -> t.Dict[str, 'Property']:
+  def get_properties(self) -> t.Dict[str, 'BaseProperty']:
     return {k: getattr(self, k) for k in self.__properties__}
 
 
-class Property(t.Generic[T]):
+class BaseProperty(t.Generic[T, A]):
   """
   The base class for properties on tasks. Properties are the preferred way to make task implementation
   configurable as they make tracking dependencies between tasks easier.
+
+  @generic_param T: The value type that the property holds.
+  @generic_param A: The value type that the property accepts and can automatically coerce to {@code T}. This
+    can only be different from {@code T} if respective value adapters are registered in the property.
+
+  Note: Use the {@link Property} type alias to refer to a type specialization with a single generic argument
+  for both the {@code T} and {@code A} param.
   """
 
   def __init__(
@@ -73,8 +81,8 @@ class Property(t.Generic[T]):
     self._value: t.Union[T, NotSet] = NotSet.Value
     self._name: t.Optional[str] = None
     self._owner: t.Optional[weakref.ReferenceType] = None
-    self._references: list['Property'] = []
-    self._value_adapters: list[t.Callable[[object, list[Property]], object]] = []
+    self._references: list['BaseProperty'] = []
+    self._value_adapters: list[t.Callable[[object, list[BaseProperty]], object]] = []
     self.__post_init__()
     if default is not NotSet.Value:
       self.set(default)
@@ -82,13 +90,14 @@ class Property(t.Generic[T]):
   def __post_init__(self) -> None:
     pass
 
-  def __class_getitem__(cls, type_hint: t.Type[T]) -> t.Type['Property[T]']:
-    return _PropertyGenericAlias(cls, (type_hint,))  # type: ignore
+  def __class_getitem__(cls, type_hint: tuple[type[T], type[A]]) -> type['BaseProperty[T, A]']:
+    assert isinstance(type_hint, tuple) and len(type_hint) == 2, repr(type_hint)
+    return _BasePropertyGenericAlias(cls, type_hint)  # type: ignore
 
   def __repr__(self) -> str:
     return f'{type(self).__name__}(name={self._name!r})'
 
-  def _bound_copy(self: T_Property, owner: object) -> T_Property:
+  def _bound_copy(self: T_BaseProperty, owner: object) -> T_BaseProperty:
     new_self = copy.copy(self)
     new_self._owner = weakref.ref(owner)
     if self._default is not NotSet.Value:
@@ -111,8 +120,8 @@ class Property(t.Generic[T]):
       return default
     return self._value
 
-  def set(self, value: t.Union[T, 'Property[T]']) -> None:
-    if isinstance(value, Property):
+  def set(self, value: t.Union[T, A, 'BaseProperty[T, object]', 'BaseProperty[A, object]']) -> None:
+    if isinstance(value, BaseProperty):
       references = [value]
       value = value.get()
     else:
@@ -121,7 +130,7 @@ class Property(t.Generic[T]):
       value = adapter(value, references)  # type: ignore
     if self._base_type is not None:
       beartype_check(self._base_type, value)
-    self._value = value
+    self._value = t.cast(T, value)
     self._references = references
 
   @property
@@ -139,7 +148,7 @@ class Property(t.Generic[T]):
     return None
 
   @property
-  def references(self) -> list['Property']:
+  def references(self) -> list['BaseProperty']:
     return self._references
 
 
@@ -147,11 +156,20 @@ class NoValueError(Exception):
   pass
 
 
-class _PropertyGenericAlias(_GenericAlias, _root=True):  # type: ignore
+class _BasePropertyGenericAlias(_GenericAlias, _root=True):  # type: ignore
   """
-  Special implementation of {@link typing._GenericAlias} for the {@link Property} class such that it
-  captures the type argument and passes it to the `base_type` argument of the Property constructor.
+  Special implementation of {@link typing._GenericAlias} for the {@link BaseProperty} class such that it
+  captures the type argument and passes it to the `base_type` argument of the BaseProperty constructor.
   """
 
-  def __call__(self, *args, **kwargs) -> Property:
+  def __call__(self, *args, **kwargs) -> BaseProperty:
     return self.__origin__(*args, **kwargs, base_type=self.__args__[0])
+
+
+# NOTE (@nrosenstein): We would like to make this an alias instead ({@code Property = BaseProperty[T, T]}), but
+#   that will not allow instance checks using the alias in MyPy, even if we could properly implement that check
+#   in {@link _BasePropertyGenericAlias}.
+class Property(BaseProperty[T, T]):
+
+  def __class_getitem__(cls, type_hint: type[T]) -> type['BaseProperty[T, T]']:  # type: ignore
+    return _BasePropertyGenericAlias(cls, (type_hint,))  # type: ignore
