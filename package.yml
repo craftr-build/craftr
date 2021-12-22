@@ -7,7 +7,7 @@ modulename: craftr
 description: General purpose build system with an easy to use API and DSL.
 typed: true
 requirements:
-- python ^3.8
+- python ^3.9
 - astor ^0.8.1
 - dataclasses ^0.6
 - nr.caching ^0.4.0
