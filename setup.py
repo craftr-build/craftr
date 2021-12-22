@@ -18,7 +18,7 @@ else:
 requirements = [
   'astor >=0.8.1,<1.0.0',
   'dataclasses >=0.6.0,<1.0.0',
-  'nr.caching >=0.3.2,<1.0.0',
+  'nr.caching >=0.4.0,<1.0.0',
   'nr.functional >=0.1.0,<1.0.0',
   'nr.parsing.core >=2.0.2,<3.0.0',
   'nr.preconditions >=0.0.4,<1.0.0',
