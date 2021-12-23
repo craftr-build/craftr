@@ -569,6 +569,15 @@ class Rewriter:
   def _rewrite_stmt_line_expr_or_assign(self) -> str:
     token = ProxyToken(self.tokenizer)
     code = self._rewrite_items(ParseMode.DEFAULT)
+
+    if not code:
+      # TODO (@nrosenstein): Better error message. How to reproduce reaching this line:
+      #
+      #   print('hello, world'!)
+      #
+      # Note how the exclamation mark is outside the string literal.
+      raise self._syntax_error('unable to parse statement')
+
     code += self._consume_whitespace(newlines=False)
 
     if token.tv == (Token.Control, '='):  # Assignment
