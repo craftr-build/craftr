@@ -1,0 +1,15 @@
+=== OPTION enable_closures ===
+=== TEST import_in_closure ===
+{
+  import nr.fs
+  print(nr.fs)
+}
+=== EXPECTS ===
+@__closure__.child
+def _closure_1(__closure__, self, *arguments, **kwarguments):
+    import nr.fs
+    __closure__['print'](nr.fs)
+
+
+_closure_1
+=== END ===

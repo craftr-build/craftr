@@ -4,6 +4,7 @@ import io
 from pathlib import Path
 from .._execute import execute
 from .._transpiler import transpile_to_source
+from .._runtime import Closure
 from .utils.testcaseparser import CaseData, cases_from
 
 
@@ -17,7 +18,8 @@ def test_transpiler(case_data: CaseData) -> None:
     print('='*30, 'OUTPUTS')
     print(case_data.outputs)
 
-  output = transpile_to_source(case_data.input, case_data.filename).rstrip()
+  options = Closure.get_options() if 'enable_closures' in case_data.options else None
+  output = transpile_to_source(case_data.input, case_data.filename, options).rstrip()
 
   print('='*30, 'ACTUAL TRANSPILED SOURCED')
   print(output)
@@ -27,7 +29,7 @@ def test_transpiler(case_data: CaseData) -> None:
   if case_data.outputs is not None:
     fp = io.StringIO()
     with contextlib.redirect_stdout(fp):
-      execute(case_data.input, case_data.filename, {})
+      execute(case_data.input, case_data.filename, {}, None, options)
 
     print('='*30, 'ACTUAL OUTPUT')
     print(fp.getvalue())

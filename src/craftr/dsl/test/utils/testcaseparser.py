@@ -18,6 +18,7 @@ class CaseData:
   expects_syntax_error: bool
   outputs: t.Optional[str]
   outputs_line: t.Optional[int]
+  options: set[str]
 
 
 def parse_testcase_file(content: str, filename: str, can_have_outputs: bool) -> t.Iterator[CaseData]:
@@ -45,6 +46,12 @@ def parse_testcase_file(content: str, filename: str, can_have_outputs: bool) -> 
         break
       if section.type == Type.Body and section.value.isspace():
         continue
+      options = set()
+      while section and section.type == Type.Marker and (m := re.match(r'OPTION\s+(\w+)', section.value)):
+        options.add(m.group(1))
+        section = next(it, None)
+      if not section:
+        raise ValueError(f'{filename}: missing TEST section')
       test_section = section
       if test_section.type != Type.Marker or not (m := re.match(r'(DISABLED\s+)?TEST\s+(\w+)$', test_section.value)):
         raise ValueError(f'{filename}: expected TEST section at line {test_section.line}, got {test_section}')
@@ -82,7 +89,8 @@ def parse_testcase_file(content: str, filename: str, can_have_outputs: bool) -> 
           bool(expects_syntax_error),
           outputs_body.value if outputs_body else None,
           outputs_body.line if outputs_body else None,
-          )
+          options,
+        )
   except StopIteration:
     raise ValueError(f'{filename}: incomplete test case section')
 

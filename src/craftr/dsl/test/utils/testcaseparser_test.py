@@ -5,6 +5,7 @@ from .testcaseparser import CaseData, parse_testcase_file
 
 def test_testcaseparser():
   content = dedent('''
+    === OPTION foobar ===
     === TEST abc ===
     foo bar
     === EXPECTS ===
@@ -17,5 +18,5 @@ def test_testcaseparser():
   result = list(parse_testcase_file(content, '<string>', True))
 
   assert result == [
-    CaseData('<string>', 'abc', 'foo bar', 2, 'baz', 4, False, 'spam', 6)
+    CaseData('<string>', 'abc', 'foo bar', 3, 'baz', 5, False, 'spam', 7, {'foobar'})
   ]

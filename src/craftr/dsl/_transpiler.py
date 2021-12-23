@@ -232,7 +232,7 @@ class NameRewriter(ast.NodeTransformer):
       if name.asname:
         names.add(name.asname)
       else:
-        names.add(name.name.rpartition('.')[-1])
+        names.add(name.name.rpartition('.')[0])
     self._add_to_locals(names)
     return self.generic_visit(node)
 
