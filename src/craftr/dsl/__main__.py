@@ -4,12 +4,13 @@ import importlib
 import os
 import sys
 
-from . import execute, transpile_to_source
+from . import execute, transpile_to_source, Closure
 
 parser = argparse.ArgumentParser(prog=os.path.basename(sys.executable) + ' -m craftr.dsl')
 parser.add_argument('file', nargs='?')
 parser.add_argument('-c', '--context', metavar='ENTRYPOINT')
 parser.add_argument('-E', '--transpile', action='store_true')
+parser.add_argument('-C', '--enable-closures', action='store_true')
 
 
 def main():
@@ -27,8 +28,10 @@ def main():
     code = sys.stdin.read()
     filename = '<stdin>'
 
+  options = Closure.get_options() if args.enable_closures else None
+
   if args.transpile:
-    print(transpile_to_source(code, filename))
+    print(transpile_to_source(code, filename, options))
     return
 
   if args.context:
@@ -38,7 +41,7 @@ def main():
     context = None
 
   globals_ = {'self': context} if context is not None else {}
-  execute(code, filename, globals_)
+  execute(code, filename, globals_, None, options)
 
 
 if __name__ == '__main__':
