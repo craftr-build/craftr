@@ -37,7 +37,7 @@ class PathProperty(_PathPropertyBase, _HasOutputAttribute):
 
     # Configure additional validators for values that can be pushed into the property.
     validator = get_type_checker(PathLike)
-    self._value_adapters.append(lambda x, r: validator(x))
+    self._value_adapters.append(lambda x, r: validator(x) and x)
     self._value_adapters.append(lambda x, r: Path(t.cast(PathLike, x)))
 
 
@@ -51,7 +51,7 @@ class PathListProperty(_PathListPropertyBase, _HasOutputAttribute):
     self._base_type = list[Path]
     validator = get_type_checker(Sequence[PathLike])
     self._value_adapters.append(self._unpack_nested_properties)
-    self._value_adapters.append(lambda l, r: validator(l))
+    self._value_adapters.append(lambda l, r: validator(l) and l)
     self._value_adapters.append(lambda l, r: [Path(x) for x in t.cast(Sequence[PathLike], l)])
 
   @staticmethod

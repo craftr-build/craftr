@@ -1,13 +1,20 @@
 
 import typing as t
+import typing_extensions as te
 import beartype
 
 T = t.TypeVar('T')
-TypeHint = object
+TypeHint = type[T]
 _registry: dict[TypeHint, t.Callable] = {}
 
 
-def check_type(type_hint: TypeHint, value: T) -> T:
+@t.overload
+def check_type(type_hint: TypeHint, value: t.Any) -> te.TypeGuard[T]: ...
+
+@t.overload
+def check_type(type_hint: object, value: t.Any) -> bool: ...
+
+def check_type(type_hint, value):
   """
   Validates the given *value* using the {@link beartype} module and the specified type hint.
   """
@@ -15,7 +22,13 @@ def check_type(type_hint: TypeHint, value: T) -> T:
   return get_type_checker(type_hint)(value)
 
 
-def get_type_checker(type_hint: TypeHint) -> t.Callable[[T], T]:
+@t.overload
+def get_type_checker(type_hint: TypeHint) -> t.Callable[[t.Any], te.TypeGuard[T]]: ...
+
+@t.overload
+def get_type_checker(type_hint: object) -> t.Callable[[t.Any], bool]: ...
+
+def get_type_checker(type_hint):
   """
   Creates a function that acts as a validator for values and the specified type hint.
   """
@@ -24,7 +37,10 @@ def get_type_checker(type_hint: TypeHint) -> t.Callable[[T], T]:
 
   if validator is None:
     @beartype.beartype
-    def _validator(value: type_hint) -> type_hint: return value  # type: ignore
-    _registry[type_hint] = validator = _validator
+    def _validator(value: type_hint): pass  # type: ignore
+    def _wrapper(value: TypeHint) -> te.TypeGuard[T]:
+      _validator(value)
+      return True
+    _registry[type_hint] = validator = _wrapper
 
-  return validator
+  return validator  # type: ignore
