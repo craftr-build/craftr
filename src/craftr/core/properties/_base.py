@@ -4,7 +4,7 @@ import copy
 import typing as t
 import weakref
 
-from craftr.utils.beartype import beartype_check, TypeHint
+from craftr.utils.typechecking import check_type, TypeHint
 from nr.pylang.utils.singletons import NotSet
 
 A = t.TypeVar('A', covariant=True)
@@ -129,7 +129,7 @@ class BaseProperty(t.Generic[T, A]):
     for adapter in self._value_adapters:
       value = adapter(value, references)  # type: ignore
     if self._base_type is not None:
-      beartype_check(self._base_type, value)
+      check_type(self._base_type, value)
     self._value = t.cast(T, value)
     self._references = references
 

@@ -1,13 +1,24 @@
 
 import abc
+import importlib
 import typing as t
 from pathlib import Path
 
-from craftr.utils.imports import load_class
 from nr.preconditions import check_instance_of
 
 T = t.TypeVar('T')
 T_LoadableFromSettings = t.TypeVar('T_LoadableFromSettings', bound='LoadableFromSettings')
+
+
+def load_class(qualname: str) -> t.Type:
+  if ':' in qualname:
+    module_name, member_name = qualname.rpartition(':')[::2]
+  else:
+    module_name, member_name = qualname.rpartition('.')[::2]
+  try:
+    return getattr(importlib.import_module(module_name), member_name)
+  except (AttributeError, ModuleNotFoundError, ValueError) as exc:
+    raise ModuleNotFoundError(f'unable to load class {qualname!r}: {exc}')
 
 
 class ClassInstantiationError(Exception):

@@ -1,6 +1,5 @@
 
 import typing as t
-import types
 import beartype
 
 T = t.TypeVar('T')
@@ -8,15 +7,15 @@ TypeHint = object
 _registry: dict[TypeHint, t.Callable] = {}
 
 
-def beartype_check(type_hint: TypeHint, value: T) -> T:
+def check_type(type_hint: TypeHint, value: T) -> T:
   """
   Validates the given *value* using the {@link beartype} module and the specified type hint.
   """
 
-  return beartype_validator(type_hint)(value)
+  return get_type_checker(type_hint)(value)
 
 
-def beartype_validator(type_hint: TypeHint) -> t.Callable[[T], T]:
+def get_type_checker(type_hint: TypeHint) -> t.Callable[[T], T]:
   """
   Creates a function that acts as a validator for values and the specified type hint.
   """

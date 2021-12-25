@@ -4,8 +4,7 @@ import typing_extensions as te
 from collections.abc import Sequence
 from pathlib import Path
 
-from beartype import beartype
-from craftr.utils.beartype import beartype_validator
+from craftr.utils.typechecking import get_type_checker
 from ._base import BaseProperty
 
 PathLike = t.Union[str, Path]
@@ -37,7 +36,7 @@ class PathProperty(_PathPropertyBase, _HasOutputAttribute):
     self._base_type = Path
 
     # Configure additional validators for values that can be pushed into the property.
-    validator = beartype_validator(PathLike)
+    validator = get_type_checker(PathLike)
     self._value_adapters.append(lambda x, r: validator(x))
     self._value_adapters.append(lambda x, r: Path(t.cast(PathLike, x)))
 
@@ -50,7 +49,7 @@ class PathListProperty(_PathListPropertyBase, _HasOutputAttribute):
   def __post_init__(self) -> None:
     assert self._base_type is None
     self._base_type = list[Path]
-    validator = beartype_validator(Sequence[PathLike])
+    validator = get_type_checker(Sequence[PathLike])
     self._value_adapters.append(self._unpack_nested_properties)
     self._value_adapters.append(lambda l, r: validator(l))
     self._value_adapters.append(lambda l, r: [Path(x) for x in t.cast(Sequence[PathLike], l)])
