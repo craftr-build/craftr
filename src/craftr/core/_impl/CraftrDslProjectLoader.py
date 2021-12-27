@@ -16,6 +16,9 @@ def context_factory(obj: t.Any) -> Context:
 
 class CraftrDslProjectLoader(ProjectLoader):
 
+  def __repr__(self) -> str:
+    return f'{type(self).__name__}()'
+
   def load_project(self, project: 'Project') -> None:
     if not (filename := project.directory / BUILD_SCRIPT_FILENAME).exists():
       raise UnableToLoadProjectError(self, project)

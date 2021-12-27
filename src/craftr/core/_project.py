@@ -196,38 +196,15 @@ class Project:
   #     raise RuntimeError(f'{self}.on_apply() already set')
   #   self._on_apply = func
 
-  # def apply(
-  #   self,
-  #   plugin_name: t.Optional[str] = None,
-  #   from_project: t.Union[None, str, 'Project'] = None,
-  #   merge: bool = True,
-  # ) -> Namespace:
-  #   """
-  #   Loads a plugin and applies it to the project. Plugins are loaded via #Context.plugin_loader and applied to the
-  #   project immediately after. The default implementation for loading plugins uses Python package entrypoints
-  #   as configured in the #Context.
+  def apply(self, plugin_name: str) -> None:
+    """
+    Loads a plugin and applies it to the project. Plugins are loaded via {@link Context#plugin_loader} and applied to the
+    project immediately after. When loaded, pugins usually register additional names inin the {@link #extensions}
+    namespace object.
+    """
 
-  #   Returns the extension namespace created for the plugin. The extension is also merged into the #Project.ext
-  #   namespace unless the *merge* parameter is set to #False.
-  #   """
-
-  #   if plugin_name is not None:
-  #     if from_project is not None:
-  #       raise TypeError('plugin_name and from_project should not be specified at the same time')
-  #     check_instance_of(plugin_name, str, 'plugin_name')
-  #     plugin = self.context.plugin_loader.load_plugin(plugin_name)
-  #     plugin.apply(self)
-
-  #   elif from_project is not None:
-  #     from_project = self.subproject(from_project) if isinstance(from_project, str) else from_project
-  #     check_instance_of(from_project, (str, Project), 'from_project')
-  #     if not from_project._on_apply:
-  #       raise ValueError(f'{from_project} has no on_apply handler')
-  #     from_project._on_apply(self)
-  #     from_project.exports.merge_into(self.extensions)
-
-  #   else:
-  #     raise TypeError('need plugin_name or from_project')
+    plugin = self.context.plugin_loader.load_plugin(plugin_name)
+    plugin.apply(self)
 
   # def file(self, sub_path: str) -> Path:
   #   return self.directory / sub_path

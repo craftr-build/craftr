@@ -10,8 +10,18 @@ from nr.caching.api import NamespaceStore
 from nr.caching.stores.sqlite import SqliteStore
 
 from ._execute import BuildGraph, Executor
-from ._impl import (ChainingProjectLoader, CraftrDslProjectLoader, DefaultBuildScriptConfigApplier, DefaultExecutor,
-  DefaultTaskHashCalculator, DefaultProjectLoader, DefaultTaskSelector)
+from ._impl import (
+  ChainingPluginLoader,
+  ChainingProjectLoader,
+  CraftrDslProjectLoader,
+  DefaultBuildScriptConfigApplier,
+  DefaultExecutor,
+  DefaultTaskHashCalculator,
+  DefaultProjectLoader,
+  DefaultTaskSelector,
+  EntrypointPluginLoader,
+  ProjectPluginLoader)
+from ._plugins import PluginLoader
 from ._project import Project, ProjectLoader, BuildScriptConfig, BuildScriptConfigApplier
 from ._settings import Settings
 from ._tasks import TaskHashCalculator, TaskSelector, TaskSelection, select_tasks
@@ -32,6 +42,7 @@ class Context:
   buildscript_config_applier: BuildScriptConfigApplier
   packages_root: Path
   localimport: localimport
+  plugin_loader: PluginLoader
 
   CRAFTR_SETTINGS_FILE = '.craftr.settings'
 
@@ -55,6 +66,7 @@ class Context:
     self.buildscript_config_applier = DefaultBuildScriptConfigApplier()
     self.packages_root = self.root_project.build_directory / '.packages'
     self.localimport = localimport(self.buildscript_config_applier.get_additional_search_paths(self.packages_root))
+    self.plugin_loader = ChainingPluginLoader([EntrypointPluginLoader(), ProjectPluginLoader(self.root_project)])
 
   def load_project(self) -> None:
     """
