@@ -1,9 +1,11 @@
 
 import dataclasses
 import pkg_resources
+import typing as t
 from beartype import beartype
 from loguru import logger
 from .._plugins import PluginLoader, PluginNotFoundError, Plugin
+from .._project import Project
 
 
 @dataclasses.dataclass
@@ -20,4 +22,18 @@ class EntrypointPluginLoader(PluginLoader):
       raise PluginNotFoundError(self, name)
     logger.debug('loading plugin {} from entrypoint {}', name, eps[0])
     cls = eps[0].load()
-    return cls()
+    if isinstance(cls, type):
+      return cls()
+    elif isinstance(cls, Plugin):
+      return cls
+    elif callable(cls):
+      return _FunctionPlugin(cls)
+    return cls
+
+
+@dataclasses.dataclass
+class _FunctionPlugin(Plugin):
+  _func: t.Callable[[Project], None]
+
+  def apply(self, project: Project) -> None:
+    return self._func(project)

@@ -66,7 +66,7 @@ class Context:
     self.buildscript_config_applier = DefaultBuildScriptConfigApplier()
     self.packages_root = self.root_project.build_directory / '.packages'
     self.localimport = localimport(self.buildscript_config_applier.get_additional_search_paths(self.packages_root))
-    self.plugin_loader = ChainingPluginLoader([EntrypointPluginLoader(), ProjectPluginLoader(self.root_project)])
+    self.plugin_loader = ChainingPluginLoader([EntrypointPluginLoader(), ProjectPluginLoader()])
 
   def load_project(self) -> None:
     """
