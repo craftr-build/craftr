@@ -35,7 +35,7 @@ python {
     console_scripts = [ 'craftr = craftr.__main__:main' ]
   }
   mypy { }
-  pytest { }
+  pytest {}
 }
 
 === EXPECTS ===
@@ -81,10 +81,7 @@ def _closure_2(self, *arguments, **kwarguments):
     def _closure_2_closure_4(self, *arguments, **kwarguments):
         pass
     mypy(_closure_2_closure_4)
-
-    def _closure_2_closure_5(self, *arguments, **kwarguments):
-        pass
-    pytest(_closure_2_closure_5)
+    pytest({})
 
 
 python(_closure_2)
