@@ -492,6 +492,7 @@ class Rewriter:
   def _test_dict(self) -> bool:
     """
     Tests if the code from the current opening curly brace looks like a dictionary definition.
+    This does not match an empty dictionary, but only one with at least one key.
     """
 
     token = ProxyToken(self.tokenizer)
@@ -653,6 +654,9 @@ class Rewriter:
       token.next()
 
       return code + self._rewrite_stmt_block(indentation)
+
+    if token.is_control('}'):
+      return code
 
     else:
       return code + self._rewrite_stmt_singleline()

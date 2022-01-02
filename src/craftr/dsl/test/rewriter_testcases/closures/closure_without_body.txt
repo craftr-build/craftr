@@ -1,0 +1,11 @@
+=== TEST closure_without_body ===
+somefunction { }
+anotherfunction 'foo' {
+
+}
+yetanother({})
+=== EXPECTS ===
+somefunction(_closure_1)
+anotherfunction('foo' ,_closure_2)
+yetanother({})
+=== END ===
