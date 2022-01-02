@@ -1,0 +1,5 @@
+=== TEST unparen_call_without_args ===
+typed
+=== EXPECTS ===
+typed()
+=== END ===

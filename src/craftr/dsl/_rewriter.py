@@ -5,6 +5,7 @@ Rewrite Craftr DSL code to pure Python code.
 
 import contextlib
 import enum
+import string
 import typing as t
 from dataclasses import dataclass
 
@@ -591,6 +592,16 @@ class Rewriter:
       # TODO(NiklasRosenstein): We may want to indicate here that we're parsing call arguments,
       #   but that the call is not parenthesised.
       code += '(' + self._rewrite_items(ParseMode.CALL_ARGS) + ')'
+
+    # TODO (@nrosenstein): This is a nasty hack to figure out if the current line contains _just_ a name or
+    #   a dotted name which, with unparenthesized calls enabled, should act as a call without arguments. Since
+    #   we'll end up parsing code that was previously re-written for example in the case of closures, we could
+    #   end up parsing a closure name (eg. just "_closure_1") if a closure was defined on its own, however that
+    #   causing the closure to be called immediately seems a bit of an erratic behaviour so we want to catch it.
+    elif (not (set(code) - set(string.ascii_letters + string.digits + '.' + '_')) and self.grammar.unparen_calls) \
+          and not code.startswith('_closure_'):
+      # Unparen call without arguments
+      code += '()'
 
     return code + self._consume_whitespace(True)
 

@@ -53,7 +53,7 @@ def _closure_2(self, *arguments, **kwarguments):
     license = 'MIT'
     author = 'Niklas Rosenstein <rosensteinniklas@gmail.com>'
     url = 'https://github.com/craftr-build/craftr'
-    typed
+    typed()
     modulename = 'craftr'
 
     def _closure_2_closure_2(self, *arguments, **kwarguments):
