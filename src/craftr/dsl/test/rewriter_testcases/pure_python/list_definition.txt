@@ -1,0 +1,11 @@
+=== TEST list_definition ===
+items = [
+  'foobar',
+  'baz'
+]
+=== EXPECTS ===
+items = [
+  'foobar',
+  'baz'
+]
+=== END ===

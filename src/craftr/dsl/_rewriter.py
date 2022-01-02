@@ -5,7 +5,9 @@ Rewrite Craftr DSL code to pure Python code.
 
 import contextlib
 import enum
+import logging
 import string
+import sys
 import typing as t
 from dataclasses import dataclass
 
@@ -17,6 +19,8 @@ except ImportError:
 from nr.parsing.core import rules
 from nr.parsing.core.scanner import Cursor
 from nr.parsing.core.tokenizer import ProxyToken as _ProxyToken, RuleSet, Tokenizer
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -380,7 +384,7 @@ class Rewriter:
       being parsed.
     """
 
-    code = self._consume_whitespace(mode)
+    code = self._consume_whitespace(mode, False)
     code += self._rewrite_atom(mode)
 
     token = ProxyToken(self.tokenizer)
@@ -393,6 +397,7 @@ class Rewriter:
         code += self._rewrite_expr(mode)
 
       elif token.is_control('(['):
+        code += self._consume_whitespace(True, False)
         code += self._rewrite_atom(ParseMode.FUNCTION_CALL | ParseMode.GROUPED if token.value == '(' else ParseMode.DEFAULT)
 
       else:
@@ -410,10 +415,13 @@ class Rewriter:
     upsert_comma = False
     while True:
       code += self._consume_whitespace(mode)
+      if token.type == Token.Newline and not mode & ParseMode.GROUPED:
+        break
       with self._lookahead() as commit:
         try:
           code += self._rewrite_expr(mode=mode)
         except SyntaxError:
+          logger.debug('syntax error consumed while trying to parse expression', exc_info=sys.exc_info())
           break
         commit()
       code += self._consume_whitespace(mode)
@@ -463,7 +471,7 @@ class Rewriter:
       code += self._consume_whitespace(True)
       if not token.is_control(expected_close_token):
         new_mode = ParseMode.CALL_ARGS if mode & ParseMode.FUNCTION_CALL else ParseMode.DEFAULT
-        code += self._rewrite_items(new_mode | ParseMode.GROUPED)
+        code += self._rewrite_items(new_mode | ParseMode.GROUPED) + self._consume_whitespace(mode, False)
       if not token.is_control(expected_close_token):
         raise self._syntax_error(f'expected {expected_close_token} but got {token}')
 
@@ -600,7 +608,6 @@ class Rewriter:
     #   causing the closure to be called immediately seems a bit of an erratic behaviour so we want to catch it.
     elif (not (set(code) - set(string.ascii_letters + string.digits + '.' + '_')) and self.grammar.unparen_calls) \
           and not code.startswith('_closure_'):
-      # Unparen call without arguments
       code += '()'
 
     return code + self._consume_whitespace(True)
