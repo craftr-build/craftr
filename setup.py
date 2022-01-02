@@ -57,6 +57,10 @@ setuptools.setup(
   entry_points = {
     'console_scripts': [
       'craftr = craftr.__main__:main',
+    ],
+    'craftr_plugins': [
+      'python = craftr_python:apply',
+      'license = craftr_license:apply',
     ]
   },
   cmdclass = {},

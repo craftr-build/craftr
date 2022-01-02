@@ -27,21 +27,28 @@ class HasProperties(abc.ABC):
     for base in cls.__bases__:
       if issubclass(base, HasProperties):
         cls.__properties__.update(base.__properties__)
+    for key, value in cls.__annotations__.items():
+      origin = value.__origin__ if isinstance(value, _GenericAlias) else value
+      if (isinstance(origin, type) and issubclass(origin, BaseProperty)) and key not in cls.__properties__:
+        cls.__properties__[key] = p = value()
+        p._name = key
     for key in dir(cls):
       value = getattr(cls, key, None)
       if isinstance(value, BaseProperty):
         assert value._name is None or value._name == key, (key, value)
         value._name = key
         cls.__properties__[key] = value
-    for key, value in cls.__annotations__.items():
-      origin = value.__origin__ if isinstance(value, _GenericAlias) else value
-      if (isinstance(origin, type) and issubclass(origin, BaseProperty)):
-        cls.__properties__[key] = value()
+
+    # Ensure all properties have names.
+    for k, v in cls.__properties__.items(): assert v._name, f'{cls.__name__}.{k}'
 
   def __init__(self) -> None:
     super().__init__()
     for key, value in self.__properties__.items():
       setattr(self, key, value._bound_copy(self))
+
+  def __call__(self: T, closure: t.Callable[[T], t.Any]) -> None:
+    closure(self)
 
   def get_properties(self) -> t.Dict[str, 'BaseProperty']:
     return {k: getattr(self, k) for k in self.__properties__}
@@ -96,6 +103,9 @@ class BaseProperty(t.Generic[T, A]):
 
   def __repr__(self) -> str:
     return f'{type(self).__name__}(name={self._name!r})'
+
+  def __call__(self, value: t.Union[T, A]) -> None:
+    self.set(value)
 
   def _bound_copy(self: T_BaseProperty, owner: t.Any) -> T_BaseProperty:
     new_self = copy.copy(self)
@@ -173,3 +183,9 @@ class Property(BaseProperty[T, T]):
 
   def __class_getitem__(cls, type_hint: type[T]) -> type['BaseProperty[T, T]']:  # type: ignore
     return _BasePropertyGenericAlias(cls, (type_hint,))  # type: ignore
+
+
+class BoolProperty(BaseProperty[bool, bool]):
+
+  def __call__(self, value: bool = True) -> None:
+    self.set(value)
