@@ -104,7 +104,7 @@ class ClosureRewriter(ast.NodeTransformer):
     if closure.expr:
       function_code += ' ' * closure.indent + 'return ' + closure.expr
     else:
-      function_code += closure.body or ''
+      function_code += closure.body.rstrip() or (' ' * closure.indent + 'pass')
 
     self.log.debug('_get_closure_def(%r): parse function body\n\n%s\n', closure_id,
         '  ' + '\n  '.join(function_code.lstrip().splitlines()))

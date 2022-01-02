@@ -1,7 +1,8 @@
 === TEST closure_without_body ===
 somefunction { }
 anotherfunction 'foo' {
-
+  nested { }
+  nested { }
 }
 yetanother({})
 === EXPECTS ===

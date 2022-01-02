@@ -1,0 +1,91 @@
+=== TEST buildscript ===
+
+buildscript {
+  requires 'craftr-python'
+}
+
+apply 'python'
+
+python {
+  name = 'craftr-build'
+  version = detect_version()
+  license = 'MIT'
+  author = 'Niklas Rosenstein <rosensteinniklas@gmail.com>'
+  url = 'https://github.com/craftr-build/craftr'
+  typed
+  modulename = 'craftr'
+  requirements {
+    run 'python ^3.9'
+    run 'astor ^0.8.1'
+    run 'dataclasses ^0.6'
+    run 'nr.caching ^0.4.0'
+    run 'nr.functional ^0.1.0'
+    run 'nr.parsing.core ^2.0.2'
+    run 'nr.preconditions ^0.0.4'
+    run 'nr.pylang.ast ~0.0.5'
+    run 'termcolor ^1.1.0'
+    run 'typing-extensions ^3.10.0.0'
+    run 'nr.pylang.utils ^0.1.3'
+    run 'beartype ^0.9.1'
+    run 'loguru ^0.5.3'
+    run 'localimport ^1.7.3'
+    test 'types-termcolor'
+  }
+  entrypoint {
+    console_scripts = [ 'craftr = craftr.__main__:main' ]
+  }
+  mypy { }
+  pytest { }
+}
+
+=== EXPECTS ===
+def _closure_1(self, *arguments, **kwarguments):
+    requires('craftr-python')
+
+
+buildscript(_closure_1)
+apply('python')
+
+
+def _closure_2(self, *arguments, **kwarguments):
+    name = 'craftr-build'
+    version = detect_version()
+    license = 'MIT'
+    author = 'Niklas Rosenstein <rosensteinniklas@gmail.com>'
+    url = 'https://github.com/craftr-build/craftr'
+    typed
+    modulename = 'craftr'
+
+    def _closure_2_closure_2(self, *arguments, **kwarguments):
+        run('python ^3.9')
+        run('astor ^0.8.1')
+        run('dataclasses ^0.6')
+        run('nr.caching ^0.4.0')
+        run('nr.functional ^0.1.0')
+        run('nr.parsing.core ^2.0.2')
+        run('nr.preconditions ^0.0.4')
+        run('nr.pylang.ast ~0.0.5')
+        run('termcolor ^1.1.0')
+        run('typing-extensions ^3.10.0.0')
+        run('nr.pylang.utils ^0.1.3')
+        run('beartype ^0.9.1')
+        run('loguru ^0.5.3')
+        run('localimport ^1.7.3')
+        test('types-termcolor')
+    requirements(_closure_2_closure_2)
+
+    def _closure_2_closure_3(self, *arguments, **kwarguments):
+        console_scripts = ['craftr = craftr.__main__:main']
+    entrypoint(_closure_2_closure_3)
+
+    def _closure_2_closure_4(self, *arguments, **kwarguments):
+        pass
+    mypy(_closure_2_closure_4)
+
+    def _closure_2_closure_5(self, *arguments, **kwarguments):
+        pass
+    pytest(_closure_2_closure_5)
+
+
+python(_closure_2)
+=== END ===
