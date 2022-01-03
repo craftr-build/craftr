@@ -1,0 +1,7 @@
+=== TEST strange_isort_case ===
+print {
+  isort  # This used to be parsed as "is" (keyword) instead of "isort" (name).
+}
+=== EXPECTS ===
+print(_closure_1)
+=== END ===

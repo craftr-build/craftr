@@ -59,7 +59,7 @@ rule_set.rule(Token.Indent, rules.regex_extract(r'[\t ]*', at_line_start_only=Tr
 rule_set.rule(Token.Newline, rules.regex_extract(r'\n'))
 rule_set.rule(Token.Whitespace, rules.regex_extract(r'\s+'))
 rule_set.rule(Token.Comment, rules.regex_extract(r'#.*'))
-rule_set.rule(Token.Control, rules.regex_extract(r'is|not'))
+rule_set.rule(Token.Control, rules.regex_extract(r'is\b|not\b'))
 rule_set.rule(Token.Name, rules.regex_extract(r'[A-Za-z\_][A-Za-z0-9\_]*'))
 rule_set.rule(Token.Literal, rules.regex_extract(r'[+\-]?(\d+)(\.\d*)?'))
 rule_set.rule(Token.Literal, rules.string_literal())
