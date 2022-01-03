@@ -14,8 +14,8 @@ try:
   from termcolor import colored
 except ImportError:
 
-  def colored(s, *a, **kw) -> str:
-    return str(s)  # type: ignore
+  def colored(s, *a, **kw) -> str:  # type: ignore
+    return str(s)
 
 
 from nr.parsing.core import rules
