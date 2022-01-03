@@ -1,7 +1,8 @@
 
 from typing import Any
 from craftr.core.properties import Configurable, Property
-from ._python import python_project_extensions, _PyprojectUpdater
+from craftr.utils.weakproperty import WeakProperty
+from ._python import python_project_extensions, _PyprojectUpdater, PythonProject
 
 
 class FlitBuilder(_PyprojectUpdater, Configurable):
@@ -10,7 +11,10 @@ class FlitBuilder(_PyprojectUpdater, Configurable):
   """
 
   version = Property[str](default='3.2')
-  dynamic = Property[list[str]](default=['version', 'description'])
+  pyproject = WeakProperty[PythonProject]('_pyproject', once=True)
+
+  def __init__(self, pyproject: PythonProject) -> None:
+    self.pyproject = pyproject
 
   def update_pyproject_config(self, config: dict[str, Any]) -> None:
     if not self.enabled.get():
@@ -19,7 +23,14 @@ class FlitBuilder(_PyprojectUpdater, Configurable):
       'requires': [f'flit_core >={self.version.get()}'],
       'build-backend': 'flit_core.buildapi',
     }
-    config.setdefault('project', {})['dynamic'] = self.dynamic.get()
+
+    dynamic = []
+    if not self.pyproject.version.is_set():
+      dynamic.append('version')
+    if not self.pyproject.description.is_set():
+      dynamic.append('description')
+    if dynamic:
+      config.setdefault('project', {})['dynamic'] = dynamic
 
 
-python_project_extensions.register('flit', lambda _: FlitBuilder())
+python_project_extensions.register('flit', FlitBuilder)

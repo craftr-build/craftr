@@ -2,14 +2,13 @@
 import dataclasses
 import types
 from collections.abc import Callable
-from typing import Any, Optional, Protocol, runtime_checkable
+from typing import Any, List, Optional, Protocol, Union, runtime_checkable
 
 import toml
-from pkg_resources import iter_entry_points
 from craftr.core import Action, Extension, Project, Task, BoolProperty, Property, Configurable, PathProperty, ExtensionRegistry
 from craftr.utils.weakproperty import WeakProperty
 
-from ._model import Author
+from ._model import Author, Requirement
 
 python_project_extensions = ExtensionRegistry['PythonProject']()
 
@@ -25,6 +24,8 @@ class PythonProject(Configurable, Extension):
   name: Property[str]
   version: Property[str]
   authors: Property[list[Author]] = Property(default=[])
+  description: Property[str]
+  module_name: Property[str]
   urls: Property[dict[str, str]] = Property(default={})
   typed: BoolProperty
   entry_points: Property[dict[str, dict[str, str]]] = Property(default={})
@@ -52,20 +53,27 @@ class PythonProject(Configurable, Extension):
 
   def _update_pyproject(self, config: dict[str, Any]) -> None:
     project = config.setdefault('project', {})
+
     if version := self.version.get(None):
       project['version'] = version
-    project['name'] = self.name.get()
+    project['name'] = self.module_name.get(self.name.get())
     project['authors'] = [x.to_json() for x in self.authors.get()]
     project['urls'] = self.urls.get()
+
+    if desc := self.description.get(None):
+      project['description'] = desc
+    if project['name'] != self.name.get():
+      config.setdefault('metadata', {})['dist-name'] = self.name.get()
+
     project['scripts'] = self.entry_points.get().get('console_scripts', {})
     for group, entry_points in self.entry_points.get().items():
       if group != 'console_scripts':
         project.setdefault('entry-points', {})[group] = entry_points
 
-    # TODO (@nrosenstein): Translate to compatible dependency strings
-    # TODO (@nrosenstein): Catch the "python" dependency to register separately in the pyproject config
-    project['dependencies'] = self.requirements._run
-    project.setdefault('optional-dependencies', {})['test'] = self.requirements._test
+    if self.requirements._python:
+      project['requires-python'] = self.requirements._python.version.to_setuptools()
+    project['dependencies'] = [r.to_setuptools() for r in self.requirements._run]
+    project.setdefault('optional-dependencies', {})['test'] = [r.to_setuptools() for r in self.requirements._test]
 
     for value in vars(self.ext).values():
       if isinstance(value, _PyprojectUpdater):
@@ -75,49 +83,50 @@ class PythonProject(Configurable, Extension):
     if not self.enabled.get():
       return
     update_pyproject_task = self.project.task('updatePyproject', UpdatePyprojectTask)
-    update_pyproject_task.pyproject_file.set(self.project.directory / 'pyproject.toml')
-    update_pyproject_task.pyproject_updaters.set([self._update_pyproject])
+    update_pyproject_task.output_file.set(self.project.directory / 'pyproject.toml')
+    update_pyproject_task.updater = self._update_pyproject
     print('Finalize!')
 
 
 @dataclasses.dataclass
-class PythonRequirements:
+class PythonRequirements(Configurable):
 
-  _run: list[str] = dataclasses.field(default_factory=list)
-  _test: list[str] = dataclasses.field(default_factory=list)
+  _python: Optional[Requirement] = None
+  _run: List[Requirement] = dataclasses.field(default_factory=list)
+  _test: List[Requirement] = dataclasses.field(default_factory=list)
 
-  def __call__(self, closure) -> None:
-    closure(self)
-
-  def run(self, req: str) -> None:
-    self._run.append(req)
+  def run(self, req: Union[str, Requirement]) -> None:
+    req = Requirement.parse(req) if isinstance(req, str) else req
+    if req.package == 'python':
+      self._python = req
+    else:
+      self._run.append(req)
 
   def test(self, req: str) -> None:
-    self._test.append(req)
+    self._test.append(Requirement(req))
 
 
 class UpdatePyprojectTask(Action, Task):
 
-  pyproject_file = PathProperty.output()
-  pyproject_updaters = Property[list[Callable[[dict[str, Any]], None]]](default=[])
+  output_file = PathProperty.output()
+  updater: Optional[Callable[[dict[str, Any]], None]] = None
 
   def _load_pyproject(self) -> None:
-    path = self.pyproject_file.get()
+    path = self.output_file.get()
     if path.exists():
       return toml.loads(path.read_text())
     else:
       return {}
 
   def _get_updated_pyproject(self) -> None:
-    config = self._load_pyproject()
-    for updater in self.pyproject_updaters.get():
-      updater(config)
+    config = {}
+    self.updater(config)
     return config
 
   def is_outdated(self) -> bool:
     return self._load_pyproject() != self._get_updated_pyproject()
 
   def execute(self, ctx) -> None:
-    path = self.pyproject_file.get()
+    path = self.output_file.get()
     config = self._get_updated_pyproject()
     path.write_text(toml.dumps(config))
