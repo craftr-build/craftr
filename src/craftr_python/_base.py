@@ -47,6 +47,9 @@ class DefaultPythonExtension(Extension[PythonProject]):
 
     self.update_config_from_profile(profile_name_or_url, dict(profile))
 
+  def from_string(self, toml_string: str) -> None:
+    self.config.get().update(toml.loads(toml_string))
+
   def finalize(self) -> None:
     if not self.enabled.get():
       return
