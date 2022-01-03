@@ -57,6 +57,9 @@ class Task(HasProperties):
   most common subclass is the {@link DefaultTask}.
   """
 
+  #: Whether the task is enabled.
+  enabled: bool = True
+
   #: Whether the task should be included if no explicit set of tasks is selected for execution.
   #: This is `True` by default for all tasks (but can be overwritten by subclasses).
   default: bool = True

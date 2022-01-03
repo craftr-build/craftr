@@ -1,7 +1,7 @@
 from craftr.core import Action, ActionContext, PathProperty, Task
 
 
-class FileRenderer(Action, Task):
+class FileRendererTask(Action, Task):
 
   output_file = PathProperty.output()
 

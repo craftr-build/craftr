@@ -1,12 +1,13 @@
 import dataclasses
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, List, Optional, Protocol, Union, runtime_checkable
+from typing import Any, List, Optional, Protocol, Union, cast, runtime_checkable
 
 import toml
 
-from craftr.bld.renderers import FileRenderer
+from craftr.bld.renderers import FileRendererTask
 from craftr.core import BoolProperty, Configurable, Extension, ExtensionRegistry, PathProperty, Project, Property
+from craftr_license import RenderLicenseTask
 
 from ._model import Author, Requirement
 from ._utils import get_readme_file
@@ -91,6 +92,13 @@ class PythonProject(Extension[Project]):
   def finalize(self) -> None:
     if not self.enabled.get():
       return
+
+    # Propagate author details to the license task if they are missing there.
+    if 'license' in self.project.tasks:
+      license_task = cast(RenderLicenseTask, self.project.tasks.license)
+      if not license_task.author.is_set() and (authors := self.authors.get()):
+        license_task.author.set(authors[0].name)
+
     update_pyproject_task = self.project.task('updatePyproject', UpdatePyprojectTask)
     update_pyproject_task.output_file.set(self.project.directory / 'pyproject.toml')
     update_pyproject_task.updater = self._update_pyproject
@@ -115,7 +123,7 @@ class PythonRequirements(Configurable):
     self._test.append(Requirement(req))
 
 
-class UpdatePyprojectTask(FileRenderer):
+class UpdatePyprojectTask(FileRendererTask):
 
   updater: Optional[Callable[[dict[str, Any]], None]] = None
 

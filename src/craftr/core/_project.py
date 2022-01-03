@@ -264,6 +264,9 @@ class ProjectTasks:
   def __getitem__(self, key: str) -> 'Task':
     return self._tasks[key]
 
+  def __contains__(self, key: object) -> bool:
+    return key in self._tasks
+
 
 @dataclasses.dataclass
 class BuildScriptConfig:
