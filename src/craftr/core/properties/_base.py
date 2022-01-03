@@ -34,11 +34,17 @@ class HasProperties(abc.ABC):
       if (isinstance(origin, type) and issubclass(origin, BaseProperty)) and key not in cls.__properties__:
         cls.__properties__[key] = p = value()
         p._name = key
+        p._is_static = True
+        p._static_owner = weakref.ref(cls)
     for key in dir(cls):
       value = getattr(cls, key, None)
       if isinstance(value, BaseProperty):
         assert value._name is None or value._name == key, (key, value)
+        value = copy.deepcopy(value)
         value._name = key
+        value._is_static = True
+        value._static_owner = weakref.ref(cls)
+        setattr(cls, key, value)
         cls.__properties__[key] = value
 
     # Ensure all properties have names.
@@ -89,6 +95,8 @@ class BaseProperty(t.Generic[T, A]):
     self._owner: t.Optional[weakref.ReferenceType] = None
     self._references: list['BaseProperty'] = []
     self._value_adapters: list[t.Callable[[t.Any, list[BaseProperty]], t.Any]] = []
+    self._is_static = False
+    self._static_owner: t.Optional[weakref.ReferenceType] = None
     self.__post_init__()
     if default is not NotSet.Value:
       self.set(self._get_default())
@@ -101,7 +109,12 @@ class BaseProperty(t.Generic[T, A]):
     return _BasePropertyGenericAlias(cls, type_hint)  # type: ignore
 
   def __repr__(self) -> str:
-    return f'{type(self).__name__}(name={self._name!r})'
+    if self._is_static:
+      assert self.static_owner
+      return f'{type(self).__name__}(`{self.static_owner.__name__}.{self._name}`)'
+    else:
+      assert self.owner
+      return f'{type(self).__name__}(`{type(self.owner).__name__}.{self._name}` of instance {self.owner!r})'
 
   def __call__(self, value: t.Union[T, A]) -> None:
     self.set(value)
@@ -119,6 +132,7 @@ class BaseProperty(t.Generic[T, A]):
     new_self._owner = weakref.ref(owner)
     if self._default is not NotSet.Value:
       new_self._value = copy.deepcopy(self._get_default())
+    new_self._is_static = False
     return new_self
 
   def is_set(self) -> bool:
@@ -138,6 +152,8 @@ class BaseProperty(t.Generic[T, A]):
     return self._value
 
   def set(self, value: t.Union[T, A, 'BaseProperty[T, t.Any]', 'BaseProperty[A, t.Any]']) -> None:
+    if self._is_static:
+      raise RuntimeError(f'cannot set value of static property {self}')
     if isinstance(value, BaseProperty):
       references = [value]
       value = value.get()
@@ -161,6 +177,19 @@ class BaseProperty(t.Generic[T, A]):
       value = self._owner()
       if value is None:
         raise RuntimeError('lost reference to property owner')
+      return value
+    return None
+
+  @property
+  def is_static(self) -> bool:
+    return self._is_static
+
+  @property
+  def static_owner(self) -> t.Any:
+    if self._static_owner:
+      value = self._static_owner()
+      if value is None:
+        raise RuntimeError('lost reference to property static owner')
       return value
     return None
 
@@ -208,6 +237,11 @@ class Configurable(HasProperties):
 
   def __call__(self: T, closure: t.Optional[t.Callable[[T], t.Any]] = None) -> None:
     if 'enabled' in self.__properties__:
+      # NOTE (@nrosenstein): This is a convenience if the Configurable parent constructor was not called
+      #   in the subclass constructor. We need to make sure each instance of the class has their own set
+      #   of mutable properties (instead of referencing the properties defined on the class level).
+      if self.enabled.is_static:
+        Configurable.__init__(self)
       self.enabled.set(True)
     if closure is not None:
       closure(self)

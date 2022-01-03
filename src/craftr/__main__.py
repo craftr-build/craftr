@@ -1,5 +1,6 @@
 
 import argparse
+import pdb
 from pathlib import Path
 
 from .core import Context, Settings
@@ -13,15 +14,25 @@ parser.add_argument('tasks', metavar='task', nargs='*')
 parser.add_argument('-v', '--verbose', action='store_true',
   help='Enable verbose mode (like -Ocraftr.core.verbose=true).')
 parser.add_argument('-l', '--list', action='store_true', help='List all tasks.')
+parser.add_argument('--pdb', action='store_true')
 
 
 def main():
   args = parser.parse_args()
+  try:
+    _main(args)
+  except:
+    if args.pdb:
+      pdb.post_mortem()
+    raise
 
-  ctx = Context(Path.cwd(), settings=Settings.from_file(args.settings_file))
-  ctx.settings.update(Settings.parse(args.option))
+
+def _main(args):
+  settings = Settings.from_file(args.settings_file)
+  settings.update(Settings.parse(args.option))
   if args.verbose:
-    ctx.settings.set('craftr.core.verbose', True)
+    settings.set('craftr.core.verbose', True)
+  ctx = Context(Path.cwd(), settings=settings)
 
   with ctx.localimport:
     ctx.load_project()

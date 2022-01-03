@@ -62,7 +62,7 @@ class Context:
     self.task_selector = DefaultTaskSelector()
     self.task_hash_store = MappingAdapter(self.kvstore.namespace('task_hashes'), str)
     self.graph = BuildGraph()
-    self.executor = DefaultExecutor()
+    self.executor = DefaultExecutor(self.settings.get_bool('craftr.core.verbose'))
     self.buildscript_config_applier = DefaultBuildScriptConfigApplier()
     self.packages_root = self.root_project.build_directory / '.packages'
     self.localimport = localimport(self.buildscript_config_applier.get_additional_search_paths(self.packages_root))

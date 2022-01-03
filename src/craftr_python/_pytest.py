@@ -1,15 +1,19 @@
 
 from typing import Any
-from craftr.core.properties import Configurable
-from ._python import python_project_extensions, _PyprojectUpdater
+from craftr.bld.system import SystemAction
+from craftr.core import Extension
+from ._python import python_project_extensions, PythonProject
 
 
-class PytestBuilder(_PyprojectUpdater, Configurable):
+@python_project_extensions.register('pytest')
+class PytestBuilder(Extension[PythonProject]):
 
   def update_pyproject_config(self, config: dict[str, Any]) -> None:
-    if not self.enabled.get():
-      return
     pass
 
-
-python_project_extensions.register('pytest', lambda _: PytestBuilder())
+  def finalize(self) -> None:
+    if not self.enabled.get():
+      return
+    task = self.ext_parent.project.task('pytest')
+    task.do_last(SystemAction(['pytest', self.ext_parent.source.get()], cwd=self.ext_parent.project.directory))
+    task.depends_on('updatePyproject')

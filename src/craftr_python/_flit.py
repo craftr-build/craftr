@@ -1,20 +1,21 @@
 
 from typing import Any
-from craftr.core.properties import Configurable, Property
-from craftr.utils.weakproperty import WeakProperty
-from ._python import python_project_extensions, _PyprojectUpdater, PythonProject
+from craftr.bld.system import SystemAction
+from craftr.core import Extension
+from craftr.core.properties import BoolProperty, Property
+from ._python import python_project_extensions, PythonProject
 
 
-class FlitBuilder(_PyprojectUpdater, Configurable):
+@python_project_extensions.register('flit')
+class FlitBuilder(Extension[PythonProject]):
   """
   Injects Flit configuration values into the pyproject file.
   """
 
   version = Property[str](default='3.2')
-  pyproject = WeakProperty[PythonProject]('_pyproject', once=True)
-
-  def __init__(self, pyproject: PythonProject) -> None:
-    self.pyproject = pyproject
+  setup_py = BoolProperty(default=True)
+  repository: Property[str]
+  test_repository: Property[str]
 
   def update_pyproject_config(self, config: dict[str, Any]) -> None:
     if not self.enabled.get():
@@ -25,12 +26,41 @@ class FlitBuilder(_PyprojectUpdater, Configurable):
     }
 
     dynamic = []
-    if not self.pyproject.version.is_set():
+    if not self.ext_parent.version.is_set():
       dynamic.append('version')
-    if not self.pyproject.description.is_set():
+    if not self.ext_parent.description.is_set():
       dynamic.append('description')
     if dynamic:
       config.setdefault('project', {})['dynamic'] = dynamic
 
+  def finalize(self) -> None:
+    if not self.enabled.get():
+      return
 
-python_project_extensions.register('flit', FlitBuilder)
+    build_args = []
+    if self.setup_py.get():
+      build_args += ['--setup-py']
+
+    publish_args = build_args[:]
+    if self.repository.is_set():
+      publish_args += ['--repository', self.repository.get()]
+
+    test_publish_args = build_args[:]
+    if self.test_repository.is_set():
+      test_publish_args += ['--repository', self.test_repository.get()]
+
+    build_task = self.ext_parent.project.task('build')
+    build_task.do(SystemAction(['flit', 'build'] + build_args))
+    build_task.depends_on('updatePyproject')
+
+    publish_task = self.ext_parent.project.task('publish')
+    publish_task.default = False
+    publish_task.depends_on(build_task)
+    publish_task.do_last(SystemAction(['flit', 'publish'] + publish_args))
+
+    if self.test_repository.is_set():
+      test_publish_task = self.ext_parent.project.task('testPublish')
+      test_publish_task.default = False
+      test_publish_task.depends_on(build_task)
+      test_publish_task.do_last(SystemAction(['flit', 'publish'] + test_publish_args))
+      publish_task.depends_on(test_publish_args)

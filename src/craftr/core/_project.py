@@ -10,6 +10,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from nr.preconditions import check_not_none
+from craftr.utils.weakproperty import OptionalWeakProperty
 from ._extension import Extension
 
 if t.TYPE_CHECKING:
@@ -19,11 +20,13 @@ if t.TYPE_CHECKING:
 T_Task = t.TypeVar('T_Task', bound='Task')
 
 
-class Project(Extension):
+class Project(Extension['Context']):
   """
   A project is a collection of tasks, usually populated through a build script, tied to a directory. Projects
   can have sub projects and there is exactly one root project.
   """
+
+  parent = OptionalWeakProperty['Project'].at('_project', True)
 
   def __init__(self,
     context: 'Context',
@@ -36,16 +39,14 @@ class Project(Extension):
     will be promoted to the root project.
     """
 
-    super().__init__()
-    self._context = weakref.ref(context)
-    self._parent = weakref.ref(parent) if parent is not None else parent
+    super().__init__(context)
+    self.parent = parent
     self.directory = Path(directory)
     self._name: t.Optional[str] = None
     self._build_directory: t.Optional[Path] = None
     self._tasks: t.Dict[str, 'Task'] = {}
     self._subprojects: t.Dict[Path, 'Project'] = {}
     self.buildscript = BuildScriptConfig(weakref.ref(self))
-    self._on_finalize: t.List[t.Callable[[], t.Any]] = []
     context.init_project(self)
 
   def __repr__(self) -> str:
@@ -53,13 +54,7 @@ class Project(Extension):
 
   @property
   def context(self) -> 'Context':
-    return check_not_none(self._context(), 'lost reference to context')
-
-  @property
-  def parent(self) -> t.Optional['Project']:
-    if self._parent is not None:
-      return check_not_none(self._parent(), 'lost reference to parent')
-    return None
+    return self.ext_parent
 
   @property
   def name(self) -> str:
@@ -185,9 +180,6 @@ class Project(Extension):
       for subproject in self._subprojects.values():
         closure(subproject)
 
-  def on_finalize(self, callback: t.Callable[[], t.Any]) -> None:
-    self._on_finalize.append(callback)
-
   def apply(self, plugin_name: str) -> None:
     """
     Loads a plugin and applies it to the project. Plugins are loaded via {@link Context#plugin_loader} and applied to the
@@ -199,14 +191,12 @@ class Project(Extension):
     plugin.apply(self)
 
   def finalize(self) -> None:
-    super().__init__()
-    for callback in self._on_finalize:
-      callback()
+    super().finalize()
     for task in self.tasks:
       if not task.finalized:
         task.finalize()
-    for project in self.subprojects():
-      project.finalize()
+    for subproject in self.subprojects():
+      subproject.finalize()
 
 
 class ProjectLoader(abc.ABC):

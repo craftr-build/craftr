@@ -2,11 +2,18 @@
 import types
 import typing as t
 
+from .properties import Configurable
+from craftr.utils.weakproperty import WeakProperty
+
 T = t.TypeVar('T')
-_T_Factory = t.TypeVar('_T_Factory', bound=t.Callable[[t.Any], t.Any])
+_T_Factory = t.TypeVar('_T_Factory', bound=t.Union[t.Callable[[t.Any], t.Any], t.Type['_FactoryConstructor']])
 
 
-class Extension:
+class _FactoryConstructor(t.Protocol[T]):
+  def __init__(self, _: T) -> None: ...
+
+
+class Extension(t.Generic[T], Configurable):
   """
   Represents an object extension that has a {@link finalize()} method that will be called automatically
   by the parent extension object when it itself is finalized. An extension can have extensions itself
@@ -17,9 +24,13 @@ class Extension:
   """
 
   ext: types.SimpleNamespace
+  ext_parent = WeakProperty[T].at('_ext_parent', True)
 
-  def __init__(self) -> None:
+  def __init__(self, ext_parent: t.Optional[T] = None) -> None:
+    super().__init__()
     self.ext = types.SimpleNamespace()
+    if ext_parent is not None:
+      self.ext_parent = ext_parent
 
   def finalize(self) -> None:
     for value in vars(self.ext).values():
@@ -44,9 +55,6 @@ class ExtensionRegistry(t.Generic[T]):
   ```
   """
 
-  class _FactoryConstructor(t.Protocol[T]):
-    def __init__(self, _: T) -> None: ...
-
   def __init__(self, name: t.Optional[str] = None) -> None:
     self._name = name
     self._factories: t.Dict[str, t.Callable[[T], t.Any]] = {}
@@ -64,7 +72,8 @@ class ExtensionRegistry(t.Generic[T]):
     if factory is None:
       def _decorator(factory):
         assert factory is not None
-        return self.register(name, factory)
+        self.register(name, factory)
+        return factory
       return _decorator
     else:
       if name in self._factories:

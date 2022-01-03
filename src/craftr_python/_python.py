@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Any, List, Optional, Protocol, Union, runtime_checkable
 
 import toml
-from craftr.core import Action, Extension, Project, Task, BoolProperty, Property, Configurable, PathProperty, ExtensionRegistry
+from craftr.bld.renderers import FileRenderer
+from craftr.core import Extension, Project, BoolProperty, Property, Configurable, PathProperty, ExtensionRegistry
 from craftr.utils.weakproperty import WeakProperty
 
 from ._model import Author, Requirement
@@ -20,7 +21,7 @@ class _PyprojectUpdater(Protocol):
     ...
 
 
-class PythonProject(Configurable, Extension):
+class PythonProject(Extension[Project]):
 
   name: Property[str]
   version: Property[str]
@@ -28,18 +29,20 @@ class PythonProject(Configurable, Extension):
   description: Property[str]
   module_name: Property[str]
   readme: PathProperty
+  source: PathProperty = PathProperty(default='src')
   urls: Property[dict[str, str]] = Property(default={})
   typed: BoolProperty
   entry_points: Property[dict[str, dict[str, str]]] = Property(default={})
 
   def __init__(self, project: Project) -> None:
-    super().__init__()
-    self.project = project
+    super().__init__(project)
+    assert not self.enabled.is_static
     self.requirements = PythonRequirements()
-    project.on_finalize(self._finalize)
     python_project_extensions.apply(self, self)
 
-  project = WeakProperty[Project]('_project', once=True)
+  @property
+  def project(self) -> Project:
+    return self.ext_parent
 
   def author(self, name: str, email: str) -> None:
     self.authors.get().append(Author(name, email))
@@ -85,13 +88,13 @@ class PythonProject(Configurable, Extension):
       if isinstance(value, _PyprojectUpdater):
         value.update_pyproject_config(config)
 
-  def _finalize(self) -> None:
+  def finalize(self) -> None:
     if not self.enabled.get():
       return
     update_pyproject_task = self.project.task('updatePyproject', UpdatePyprojectTask)
     update_pyproject_task.output_file.set(self.project.directory / 'pyproject.toml')
     update_pyproject_task.updater = self._update_pyproject
-    print('Finalize!')
+    super().finalize()
 
 
 @dataclasses.dataclass
@@ -112,9 +115,8 @@ class PythonRequirements(Configurable):
     self._test.append(Requirement(req))
 
 
-class UpdatePyprojectTask(Action, Task):
+class UpdatePyprojectTask(FileRenderer):
 
-  output_file = PathProperty.output()
   updater: Optional[Callable[[dict[str, Any]], None]] = None
 
   def _load_pyproject(self) -> None:
@@ -124,15 +126,7 @@ class UpdatePyprojectTask(Action, Task):
     else:
       return {}
 
-  def _get_updated_pyproject(self) -> None:
+  def get_file_contents(self) -> None:
     config = {}
     self.updater(config)
-    return config
-
-  def is_outdated(self) -> bool:
-    return self._load_pyproject() != self._get_updated_pyproject()
-
-  def execute(self, ctx) -> None:
-    path = self.output_file.get()
-    config = self._get_updated_pyproject()
-    path.write_text(toml.dumps(config))
+    return toml.dumps(config)

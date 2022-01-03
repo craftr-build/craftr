@@ -18,8 +18,6 @@ class BuildGraph(DiGraph[str, Task, None]):
     if seen is None:
       seen = set()
     for task in set(tasks):
-      if task in seen:
-        raise RuntimeError('cyclic dependency')
       seen.add(task)
       self.node(task.path, task)
       for dep in task.dependencies:

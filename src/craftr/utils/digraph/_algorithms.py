@@ -18,7 +18,7 @@ def topological_sort(graph: DiGraph[K, N, E]) -> t.Iterator[K]:
       raise RuntimeError('encountered a cycle in the graph')
     seen.update(roots)
     yield from roots
-    roots = {k: None for n in roots for k in graph.successors(n)}.keys()
+    roots = {k: None for n in roots for k in sorted(graph.successors(n))}.keys()
 
   if len(seen) != len(graph.nodes):
     raise RuntimeError('encountered a cycle in the graph')
