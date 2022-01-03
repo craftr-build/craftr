@@ -1,9 +1,13 @@
 
+
 from typing import Any
-import toml
+
 import requests
+import toml
 from pkg_resources import resource_string
+
 from craftr.bld.system import SystemAction
+
 from ._base import DefaultPythonExtension
 from ._python import python_project_extensions
 
@@ -25,7 +29,6 @@ class Isort(DefaultPythonExtension):
     if not self.enabled.get():
       return
     super().finalize()
-    # task = self.ext_parent.project.task('mypy')
-    # task.group = 'check'
-    # task.do_last(SystemAction(command=['mypy', self.ext_parent.source.get()], cwd=self.ext_parent.project.directory))
-    # task.depends_on('updatePyproject')
+    task = self.ext_parent.project.task('isort')
+    task.do_last(SystemAction(command=['isort', self.ext_parent.source.get()], cwd=self.ext_parent.project.directory))
+    task.depends_on('updatePyproject')

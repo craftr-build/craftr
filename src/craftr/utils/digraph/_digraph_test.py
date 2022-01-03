@@ -1,5 +1,7 @@
 
+
 import pytest
+
 from ._digraph import DiGraph, UnknownEdgeError, UnknownNodeError
 
 

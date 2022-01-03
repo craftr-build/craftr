@@ -4,7 +4,9 @@ Implements the default project loader which loads `build.craftr.py` files and ex
 plain Python script providing the current #Project in the global scope.
 """
 
+
 from pathlib import Path
+
 from .._project import Project, ProjectLoader, UnableToLoadProjectError
 
 BUILD_SCRIPT_FILENAME = Path('build.craftr.py')

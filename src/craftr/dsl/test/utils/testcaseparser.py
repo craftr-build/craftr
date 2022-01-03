@@ -1,11 +1,15 @@
 
+
 import os
 import re
 import typing as t
 from dataclasses import dataclass
 from pathlib import Path
+
 import pytest
-from .sectionfileparser import Section, parse_section_file, Type
+
+from .sectionfileparser import Section, Type, parse_section_file
+
 
 @dataclass
 class CaseData:

@@ -1,9 +1,11 @@
 
+
 import types
 import typing as t
 
-from .properties import Configurable
 from craftr.utils.weakproperty import WeakProperty
+
+from .properties import Configurable
 
 T = t.TypeVar('T')
 T_co = t.TypeVar('T_co', covariant=True)

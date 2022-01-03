@@ -1,10 +1,14 @@
 
+
 from typing import Any, ClassVar, Optional
-import toml
+
 import requests
+import toml
 from pkg_resources import resource_string
+
 from craftr.core import Extension
 from craftr.core.properties import Property
+
 from ._python import PythonProject
 
 

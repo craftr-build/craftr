@@ -1,8 +1,10 @@
 
+
 import pytest
+
 from ._algorithms import remove_with_predecessors, topological_sort
 from ._digraph import DiGraph
-from ._digraph_test import diamond_graph, diamond_cross_graph
+from ._digraph_test import diamond_cross_graph, diamond_graph
 
 
 def test_topological_sort(diamond_graph: DiGraph):

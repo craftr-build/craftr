@@ -1,6 +1,8 @@
 
+
 from pathlib import Path
-from ._path import PathProperty, PathListProperty
+
+from ._path import PathListProperty, PathProperty
 
 
 def test_path_property():

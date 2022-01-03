@@ -1,8 +1,10 @@
 
+
 import hashlib
 from pathlib import Path
-from ..properties import is_path_property, get_path_property_paths
-from .._tasks import TaskHashCalculator, Task
+
+from .._tasks import Task, TaskHashCalculator
+from ..properties import get_path_property_paths, is_path_property
 
 
 class DefaultTaskHashCalculator(TaskHashCalculator):

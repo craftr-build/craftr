@@ -1,11 +1,14 @@
 
+
 import typing as t
-import typing_extensions as te
 from collections.abc import Sequence
 from pathlib import Path
 
-from craftr.utils.typechecking import get_type_checker
+import typing_extensions as te
 from nr.pylang.utils.singletons import NotSet
+
+from craftr.utils.typechecking import get_type_checker
+
 from ._base import BaseProperty
 
 PathLike = t.Union[str, Path]

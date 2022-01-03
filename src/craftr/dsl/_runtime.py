@@ -4,15 +4,19 @@ Helpers for added runtime capabilities of transpiled Craftr DSL code, specifical
 name resolution when enabling #TranspileOptions.closure_target.
 """
 
+
 import builtins
 import functools
 import sys
 import types
 import typing as t
-# import weakref
+
+from nr.pylang.utils.singletons import NotSet
 
 from ._transpiler import TranspileOptions, transpile_to_ast
-from nr.pylang.utils.singletons import NotSet
+
+# import weakref
+
 
 undefined = NotSet.Value
 

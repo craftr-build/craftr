@@ -3,6 +3,7 @@
 Rewrite Craftr DSL code to pure Python code.
 """
 
+
 import contextlib
 import enum
 import logging
@@ -16,9 +17,11 @@ try:
 except ImportError:
   def colored(s, *a, **kw) -> str: return str(s)  # type: ignore
 
+
 from nr.parsing.core import rules
 from nr.parsing.core.scanner import Cursor
-from nr.parsing.core.tokenizer import ProxyToken as _ProxyToken, RuleSet, Tokenizer
+from nr.parsing.core.tokenizer import ProxyToken as _ProxyToken
+from nr.parsing.core.tokenizer import RuleSet, Tokenizer
 
 logger = logging.getLogger(__name__)
 

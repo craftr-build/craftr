@@ -1,4 +1,5 @@
 
+
 import abc
 import dataclasses
 import hashlib
@@ -10,12 +11,14 @@ from collections.abc import Callable
 from pathlib import Path
 
 from nr.preconditions import check_not_none
+
 from craftr.utils.weakproperty import OptionalWeakProperty
+
 from ._extension import Extension
 
 if t.TYPE_CHECKING:
   from ._context import Context
-  from ._tasks import Task, _TaskConfigurator, _ActionCallable
+  from ._tasks import Task, _ActionCallable, _TaskConfigurator
 
 T_Task = t.TypeVar('T_Task', bound='Task')
 

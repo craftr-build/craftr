@@ -1,4 +1,5 @@
 
+
 import abc
 import dataclasses
 import typing as t
@@ -7,7 +8,8 @@ from collections.abc import Callable, Collection
 
 from beartype import beartype
 from nr.preconditions import check_not_none
-from .properties import HasProperties, is_path_property, get_path_property_paths
+
+from .properties import HasProperties, get_path_property_paths, is_path_property
 
 _ActionCallable = Callable[['Task', 'ActionContext'], t.Any]
 _TaskConfigurator = Callable[['Task'], t.Any]

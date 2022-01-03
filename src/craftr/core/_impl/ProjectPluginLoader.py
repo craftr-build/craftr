@@ -1,5 +1,6 @@
 
-from .._plugins import PluginLoader, Plugin, PluginNotFoundError
+
+from .._plugins import Plugin, PluginLoader, PluginNotFoundError
 
 
 class ProjectPluginLoader(PluginLoader):

@@ -1,7 +1,9 @@
 
+
 import re
 from textwrap import dedent
-from .sectionfileparser import parse_section_file, Section, Type
+
+from .sectionfileparser import Section, Type, parse_section_file
 
 
 def test_sectionfileparser():

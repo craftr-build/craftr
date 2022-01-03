@@ -5,12 +5,14 @@ A tiny client for the [DejaCode license library][1].
   [1]: https://enterprise.dejacode.com/licenses/
 """
 
+
 import argparse
-import bs4
 import re
-import requests
 import textwrap
 import typing as t
+
+import bs4
+import requests
 
 BASE_URL = 'https://enterprise.dejacode.com/licenses/public/{}/'
 

@@ -1,9 +1,12 @@
 
+
 from typing import Any
+
 from craftr.bld.system import SystemAction
 from craftr.core import Extension
 from craftr.core.properties import BoolProperty, Property
-from ._python import python_project_extensions, PythonProject
+
+from ._python import PythonProject, python_project_extensions
 
 
 @python_project_extensions.register('flit')

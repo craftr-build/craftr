@@ -1,11 +1,14 @@
 
+
 import dataclasses
-import pkg_resources
 import typing as t
+
+import pkg_resources
 from beartype import beartype
 from loguru import logger
+
 from .._extension import ExtensionRegistry
-from .._plugins import PluginLoader, PluginNotFoundError, Plugin
+from .._plugins import Plugin, PluginLoader, PluginNotFoundError
 from .._project import Project
 
 

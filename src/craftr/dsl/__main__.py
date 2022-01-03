@@ -1,10 +1,11 @@
 
+
 import argparse
 import importlib
 import os
 import sys
 
-from . import execute, transpile_to_source, Closure
+from . import Closure, execute, transpile_to_source
 
 parser = argparse.ArgumentParser(prog=os.path.basename(sys.executable) + ' -m craftr.dsl')
 parser.add_argument('file', nargs='?')

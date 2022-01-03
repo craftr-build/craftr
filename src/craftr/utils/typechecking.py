@@ -1,7 +1,9 @@
 
+
 import typing as t
-import typing_extensions as te
+
 import beartype
+import typing_extensions as te
 
 T = t.TypeVar('T')
 TypeHint = type[T]

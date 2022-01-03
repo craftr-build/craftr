@@ -1,8 +1,9 @@
 
+
 import typing as t
 
-from .._tasks import Task, TaskSelector
 from .._project import Project
+from .._tasks import Task, TaskSelector
 
 
 class DefaultTaskSelector(TaskSelector):

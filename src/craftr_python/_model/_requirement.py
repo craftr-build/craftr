@@ -19,6 +19,7 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
+
 import abc
 import enum
 import os
@@ -26,10 +27,10 @@ import posixpath
 import re
 import typing as t
 from dataclasses import dataclass
-from typing import Iterable, List, Optional, Union, TypeVar
+from typing import Iterable, List, Optional, TypeVar, Union
 from urllib.parse import urlparse
 
-from ._version import bump_version, Version
+from ._version import Version, bump_version
 
 T = TypeVar('T')
 

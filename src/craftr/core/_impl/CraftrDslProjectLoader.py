@@ -1,8 +1,10 @@
 
-import typing as t
-from craftr.dsl import ChainContext, Context, Closure, ObjectContext
-from .._project import Extension, Project, ProjectLoader, UnableToLoadProjectError
 
+import typing as t
+
+from craftr.dsl import ChainContext, Closure, Context, ObjectContext
+
+from .._project import Extension, Project, ProjectLoader, UnableToLoadProjectError
 
 BUILD_SCRIPT_FILENAME = 'build.craftr'
 

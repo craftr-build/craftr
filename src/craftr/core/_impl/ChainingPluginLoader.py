@@ -1,7 +1,10 @@
 
+
 import dataclasses
+
 from beartype import beartype
-from .._plugins import PluginLoader, PluginNotFoundError, Plugin
+
+from .._plugins import Plugin, PluginLoader, PluginNotFoundError
 
 
 @dataclasses.dataclass

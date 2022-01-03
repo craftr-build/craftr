@@ -1,6 +1,8 @@
 
+
 import typing as t
-from ._digraph import DiGraph, K, N, E
+
+from ._digraph import DiGraph, E, K, N
 
 
 def topological_sort(graph: DiGraph[K, N, E]) -> t.Iterator[K]:

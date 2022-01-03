@@ -1,11 +1,13 @@
 
+
 import abc
 import copy
 import typing as t
 import weakref
 
-from craftr.utils.typechecking import check_type, TypeHint
 from nr.pylang.utils.singletons import NotSet
+
+from craftr.utils.typechecking import TypeHint, check_type
 
 A = t.TypeVar('A', covariant=True)
 T = t.TypeVar('T')

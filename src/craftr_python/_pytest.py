@@ -1,8 +1,11 @@
 
+
 from typing import Any
+
 from craftr.bld.system import SystemAction
-from ._python import python_project_extensions
+
 from ._base import DefaultPythonExtension
+from ._python import python_project_extensions
 
 
 @python_project_extensions.register('pytest')

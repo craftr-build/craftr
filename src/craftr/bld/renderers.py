@@ -1,5 +1,6 @@
 
-from craftr.core import Action, ActionContext, Task, PathProperty
+
+from craftr.core import Action, ActionContext, PathProperty, Task
 
 
 class FileRenderer(Action, Task):

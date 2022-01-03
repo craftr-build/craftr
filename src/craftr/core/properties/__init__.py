@@ -1,3 +1,3 @@
 
-from ._base import Configurable, HasProperties, BaseProperty, Property, NoValueError, BoolProperty
-from ._path import PathProperty, PathListProperty, is_path_property, get_path_property_paths
+from ._base import BaseProperty, BoolProperty, Configurable, HasProperties, NoValueError, Property
+from ._path import PathListProperty, PathProperty, get_path_property_paths, is_path_property

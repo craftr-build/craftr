@@ -1,8 +1,11 @@
 
-import pytest
+
 from pathlib import Path
+
+import pytest
 from beartype.roar import BeartypeCallHintPepParamException
-from ._base import HasProperties, BaseProperty, Property, NoValueError
+
+from ._base import BaseProperty, HasProperties, NoValueError, Property
 
 
 def test_property_get_set():

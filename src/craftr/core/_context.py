@@ -1,30 +1,23 @@
 
+
 import typing as t
 from collections.abc import MutableMapping
 from pathlib import Path
 
 from localimport import localimport  # type: ignore
-from nr.caching.adapters.mapping import MappingAdapter
 from nr.caching.adapters.json import JsonCache
+from nr.caching.adapters.mapping import MappingAdapter
 from nr.caching.api import NamespaceStore
 from nr.caching.stores.sqlite import SqliteStore
 
 from ._execute import BuildGraph, Executor
-from ._impl import (
-  ChainingPluginLoader,
-  ChainingProjectLoader,
-  CraftrDslProjectLoader,
-  DefaultBuildScriptConfigApplier,
-  DefaultExecutor,
-  DefaultTaskHashCalculator,
-  DefaultProjectLoader,
-  DefaultTaskSelector,
-  EntrypointPluginLoader,
-  ProjectPluginLoader)
+from ._impl import (ChainingPluginLoader, ChainingProjectLoader, CraftrDslProjectLoader,
+                    DefaultBuildScriptConfigApplier, DefaultExecutor, DefaultProjectLoader, DefaultTaskHashCalculator,
+                    DefaultTaskSelector, EntrypointPluginLoader, ProjectPluginLoader)
 from ._plugins import PluginLoader
-from ._project import Project, ProjectLoader, BuildScriptConfig, BuildScriptConfigApplier
+from ._project import BuildScriptConfig, BuildScriptConfigApplier, Project, ProjectLoader
 from ._settings import Settings
-from ._tasks import TaskHashCalculator, TaskSelector, TaskSelection, select_tasks
+from ._tasks import TaskHashCalculator, TaskSelection, TaskSelector, select_tasks
 
 
 class Context:

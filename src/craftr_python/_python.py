@@ -1,12 +1,14 @@
 
+
 import dataclasses
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, List, Optional, Protocol, Union, runtime_checkable
 
 import toml
+
 from craftr.bld.renderers import FileRenderer
-from craftr.core import Extension, Project, BoolProperty, Property, Configurable, PathProperty, ExtensionRegistry
+from craftr.core import BoolProperty, Configurable, Extension, ExtensionRegistry, PathProperty, Project, Property
 from craftr.utils.weakproperty import WeakProperty
 
 from ._model import Author, Requirement
