@@ -1,4 +1,3 @@
-
 import abc
 import dataclasses
 import hashlib
@@ -30,7 +29,8 @@ class Project(Extension['Context']):
 
   parent = OptionalWeakProperty['Project'].at('_project', True)
 
-  def __init__(self,
+  def __init__(
+    self,
     context: 'Context',
     parent: t.Optional['Project'],
     directory: t.Union[str, Path],
@@ -96,21 +96,28 @@ class Project(Extension['Context']):
   def task(
     self,
     name: str,
-    configure: t.Optional['_TaskConfigurator'] = None, /, *,
+    configure: t.Optional['_TaskConfigurator'] = None,
+    /,
+    *,
     do: t.Optional['_ActionCallable'] = None,
-  ) -> 'Task': ...
+  ) -> 'Task':
+    ...
 
   @t.overload
   def task(
     self,
     name: str,
-    task_class: type[T_Task], /,
-  ) -> T_Task: ...
+    task_class: type[T_Task],
+    /,
+  ) -> T_Task:
+    ...
 
   def task(
     self,
     name: str,
-    task_class: t.Union[t.Optional['_TaskConfigurator'], type['Task']] = None, /, *,
+    task_class: t.Union[t.Optional['_TaskConfigurator'], type['Task']] = None,
+    /,
+    *,
     do: t.Optional['_ActionCallable'] = None,
   ) -> 'Task':
     """
@@ -175,7 +182,7 @@ class Project(Extension['Context']):
   def subprojects(self, closure: Callable[['Project'], None]) -> None:
     """ Call *closure* for every subproject currently loaded in the project.. """
 
-  def subprojects(self, closure = None):
+  def subprojects(self, closure=None):
     if closure is None:
       return list(self._subprojects.values())
     else:
@@ -207,7 +214,8 @@ class ProjectLoader(abc.ABC):
   """
 
   @abc.abstractmethod
-  def load_project(self, project: 'Project') -> None: ...
+  def load_project(self, project: 'Project') -> None:
+    ...
 
 
 @dataclasses.dataclass
@@ -275,21 +283,25 @@ class BuildScriptConfig:
   def hash(self) -> str:
     """ Calculates a SHA1 hash for the state of the object. """
 
-    return hashlib.sha1(json.dumps({
-      'project': self.project.path,
-      'requirements': self.requirements,
-      'index_url': self.index_url,
-      'extra_index_urls': self.extra_index_urls,
-    }).encode('utf8')).hexdigest()
+    return hashlib.sha1(
+      json.dumps({
+        'project': self.project.path,
+        'requirements': self.requirements,
+        'index_url': self.index_url,
+        'extra_index_urls': self.extra_index_urls,
+      }).encode('utf8')
+    ).hexdigest()
 
   @t.overload
-  def requires(self, package: str, *, version: t.Optional[str] = None) -> None: ...
+  def requires(self, package: str, *, version: t.Optional[str] = None) -> None:
+    ...
 
   @t.overload
-  def requires(self, package: str, *packages: str) -> None: ...
+  def requires(self, package: str, *packages: str) -> None:
+    ...
 
   def requires(self, package: str, *packages: str, version: t.Optional[str] = None) -> None:
-    for package in (package,) + packages:
+    for package in (package, ) + packages:
       self.requirements.append(f'{package} {version or ""}'.strip())
 
   def extra_index_url(self, *urls: str) -> None:
@@ -333,7 +345,8 @@ class BuildScriptConfigApplier(abc.ABC):
     """
 
   @abc.abstractmethod
-  def get_additional_search_paths(self, packages_root: Path) -> list[Path]: ...
+  def get_additional_search_paths(self, packages_root: Path) -> list[Path]:
+    ...
 
 
 from ._tasks import Task

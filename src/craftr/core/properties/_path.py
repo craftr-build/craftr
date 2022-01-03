@@ -1,5 +1,3 @@
-
-
 import typing as t
 from collections.abc import Sequence
 from pathlib import Path
@@ -13,15 +11,10 @@ from ._base import BaseProperty
 
 PathLike = t.Union[str, Path]
 
-_PathPropertyBase = BaseProperty[
-  Path,
-  t.Union[PathLike, BaseProperty[Path, t.Any]]
-]
+_PathPropertyBase = BaseProperty[Path, t.Union[PathLike, BaseProperty[Path, t.Any]]]
 
-_PathListPropertyBase = BaseProperty[
-  list[Path],
-  t.Union[PathLike, BaseProperty[Path, t.Any], Sequence[t.Union[PathLike, BaseProperty[Path, t.Any]]]]
-]
+_PathListPropertyBase = BaseProperty[list[Path], t.Union[PathLike, BaseProperty[Path, t.Any],
+                                                          Sequence[t.Union[PathLike, BaseProperty[Path, t.Any]]]]]
 
 
 class _HasOutputAttribute:

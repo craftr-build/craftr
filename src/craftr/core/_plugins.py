@@ -1,5 +1,3 @@
-
-
 import abc
 import dataclasses
 
@@ -12,7 +10,8 @@ class PluginLoader(abc.ABC):
   """
 
   @abc.abstractmethod
-  def load_plugin(self, name: str) -> 'Plugin': ...
+  def load_plugin(self, name: str) -> 'Plugin':
+    ...
 
 
 class Plugin(abc.ABC):
@@ -21,7 +20,8 @@ class Plugin(abc.ABC):
   """
 
   @abc.abstractmethod
-  def apply(self, project: Project) -> None: ...
+  def apply(self, project: Project) -> None:
+    ...
 
 
 @dataclasses.dataclass

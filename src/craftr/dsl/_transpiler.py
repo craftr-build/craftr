@@ -1,8 +1,6 @@
-
 """
 Transpile Craftr DSL code to full fledged Python code.
 """
-
 
 import ast
 import logging
@@ -108,8 +106,10 @@ class ClosureRewriter(ast.NodeTransformer):
     else:
       function_code += (closure.body or '').rstrip() or (' ' * closure.indent + 'pass')
 
-    self.log.debug('_get_closure_def(%r): parse function body\n\n%s\n', closure_id,
-        '  ' + '\n  '.join(function_code.lstrip().splitlines()))
+    self.log.debug(
+      '_get_closure_def(%r): parse function body\n\n%s\n', closure_id,
+      '  ' + '\n  '.join(function_code.lstrip().splitlines())
+    )
 
     module = ast.parse(function_code, self.filename, mode='exec', type_comments=False)
     func = module.body[0]
@@ -141,7 +141,7 @@ class ClosureRewriter(ast.NodeTransformer):
         result = [result]
         for closure_id in self._closure_inserts.get(node, []):
           func = self.visit(self._get_closure_def(closure_id))
-          result.insert(len(result)-1, func)
+          result.insert(len(result) - 1, func)
       return result
     finally:
       assert self._hierarchy.pop() == node
@@ -196,7 +196,8 @@ class NameRewriter(ast.NodeTransformer):
     return ast.Subscript(
       value=ast.Name(id=self.options.closure_target, ctx=ast.Load()),
       slice=ast.Index(value=ast.Constant(value=node.id)),
-      ctx=node.ctx)
+      ctx=node.ctx
+    )
 
   def visit_Assign(self, assign: ast.Assign) -> ast.AST:
     if len(assign.targets) == 1 and isinstance(assign.targets[0], ast.Name):

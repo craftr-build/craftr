@@ -1,5 +1,3 @@
-
-
 import abc
 import typing as t
 from collections.abc import Collection
@@ -38,4 +36,5 @@ class BuildGraph(DiGraph[str, Task, None]):
 class Executor(abc.ABC):
 
   @abc.abstractmethod
-  def execute(self, context: 'Context', graph: BuildGraph) -> None: ...
+  def execute(self, context: 'Context', graph: BuildGraph) -> None:
+    ...

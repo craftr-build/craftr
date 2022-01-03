@@ -1,4 +1,3 @@
-
 import os
 import typing as t
 
@@ -39,4 +38,5 @@ def get_readme_file(directory: str) -> t.Optional[str]:
     directory=directory,
     prefix='README.',
     preferred=['README.md', 'README.rst', 'README.txt', 'README'],
-    case_sensitive=False)
+    case_sensitive=False
+  )

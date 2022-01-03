@@ -1,5 +1,3 @@
-
-
 from pathlib import Path
 
 from ._path import PathListProperty, PathProperty

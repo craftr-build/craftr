@@ -1,5 +1,3 @@
-
-
 import typing as t
 
 from ._transpiler import TranspileOptions, transpile_to_ast

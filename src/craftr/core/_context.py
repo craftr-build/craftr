@@ -1,4 +1,3 @@
-
 import typing as t
 from collections.abc import MutableMapping
 from pathlib import Path
@@ -10,9 +9,10 @@ from nr.caching.api import NamespaceStore
 from nr.caching.stores.sqlite import SqliteStore
 
 from ._execute import BuildGraph, Executor
-from ._impl import (ChainingPluginLoader, ChainingProjectLoader, CraftrDslProjectLoader,
-                    DefaultBuildScriptConfigApplier, DefaultExecutor, DefaultProjectLoader, DefaultTaskHashCalculator,
-                    DefaultTaskSelector, EntrypointPluginLoader, ProjectPluginLoader)
+from ._impl import (
+  ChainingPluginLoader, ChainingProjectLoader, CraftrDslProjectLoader, DefaultBuildScriptConfigApplier, DefaultExecutor,
+  DefaultProjectLoader, DefaultTaskHashCalculator, DefaultTaskSelector, EntrypointPluginLoader, ProjectPluginLoader
+)
 from ._plugins import PluginLoader
 from ._project import BuildScriptConfig, BuildScriptConfigApplier, Project, ProjectLoader
 from ._settings import Settings
@@ -78,8 +78,10 @@ class Context:
 
     key = 'buildscript_config_applier_state'
     state = self.json_cache.load_or_none(key) or {}
+
     def persist():
       self.json_cache.store(key, state)
+
     self.buildscript_config_applier.apply(buildscript, self.packages_root, state, persist)
     persist()
 

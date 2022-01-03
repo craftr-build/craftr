@@ -1,5 +1,3 @@
-
-
 import typing as t
 
 from termcolor import colored

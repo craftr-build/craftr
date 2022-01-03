@@ -1,4 +1,3 @@
-
 import argparse
 import pdb
 import sys
@@ -7,15 +6,22 @@ from pathlib import Path
 from .core import BuildError, Context, Settings
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-O', '--option', default=[], action='append',
-  help='Set or override an option in the settings of the build.')
-parser.add_argument('--settings-file', default=Context.CRAFTR_SETTINGS_FILE, type=Path,
-  help='Point to another settings file. (default: %(default)s)')
+parser.add_argument(
+  '-O', '--option', default=[], action='append', help='Set or override an option in the settings of the build.'
+)
+parser.add_argument(
+  '--settings-file',
+  default=Context.CRAFTR_SETTINGS_FILE,
+  type=Path,
+  help='Point to another settings file. (default: %(default)s)'
+)
 parser.add_argument('tasks', metavar='task', nargs='*')
-parser.add_argument('-x', '--exclude', metavar='task', action='append',
-  help='Exclude the specified task from the build.')
-parser.add_argument('-v', '--verbose', action='store_true',
-  help='Enable verbose mode (like -Ocraftr.core.verbose=true).')
+parser.add_argument(
+  '-x', '--exclude', metavar='task', action='append', help='Exclude the specified task from the build.'
+)
+parser.add_argument(
+  '-v', '--verbose', action='store_true', help='Enable verbose mode (like -Ocraftr.core.verbose=true).'
+)
 parser.add_argument('-l', '--list', action='store_true', help='List all tasks.')
 parser.add_argument('--pdb', action='store_true')
 

@@ -1,9 +1,7 @@
-
 """
 Implements the default project loader which loads `build.craftr.py` files and executes them as a
 plain Python script providing the current #Project in the global scope.
 """
-
 
 from pathlib import Path
 

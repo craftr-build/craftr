@@ -1,8 +1,6 @@
-
 """
 Rewrite Craftr DSL code to pure Python code.
 """
-
 
 import contextlib
 import enum
@@ -15,7 +13,9 @@ from dataclasses import dataclass
 try:
   from termcolor import colored
 except ImportError:
-  def colored(s, *a, **kw) -> str: return str(s)  # type: ignore
+
+  def colored(s, *a, **kw) -> str:
+    return str(s)  # type: ignore
 
 
 from nr.parsing.core import rules
@@ -66,8 +66,10 @@ rule_set.rule(Token.Control, rules.regex_extract(r'is\b|not\b'))
 rule_set.rule(Token.Name, rules.regex_extract(r'[A-Za-z\_][A-Za-z0-9\_]*'))
 rule_set.rule(Token.Literal, rules.regex_extract(r'[+\-]?(\d+)(\.\d*)?'))
 rule_set.rule(Token.Literal, rules.string_literal())
-rule_set.rule(Token.Control, rules.regex_extract(
-  r'(\[|\]|\{|\}|\(|\)|<<|<|>>|>|\.|,|\->|\-|!|\+|\*\*|\*|//|/|->|==|<=|>=|<|>|=|:|&|\||^|%|@|;)'))
+rule_set.rule(
+  Token.Control,
+  rules.regex_extract(r'(\[|\]|\{|\}|\(|\)|<<|<|>>|>|\.|,|\->|\-|!|\+|\*\*|\*|//|/|->|==|<=|>=|<|>|=|:|&|\||^|%|@|;)')
+)
 
 
 class ProxyToken(_ProxyToken):
@@ -175,7 +177,9 @@ class Rewriter:
   """
 
   UNARY_OPERATORS = frozenset(['not', '~'])
-  BINARY_OPERATORS = frozenset(['-', '+', '*', '**', '/', '//', '^', '|', '&', '.', '==', '<=', '>=', '<', '>', 'is', '%'])
+  BINARY_OPERATORS = frozenset([
+    '-', '+', '*', '**', '/', '//', '^', '|', '&', '.', '==', '<=', '>=', '<', '>', 'is', '%'
+  ])
   PYTHON_BLOCK_KEYWORDS = frozenset(['class', 'def', 'if', 'elif', 'else', 'for', 'while', 'with'])
 
   def __init__(self, text: str, filename: str, grammar: t.Optional[Grammar] = None) -> None:
@@ -203,9 +207,11 @@ class Rewriter:
     state = self.tokenizer.state
     closure_state = self._closure_counter, self._closures.copy(), self._closure_stack[:]
     do_restore = True
+
     def commit():
       nonlocal do_restore
       do_restore = False
+
     try:
       yield commit
     finally:
@@ -363,8 +369,10 @@ class Rewriter:
 
       while token.tv != (Token.Control, ')'):
 
-        if (not is_delimited  # Token is not preceeded by an opening parentheses or comma.
-            or token.type != Token.Name):  # We can only accept a name at this position.
+        if (
+          not is_delimited  # Token is not preceeded by an opening parentheses or comma.
+          or token.type != Token.Name
+        ):  # We can only accept a name at this position.
           token.load(state)
           return None
 
@@ -401,7 +409,9 @@ class Rewriter:
 
       elif token.is_control('(['):
         code += self._consume_whitespace(True, False)
-        code += self._rewrite_atom(ParseMode.FUNCTION_CALL | ParseMode.GROUPED if token.value == '(' else ParseMode.DEFAULT)
+        code += self._rewrite_atom(
+          ParseMode.FUNCTION_CALL | ParseMode.GROUPED if token.value == '(' else ParseMode.DEFAULT
+        )
 
       else:
         break
@@ -428,7 +438,9 @@ class Rewriter:
           break
         commit()
       code += self._consume_whitespace(mode)
-      if mode & ParseMode.CALL_ARGS and (token.is_control('=') or (self.grammar.colon_kwargs and token.is_control(':'))):
+      if mode & ParseMode.CALL_ARGS and (
+        token.is_control('=') or (self.grammar.colon_kwargs and token.is_control(':'))
+      ):
         code += '='
         token.next()
         # TODO(NiklasRosenstein): This may be problematic in unparenthesised calls?

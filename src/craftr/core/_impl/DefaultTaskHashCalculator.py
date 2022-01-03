@@ -1,5 +1,3 @@
-
-
 import hashlib
 from pathlib import Path
 

@@ -1,4 +1,3 @@
-
 from craftr.core import ExtensionRegistry, Project
 
 registry = ExtensionRegistry[Project](__name__)

@@ -1,5 +1,3 @@
-
-
 from craftr.core import Action, ActionContext, PathProperty, Task
 
 

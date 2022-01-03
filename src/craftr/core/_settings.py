@@ -1,4 +1,3 @@
-
 import abc
 import importlib
 import typing as t
@@ -34,7 +33,8 @@ class LoadableFromSettings(abc.ABC):
 
   @classmethod
   @abc.abstractclassmethod
-  def from_settings(cls: t.Type[T_LoadableFromSettings], settings: 'Settings') -> T_LoadableFromSettings: ...
+  def from_settings(cls: t.Type[T_LoadableFromSettings], settings: 'Settings') -> T_LoadableFromSettings:
+    ...
 
 
 class Settings(abc.ABC):
@@ -106,8 +106,9 @@ class Settings(abc.ABC):
         instance = class_()
     except Exception:
       raise ClassInstantiationError(
-          f'Error while instantiating instance of `{class_.__module__}.{class_.__qualname__}` '
-          f'from configuration key `{config_key}`')
+        f'Error while instantiating instance of `{class_.__module__}.{class_.__qualname__}` '
+        f'from configuration key `{config_key}`'
+      )
     check_instance_of(instance, type)
     return instance
 

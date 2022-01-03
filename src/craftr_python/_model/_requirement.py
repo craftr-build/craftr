@@ -19,7 +19,6 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 
-
 import abc
 import enum
 import os
@@ -81,6 +80,7 @@ class VersionSelector(object):
       return '==' + self._string
 
     regex = r'[~^](\d+\.\d+(\.\d+)?[.\-\w]*)'
+
     def sub(match):
       index = {'^': 0, '~': 1}[match.group(0)[0]]
       max_version = match.group(1).split('.')[:3]
@@ -89,7 +89,7 @@ class VersionSelector(object):
       if '-' in max_version[-1]:
         max_version[-1] = max_version[-1].partition('-')[0]
       max_version[index] = str(int(max_version[index]) + 1)
-      for i in range(index+1, 3):
+      for i in range(index + 1, 3):
         max_version[i] = '0'
       return '>={},<{}'.format(match.group(1), '.'.join(max_version))
 
@@ -119,13 +119,16 @@ VersionSelector.ANY = VersionSelector('*')
 class BaseRequirement(abc.ABC):
 
   @abc.abstractclassmethod
-  def from_string(cls, value: str) -> 'BaseRequirement': ...
+  def from_string(cls, value: str) -> 'BaseRequirement':
+    ...
 
   @abc.abstractmethod
-  def __str__(self) -> str: ...
+  def __str__(self) -> str:
+    ...
 
   @abc.abstractmethod
-  def to_setuptools(self) -> str: ...
+  def to_setuptools(self) -> str:
+    ...
 
 
 @dataclass
@@ -156,17 +159,22 @@ class Requirement(BaseRequirement):
     error = ValueError('invalid requirement: {!r}'.format(requirement_string))
     if set(requirement_string) & set(cls.INVALID_CHARACTERS):
       raise error
-    match = re.match(r'''
+    match = re.match(
+      r'''
       ^\s*                # Allow leading whitespace
       ([\w\d\-\._]+)      # Package name
       (?:\[([^\]]+)\])?   # Package extras
       (?:\s*([^\[\]]+))?  # Version selector (do not allow brackets to avoid matching empty extras)
-      $''', requirement_string, re.VERBOSE)
+      $''', requirement_string, re.VERBOSE
+    )
     if not match:
       raise error
     package, extras, version = match.groups()
-    return cls(package, VersionSelector(version or VersionSelector.ANY),
-      extras=sorted(map(str.strip, extras.split(','))) if extras else None)
+    return cls(
+      package,
+      VersionSelector(version or VersionSelector.ANY),
+      extras=sorted(map(str.strip, extras.split(','))) if extras else None
+    )
 
   def to_setuptools(self) -> str:
     return self.__str__(setuptools=True)  # type: ignore

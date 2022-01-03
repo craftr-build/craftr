@@ -1,5 +1,3 @@
-
-
 from typing import Any, ClassVar, Optional
 
 import requests
@@ -27,7 +25,7 @@ class DefaultPythonExtension(Extension[PythonProject]):
     raise NotImplementedError
 
   def update_pyproject_config(self, config: dict[str, Any]) -> None:
-    raise NotImplementedError
+    pass
 
   def profile(self, profile_name_or_url: str) -> None:
     """

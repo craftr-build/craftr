@@ -1,10 +1,8 @@
-
 """
 A tiny client for the [DejaCode license library][1].
 
   [1]: https://enterprise.dejacode.com/licenses/
 """
-
 
 import argparse
 import re
@@ -47,11 +45,11 @@ def get_license_metadata(license_name):
   html = response.text
   soup = bs4.BeautifulSoup(html, 'html.parser')
 
-  extract_keys = ['Key', 'Name', 'Short Name', 'Category', 'License type',
-    'License profile', 'License style', 'Owner', 'SPDX short identifier',
-    'Keywords', 'Standard notice', 'Special obligations', 'Publication year',
-    'URN', 'Dataspace', 'Homepage URL', 'Text URLs', 'OSI URL', 'FAQ URL',
-    'Guidance URL', 'Other URLs']
+  extract_keys = [
+    'Key', 'Name', 'Short Name', 'Category', 'License type', 'License profile', 'License style', 'Owner',
+    'SPDX short identifier', 'Keywords', 'Standard notice', 'Special obligations', 'Publication year', 'URN',
+    'Dataspace', 'Homepage URL', 'Text URLs', 'OSI URL', 'FAQ URL', 'Guidance URL', 'Other URLs'
+  ]
 
   data = {}
   for key in extract_keys:

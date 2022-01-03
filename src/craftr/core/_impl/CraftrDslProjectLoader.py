@@ -1,5 +1,3 @@
-
-
 import typing as t
 
 from craftr.dsl import ChainContext, Closure, Context, ObjectContext

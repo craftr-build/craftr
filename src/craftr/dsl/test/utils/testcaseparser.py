@@ -1,5 +1,3 @@
-
-
 import os
 import re
 import typing as t
@@ -65,7 +63,9 @@ def parse_testcase_file(content: str, filename: str, can_have_outputs: bool) -> 
       if test_body.type != Type.Body:
         raise ValueError(f'{filename}: expected TEST section body at line {test_body.line}')
       expects_section = next(it)
-      if expects_section.type != Type.Marker or not (m := re.match(r'EXPECTS(\s+SYNTAX ERROR)?$', expects_section.value)):
+      if expects_section.type != Type.Marker or not (
+        m := re.match(r'EXPECTS(\s+SYNTAX ERROR)?$', expects_section.value)
+      ):
         raise ValueError(f'{filename}: expected EXPECTS section at line {expects_section.line}, got {expects_section}')
       expects_syntax_error = m.group(1)
       expects_body = next(it)
@@ -115,9 +115,11 @@ def cases_from(path: Path, can_have_outputs: bool) -> t.Callable[[t.Callable], t
   test_parameters = [(path, name) for path, tests in test_cases.items() for name in tests]
 
   def decorator(func: t.Callable) -> t.Callable:
+
     @pytest.mark.parametrize('path,name', test_parameters)
     def wrapper(path, name):
       return func(test_cases[path][name])
+
     wrapper.__name__ = func.__name__
     return wrapper
 

@@ -1,15 +1,10 @@
-
-
 from typing import Any
-
-import requests
-import toml
-from pkg_resources import resource_string
 
 from craftr.bld.system import SystemAction
 
 from ._base import DefaultPythonExtension
 from ._python import python_project_extensions
+from ._style import Style
 
 
 @python_project_extensions.register('isort')
@@ -29,6 +24,15 @@ class Isort(DefaultPythonExtension):
     if not self.enabled.get():
       return
     super().finalize()
+
+    # Inherit style details.
+    style: Style = self.ext_parent.ext.style
+    config = self.config.get()
+    if 'indent' not in config:
+      config['indent'] = style.indent.get()
+    if 'line_length' not in config:
+      config['line_length'] = style.line_length.get()
+
     task = self.ext_parent.project.task('isort')
     task.do_last(SystemAction(command=['isort', self.ext_parent.source.get()], cwd=self.ext_parent.project.directory))
     task.depends_on('updatePyproject')

@@ -1,4 +1,3 @@
-
 import dataclasses
 from collections.abc import Callable
 from pathlib import Path
@@ -8,7 +7,6 @@ import toml
 
 from craftr.bld.renderers import FileRenderer
 from craftr.core import BoolProperty, Configurable, Extension, ExtensionRegistry, PathProperty, Project, Property
-from craftr.utils.weakproperty import WeakProperty
 
 from ._model import Author, Requirement
 from ._utils import get_readme_file
@@ -18,6 +16,7 @@ python_project_extensions = ExtensionRegistry['PythonProject']()
 
 @runtime_checkable
 class _PyprojectUpdater(Protocol):
+
   def update_pyproject_config(self, config: dict[str, Any]) -> None:
     ...
 

@@ -1,9 +1,7 @@
-
 """
 Helpers for added runtime capabilities of transpiled Craftr DSL code, specifically around variable
 name resolution when enabling #TranspileOptions.closure_target.
 """
-
 
 import builtins
 import functools
@@ -17,7 +15,6 @@ from ._transpiler import TranspileOptions, transpile_to_ast
 
 # import weakref
 
-
 undefined = NotSet.Value
 
 
@@ -27,11 +24,14 @@ class Context(t.Protocol):
   a name resolution error.
   """
 
-  def __getitem__(self, key: str) -> t.Any: ...
+  def __getitem__(self, key: str) -> t.Any:
+    ...
 
-  def __setitem__(self, key: str, value: t.Any) -> None: ...
+  def __setitem__(self, key: str, value: t.Any) -> None:
+    ...
 
-  def __delitem__(self, key: str) -> None: ...
+  def __delitem__(self, key: str) -> None:
+    ...
 
 
 class ObjectContext(Context):

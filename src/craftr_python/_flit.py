@@ -1,5 +1,3 @@
-
-
 from typing import Any
 
 from craftr.bld.system import SystemAction

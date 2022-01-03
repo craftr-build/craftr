@@ -1,5 +1,3 @@
-
-
 import typing as t
 
 from ._digraph import DiGraph, E, K, N
@@ -22,7 +20,7 @@ def topological_sort(graph: DiGraph[K, N, E]) -> t.Iterator[K]:
     yield from roots
     roots = {
       k: None
-      for n in roots for k in sorted(graph.successors(n))   # type: ignore[type-var]
+      for n in roots for k in sorted(graph.successors(n))  # type: ignore[type-var]
       if not graph.predecessors(k) - seen
     }.keys()
 

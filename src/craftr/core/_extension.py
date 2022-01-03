@@ -1,5 +1,3 @@
-
-
 import types
 import typing as t
 
@@ -13,7 +11,9 @@ _T_Factory = t.TypeVar('_T_Factory', bound=t.Union[t.Callable[[t.Any], t.Any], t
 
 
 class _FactoryConstructor(t.Protocol[T_co]):
-  def __init__(self, _: T) -> None: ...
+
+  def __init__(self, _: T) -> None:
+    ...
 
 
 class Extension(t.Generic[T], Configurable):
@@ -66,17 +66,21 @@ class ExtensionRegistry(t.Generic[T]):
     return f'{type(self).__name__}(name={self._name!r})'
 
   @t.overload
-  def register(self, name: str) -> t.Callable[[_T_Factory], _T_Factory]: ...
+  def register(self, name: str) -> t.Callable[[_T_Factory], _T_Factory]:
+    ...
 
   @t.overload
-  def register(self, name: str, factory: t.Union[t.Callable[[T], t.Any], t.Type[_FactoryConstructor]]) -> None: ...
+  def register(self, name: str, factory: t.Union[t.Callable[[T], t.Any], t.Type[_FactoryConstructor]]) -> None:
+    ...
 
   def register(self, name, factory=None):
     if factory is None:
+
       def _decorator(factory):
         assert factory is not None
         self.register(name, factory)
         return factory
+
       return _decorator
     else:
       if name in self._factories:

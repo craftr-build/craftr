@@ -1,5 +1,3 @@
-
-
 import abc
 import copy
 import typing as t
@@ -51,7 +49,8 @@ class HasProperties(abc.ABC):
         cls.__properties__[key] = value
 
     # Ensure all properties have names.
-    for k, v in cls.__properties__.items(): assert v._name, f'{cls.__name__}.{k}'
+    for k, v in cls.__properties__.items():
+      assert v._name, f'{cls.__name__}.{k}'
 
   def __init__(self) -> None:
     super().__init__()
@@ -76,7 +75,8 @@ class BaseProperty(t.Generic[T, A]):
   """
 
   def __init__(
-    self, *,
+    self,
+    *,
     default: t.Union[T, A, t.Callable[[], t.Union[T, A]], NotSet] = NotSet.Value,
     base_type: t.Union[TypeHint, None] = None,
     **kwargs,
@@ -141,10 +141,12 @@ class BaseProperty(t.Generic[T, A]):
     return self._value is not NotSet.Value
 
   @t.overload
-  def get(self) -> T: ...
+  def get(self) -> T:
+    ...
 
   @t.overload
-  def get(self, default: R) -> t.Union[T, R]: ...
+  def get(self, default: R) -> t.Union[T, R]:
+    ...
 
   def get(self, default=NotSet.Value):
     if self._value is NotSet.Value:
@@ -220,7 +222,7 @@ class _BasePropertyGenericAlias(_GenericAlias, _root=True):  # type: ignore
 class Property(BaseProperty[T, T]):
 
   def __class_getitem__(cls, type_hint: type[T]) -> type['BaseProperty[T, T]']:  # type: ignore
-    return _BasePropertyGenericAlias(cls, (type_hint,))
+    return _BasePropertyGenericAlias(cls, (type_hint, ))
 
 
 class BoolProperty(BaseProperty[bool, bool]):

@@ -1,5 +1,3 @@
-
-
 import abc
 import dataclasses
 import typing as t
@@ -253,13 +251,15 @@ class TaskHashCalculator(abc.ABC):
 class TaskSelector(abc.ABC):
 
   @abc.abstractmethod
-  def select_tasks(self, selection: str, project: 'Project') -> Collection[Task]: ...
+  def select_tasks(self, selection: str, project: 'Project') -> Collection[Task]:
+    ...
 
   @abc.abstractmethod
-  def select_default(self, project: 'Project') -> Collection[Task]: ...
+  def select_default(self, project: 'Project') -> Collection[Task]:
+    ...
 
 
-TaskSelection =  t.Union[None, str, Task, list[t.Union[str, Task]]]
+TaskSelection = t.Union[None, str, Task, list[t.Union[str, Task]]]
 
 
 @beartype

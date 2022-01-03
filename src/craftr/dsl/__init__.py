@@ -1,4 +1,3 @@
-
 from ._execute import execute
 from ._rewriter import Grammar, SyntaxError
 from ._runtime import ChainContext, Closure, Context, MapContext, ObjectContext
