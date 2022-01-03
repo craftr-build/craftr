@@ -1,0 +1,52 @@
+# type: ignore
+
+buildscript {
+  requires 'flit', 'isort', 'yapf'
+}
+
+apply 'python'
+apply 'license'
+
+tasks.license 'MIT'
+
+python {
+  name 'craftr-build'
+  module_name 'craftr'
+  author 'Niklas Rosenstein', email: 'rosensteinniklas@gmail.com'
+  url 'https://github.com/craftr-build/craftr'
+  typed
+
+  requirements {
+    run 'python ^3.9'
+    run 'astor ^0.8.1'
+    run 'dataclasses ^0.6'
+    run 'nr.caching ^0.4.0'
+    run 'nr.functional ^0.1.0'
+    run 'nr.parsing.core ^2.0.2'
+    run 'nr.preconditions ^0.0.4'
+    run 'nr.pylang.ast ~0.0.5'
+    run 'termcolor ^1.1.0'
+    run 'typing-extensions ^3.10.0.0'
+    run 'nr.pylang.utils ^0.1.3'
+    run 'beartype ^0.9.1'
+    run 'loguru ^0.5.3'
+    run 'localimport ^1.7.3'
+    test 'mypy'
+    test 'pytest'
+    test 'types-termcolor'
+    test 'types-toml'
+  }
+
+  script 'craftr = craftr.__main__:main'
+
+  style {
+    indent '  '
+    line_length 120
+  }
+
+  flit { test_repository 'testpypi' }
+  mypy
+  pytest
+  isort
+  yapf
+}
