@@ -206,7 +206,8 @@ class Configurable(HasProperties):
 
   enabled = BoolProperty(default=False)
 
-  def __call__(self: T, closure: t.Callable[[T], t.Any]) -> None:
+  def __call__(self: T, closure: t.Optional[t.Callable[[T], t.Any]] = None) -> None:
     if 'enabled' in self.__properties__:
       self.enabled.set(True)
-    closure(self)
+    if closure is not None:
+      closure(self)
