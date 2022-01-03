@@ -17,6 +17,12 @@ def diamond_graph() -> DiGraph[str, None, None]:
   return g
 
 
+@pytest.fixture
+def diamond_cross_graph(diamond_graph: DiGraph[str, None, None]) -> DiGraph[str, None, None]:
+  diamond_graph.edge('a', 'd', None)
+  return diamond_graph
+
+
 def test_diamond_graph(diamond_graph: DiGraph):
   g = diamond_graph
   assert 'a' in g.nodes
