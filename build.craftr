@@ -38,11 +38,10 @@ python {
   }
 
   script 'craftr = craftr.__main__:main'
-
-  entry_points.get()['craftr_plugins'] = [
-    'python = craftr_python:registry',
-    'license = craftr_license:registry',
-  ]
+  entry_points.get()['craftr_plugins'] = {
+    'python': 'craftr_python:registry',
+    'license': 'craftr_license:registry',
+  }
 
   style {
     indent '  '

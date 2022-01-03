@@ -21,9 +21,6 @@ Source = "https://github.com/craftr-build/craftr"
 [project.scripts]
 craftr = "craftr.__main__:main"
 
-[project.entry-points]
-craftr_plugins = [ "python = craftr_python:registry", "license = craftr_license:registry",]
-
 [project.optional-dependencies]
 test = [ "mypy", "pytest", "types-termcolor", "types-toml",]
 
@@ -56,3 +53,7 @@ DEDENT_CLOSING_BRACKETS = true
 INDENT_CLOSING_BRACKETS = false
 INDENT_WIDTH = 2
 COLUMN_LIMIT = 120
+
+[project.entry-points.craftr_plugins]
+python = "craftr_python:registry"
+license = "craftr_license:registry"
