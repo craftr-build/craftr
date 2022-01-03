@@ -69,7 +69,7 @@ class BaseProperty(t.Generic[T, A]):
 
   def __init__(
     self, *,
-    default: t.Union[T, A, NotSet] = NotSet.Value,
+    default: t.Union[T, A, t.Callable[[], t.Union[T, A]], NotSet] = NotSet.Value,
     base_type: t.Union[TypeHint, None] = None,
     **kwargs,
   ) -> None:
@@ -92,7 +92,7 @@ class BaseProperty(t.Generic[T, A]):
     self._value_adapters: list[t.Callable[[t.Any, list[BaseProperty]], t.Any]] = []
     self.__post_init__()
     if default is not NotSet.Value:
-      self.set(default)
+      self.set(self._get_default())
 
   def __post_init__(self) -> None:
     pass
@@ -107,11 +107,19 @@ class BaseProperty(t.Generic[T, A]):
   def __call__(self, value: t.Union[T, A]) -> None:
     self.set(value)
 
+  def _get_default(self) -> t.Union[T, A, NotSet]:
+    if self._default is NotSet.Value:
+      return NotSet.Value
+    if callable(self._default):
+      return self._default()
+    else:
+      return self._default
+
   def _bound_copy(self: T_BaseProperty, owner: t.Any) -> T_BaseProperty:
     new_self = copy.copy(self)
     new_self._owner = weakref.ref(owner)
     if self._default is not NotSet.Value:
-      new_self._value = copy.deepcopy(self._default)
+      new_self._value = copy.deepcopy(self._get_default())
     return new_self
 
   def is_set(self) -> bool:

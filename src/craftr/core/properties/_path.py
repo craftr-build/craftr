@@ -5,6 +5,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from craftr.utils.typechecking import get_type_checker
+from nr.pylang.utils.singletons import NotSet
 from ._base import BaseProperty
 
 PathLike = t.Union[str, Path]
@@ -31,6 +32,10 @@ class PathProperty(_PathPropertyBase, _HasOutputAttribute):
   A special property type for paths.
   """
 
+  @classmethod
+  def output(cls, default: t.Union[PathLike, NotSet] = NotSet.Value) -> 'PathProperty':
+    return cls(default=default, is_output=True)
+
   def __post_init__(self) -> None:
     assert self._base_type is None
     self._base_type = Path
@@ -45,6 +50,10 @@ class PathListProperty(_PathListPropertyBase, _HasOutputAttribute):
   """
   A special property type for a list of paths.
   """
+
+  @classmethod
+  def output(cls, default: t.Union[PathLike, Sequence[PathLike], NotSet] = NotSet.Value) -> 'PathListProperty':
+    return cls(default=default, is_output=True)
 
   def __post_init__(self) -> None:
     assert self._base_type is None

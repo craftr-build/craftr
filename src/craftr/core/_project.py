@@ -44,8 +44,9 @@ class Project:
     self._tasks: t.Dict[str, 'Task'] = {}
     self._subprojects: t.Dict[Path, 'Project'] = {}
     self.buildscript = BuildScriptConfig(weakref.ref(self))
-    # self._on_apply: t.Optional[ProjectOnApplyCallback] = None
     self.extensions = types.SimpleNamespace()
+    self._on_finalize: t.List[t.Callable[[], t.Any]] = []
+    # self._on_apply: t.Optional[ProjectOnApplyCallback] = None
     # self.exports = Namespace(self, 'exports')
 
     context.init_project(self)
@@ -187,6 +188,9 @@ class Project:
       for subproject in self._subprojects.values():
         closure(subproject)
 
+  def on_finalize(self, callback: t.Callable[[], t.Any]) -> None:
+    self._on_finalize.append(callback)
+
   # def on_apply(self, func: ProjectOnApplyCallback) -> None:
   #   """
   #   Register a function to call when the project is applied using `apply from_project: <project>`.
@@ -218,6 +222,8 @@ class Project:
   #   return [Path(f) for f in glob.glob(str(self.directory / pattern))]
 
   def finalize(self) -> None:
+    for callback in self._on_finalize:
+      callback()
     for task in self.tasks:
       if not task.finalized:
         task.finalize()
