@@ -91,13 +91,19 @@ class Context:
     self.buildscript_config_applier.apply(buildscript, self.packages_root, state, persist)
     persist()
 
-  def execute(self, selection: TaskSelection = None) -> None:
+  def execute(self, selection: TaskSelection = None, exclude: TaskSelection = None) -> None:
     """
     Execute the tasks registered by the projects in this context.
     """
 
     self.root_project.finalize()
+
     tasks = select_tasks(self.task_selector, self.root_project, selection)
     assert all(t.finalized for t in tasks), 'some tasks not finalized?'
     self.graph.add_tasks(tasks)
+
+    if exclude:
+      excluded_tasks = select_tasks(self.task_selector, self.root_project, exclude)
+      self.graph.exclude_tasks(excluded_tasks)
+
     self.executor.execute(self, self.graph)
