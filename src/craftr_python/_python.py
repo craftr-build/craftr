@@ -119,14 +119,15 @@ class UpdatePyprojectTask(FileRenderer):
 
   updater: Optional[Callable[[dict[str, Any]], None]] = None
 
-  def _load_pyproject(self) -> None:
+  def _load_pyproject(self) -> dict[str, Any]:
     path = self.output_file.get()
     if path.exists():
-      return toml.loads(path.read_text())
+      return dict(toml.loads(path.read_text()))
     else:
       return {}
 
-  def get_file_contents(self) -> None:
-    config = {}
+  def get_file_contents(self) -> str:
+    config: dict[str, Any] = {}
+    assert self.updater is not None
     self.updater(config)
     return toml.dumps(config)

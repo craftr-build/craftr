@@ -3,7 +3,6 @@ import typing as t
 import weakref
 
 T = t.TypeVar('T')
-R = t.TypeVar('R', bound='WeakProperty')
 
 
 class WeakProperty(t.Generic[T]):
@@ -31,13 +30,13 @@ class WeakProperty(t.Generic[T]):
     return value
 
   @classmethod
-  def at(cls: R, name: str, once: bool = False) -> T:
-    return cls(name, once)
+  def at(cls, name: str, once: bool = False) -> T:
+    return t.cast(T, cls(name, once))
 
 
 class OptionalWeakProperty(WeakProperty[t.Optional[T]]):
 
-  def __set__(self, instance: t.Any, value: T) -> None:
+  def __set__(self, instance: t.Any, value: t.Optional[T]) -> None:
     has_value: t.Optional[weakref.ReferenceType[T]] = getattr(instance, self._name, None)
     if self._once and has_value is not None:
       raise RuntimeError('property can not be set more than once')

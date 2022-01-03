@@ -37,10 +37,10 @@ def get_type_checker(type_hint):
 
   if validator is None:
     @beartype.beartype
-    def _validator(value: type_hint): pass  # type: ignore
+    def _validator(value: type_hint): pass
     def _wrapper(value: TypeHint) -> te.TypeGuard[T]:
       _validator(value)
       return True
     _registry[type_hint] = validator = _wrapper
 
-  return validator  # type: ignore
+  return validator

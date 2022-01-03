@@ -1,9 +1,10 @@
 
 import argparse
 import pdb
+import sys
 from pathlib import Path
 
-from .core import Context, Settings
+from .core import BuildError, Context, Settings
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-O', '--option', default=[], action='append',
@@ -44,7 +45,10 @@ def _main(args):
         print(task.path)
       return
 
-    ctx.execute(args.tasks or None, args.exclude)
+    try:
+      ctx.execute(args.tasks or None, args.exclude)
+    except BuildError:
+      sys.exit(1)
 
 
 if __name__ == '__main__':

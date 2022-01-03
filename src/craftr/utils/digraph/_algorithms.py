@@ -1,5 +1,4 @@
 
-import copy
 import typing as t
 from ._digraph import DiGraph, K, N, E
 
@@ -21,7 +20,7 @@ def topological_sort(graph: DiGraph[K, N, E]) -> t.Iterator[K]:
     yield from roots
     roots = {
       k: None
-      for n in roots for k in sorted(graph.successors(n))
+      for n in roots for k in sorted(graph.successors(n))   # type: ignore[type-var]
       if not graph.predecessors(k) - seen
     }.keys()
 
@@ -35,14 +34,14 @@ def remove_with_predecessors(graph: DiGraph[K, N, E], nodes: t.Iterable[K]) -> N
   are kept on the graph.
   """
 
-  untangle: set[str] = set()
+  untangle: set[K] = set()
 
   for node_id in nodes:
     untangle.update(graph.predecessors(node_id))
     del graph.nodes[node_id]
 
   while untangle:
-    next_stage: set[str] = set()
+    next_stage: set[K] = set()
     for node_id in untangle:
       if node_id not in graph.nodes: continue
       if not graph.successors(node_id):

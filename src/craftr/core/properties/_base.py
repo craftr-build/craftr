@@ -11,6 +11,7 @@ A = t.TypeVar('A', covariant=True)
 T = t.TypeVar('T')
 R = t.TypeVar('R')
 T_BaseProperty = t.TypeVar('T_BaseProperty', bound='BaseProperty')
+T_Configuable = t.TypeVar('T_Configuable', bound='Configurable')
 _GenericAlias = t._GenericAlias  # type: ignore
 
 
@@ -106,7 +107,7 @@ class BaseProperty(t.Generic[T, A]):
 
   def __class_getitem__(cls, type_hint: tuple[type[T], type[A]]) -> type['BaseProperty[T, A]']:
     assert isinstance(type_hint, tuple) and len(type_hint) == 2, repr(type_hint)
-    return _BasePropertyGenericAlias(cls, type_hint)  # type: ignore
+    return _BasePropertyGenericAlias(cls, type_hint)
 
   def __repr__(self) -> str:
     if self._is_static:
@@ -119,9 +120,8 @@ class BaseProperty(t.Generic[T, A]):
   def __call__(self, value: t.Union[T, A]) -> None:
     self.set(value)
 
-  def _get_default(self) -> t.Union[T, A, NotSet]:
-    if self._default is NotSet.Value:
-      return NotSet.Value
+  def _get_default(self) -> t.Union[T, A]:
+    assert self._default is not NotSet.Value
     if callable(self._default):
       return self._default()
     else:
@@ -160,7 +160,7 @@ class BaseProperty(t.Generic[T, A]):
     else:
       references = []
     for adapter in self._value_adapters:
-      value = adapter(value, references)  # type: ignore
+      value = adapter(value, references)
     if self._base_type is not None:
       check_type(self._base_type, value)
     self._value = t.cast(T, value)
@@ -218,7 +218,7 @@ class _BasePropertyGenericAlias(_GenericAlias, _root=True):  # type: ignore
 class Property(BaseProperty[T, T]):
 
   def __class_getitem__(cls, type_hint: type[T]) -> type['BaseProperty[T, T]']:  # type: ignore
-    return _BasePropertyGenericAlias(cls, (type_hint,))  # type: ignore
+    return _BasePropertyGenericAlias(cls, (type_hint,))
 
 
 class BoolProperty(BaseProperty[bool, bool]):
@@ -235,7 +235,7 @@ class Configurable(HasProperties):
 
   enabled = BoolProperty(default=False)
 
-  def __call__(self: T, closure: t.Optional[t.Callable[[T], t.Any]] = None) -> None:
+  def __call__(self: T_Configuable, closure: t.Optional[t.Callable[[T_Configuable], t.Any]] = None) -> None:
     if 'enabled' in self.__properties__:
       # NOTE (@nrosenstein): This is a convenience if the Configurable parent constructor was not called
       #   in the subclass constructor. We need to make sure each instance of the class has their own set

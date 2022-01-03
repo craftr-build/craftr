@@ -6,10 +6,11 @@ from .properties import Configurable
 from craftr.utils.weakproperty import WeakProperty
 
 T = t.TypeVar('T')
+T_co = t.TypeVar('T_co', covariant=True)
 _T_Factory = t.TypeVar('_T_Factory', bound=t.Union[t.Callable[[t.Any], t.Any], t.Type['_FactoryConstructor']])
 
 
-class _FactoryConstructor(t.Protocol[T]):
+class _FactoryConstructor(t.Protocol[T_co]):
   def __init__(self, _: T) -> None: ...
 
 

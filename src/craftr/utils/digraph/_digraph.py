@@ -151,10 +151,13 @@ class NodesView(Mapping[K, N]):
       raise UnknownNodeError(key)
 
   def __setitem__(self, key: K, value: N) -> None:
-    self._g().add_node(key, value)
+    g = self._g()
+    assert g is not None
+    g.add_node(key, value)
 
   def __delitem__(self, key: K) -> None:
     g = self._g()
+    assert g is not None
     node = g._nodes.pop(key)
     for pred in node.predecessors:
       g._nodes[pred].successors.pop(key)
@@ -190,8 +193,10 @@ class EdgesView(Mapping[tuple[K, K], E]):
     except KeyError:
       raise UnknownEdgeError(key)
 
-  def __setitem__(self, key: tuple[K, K], value: N) -> None:
-    self._g().add_edge(key[0], key[1], value)
+  def __setitem__(self, key: tuple[K, K], value: E) -> None:
+    g = self._g()
+    assert g is not None
+    g.add_edge(key[0], key[1], value)
 
   def __delitem__(self, key: tuple[K, K]) -> None:
     del self._edges[key]

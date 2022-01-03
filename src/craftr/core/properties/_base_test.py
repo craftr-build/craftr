@@ -25,11 +25,11 @@ def test_property_get_set():
 def test_property_beartype_check():
   p1 = Property[int]()
   with pytest.raises(BeartypeCallHintPepParamException):
-    p1.set('foobar')  # type: ignore
+    p1.set('foobar')
 
   p2 = Property[Path]()
   with pytest.raises(BeartypeCallHintPepParamException):
-    p2.set('foo/bar')  # type: ignore
+    p2.set('foo/bar')
 
 
 def test_has_properties():

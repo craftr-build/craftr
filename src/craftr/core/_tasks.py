@@ -9,9 +9,12 @@ from beartype import beartype
 from nr.preconditions import check_not_none
 from .properties import HasProperties, is_path_property, get_path_property_paths
 
-_HASHES_KEY = 'tasks.hashes'
 _ActionCallable = Callable[['Task', 'ActionContext'], t.Any]
 _TaskConfigurator = Callable[['Task'], t.Any]
+
+
+class BuildError(Exception):
+  pass
 
 
 @dataclasses.dataclass
@@ -23,7 +26,7 @@ class Action(abc.ABC):
 
   @abc.abstractmethod
   def execute(self, ctx: ActionContext) -> None:
-    pass
+    """ Execute the action. Should raise {@link BuildError} for a graceful failure signal. """
 
 
 class LambdaAction(Action):
