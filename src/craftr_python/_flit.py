@@ -64,4 +64,4 @@ class FlitBuilder(Extension[PythonProject]):
       test_publish_task.default = False
       test_publish_task.depends_on(build_task)
       test_publish_task.do_last(SystemAction(['flit', 'publish'] + test_publish_args))
-      publish_task.depends_on(test_publish_args)
+      publish_task.depends_on(test_publish_task)
