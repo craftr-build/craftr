@@ -32,6 +32,7 @@ requirements = [
 ]
 test_requirements = [
   'types-termcolor',
+  'types-toml >=0.10.1,<1.0.0',
 ]
 extras_require = {}
 extras_require['test'] = test_requirements

@@ -23,6 +23,7 @@ requirements:
 - localimport ^1.7.3
 test-requirements:
 - types-termcolor
+- types-toml ^0.10.1
 entrypoints:
   console_scripts:
   - craftr = craftr.__main__:main
