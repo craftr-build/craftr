@@ -47,9 +47,6 @@ class HasProperties(abc.ABC):
     for key, value in self.__properties__.items():
       setattr(self, key, value._bound_copy(self))
 
-  def __call__(self: T, closure: t.Callable[[T], t.Any]) -> None:
-    closure(self)
-
   def get_properties(self) -> t.Dict[str, 'BaseProperty']:
     return {k: getattr(self, k) for k in self.__properties__}
 
@@ -197,3 +194,17 @@ class BoolProperty(BaseProperty[bool, bool]):
 
   def __call__(self, value: bool = True) -> None:
     self.set(value)
+
+
+class Configurable(HasProperties):
+  """
+  A base class for objects that are configurable with closures. Every configurable has an "enabled" property
+  that will be set to {@code True} the moment that the object is configured with a closure.
+  """
+
+  enabled = BoolProperty(default=False)
+
+  def __call__(self: T, closure: t.Callable[[T], t.Any]) -> None:
+    if 'enabled' in self.__properties__:
+      self.enabled.set(True)
+    closure(self)

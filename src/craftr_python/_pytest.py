@@ -1,12 +1,14 @@
 
 from typing import Any
-from craftr.core.properties import HasProperties, Property
+from craftr.core.properties import Configurable, Property
 from ._python import python_project_extension, PythonProject
 
 
-class PytestBuilder(HasProperties):
+class PytestBuilder(Configurable):
 
   def _update_pyproject(self, config: dict[str, Any]) -> None:
+    if not self.enabled.get():
+      return
     pass
 
 

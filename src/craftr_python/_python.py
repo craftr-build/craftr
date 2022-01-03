@@ -8,7 +8,7 @@ from typing import Any, Optional
 import toml
 from pkg_resources import iter_entry_points
 from craftr.core import Action, Project, Task
-from craftr.core.properties import BoolProperty, Property, HasProperties, PathProperty
+from craftr.core.properties import BoolProperty, Property, Configurable, PathProperty
 from craftr.utils.weakproperty import WeakProperty
 
 from ._model import Author
@@ -27,7 +27,7 @@ def python_project_extension(name: str) -> Callable[[PythonProjectExtension], Py
   return _decorator
 
 
-class PythonProject(HasProperties):
+class PythonProject(Configurable):
 
   name: Property[str]
   version: Property[str]
@@ -81,10 +81,13 @@ class PythonProject(HasProperties):
         project.setdefault('entry-points', {})[group] = entry_points
 
     # TODO (@nrosenstein): Translate to compatible dependency strings
+    # TODO (@nrosenstein): Catch the "python" dependency to register separately in the pyproject config
     project['dependencies'] = self.requirements._run
     project.setdefault('optional-dependencies', {})['test'] = self.requirements._test
 
   def _finalize(self) -> None:
+    if not self.enabled.get():
+      return
     update_pyproject_task = self.project.task('updatePyproject', UpdatePyprojectTask)
     update_pyproject_task.pyproject_file.set(self.project.directory / 'pyproject.toml')
     update_pyproject_task.pyproject_updaters.set(self._pyproject_updaters)
