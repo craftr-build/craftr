@@ -1,7 +1,7 @@
 
 import dataclasses
-import types
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any, List, Optional, Protocol, Union, runtime_checkable
 
 import toml
@@ -9,6 +9,7 @@ from craftr.core import Action, Extension, Project, Task, BoolProperty, Property
 from craftr.utils.weakproperty import WeakProperty
 
 from ._model import Author, Requirement
+from ._utils import get_readme_file
 
 python_project_extensions = ExtensionRegistry['PythonProject']()
 
@@ -26,6 +27,7 @@ class PythonProject(Configurable, Extension):
   authors: Property[list[Author]] = Property(default=[])
   description: Property[str]
   module_name: Property[str]
+  readme: PathProperty
   urls: Property[dict[str, str]] = Property(default={})
   typed: BoolProperty
   entry_points: Property[dict[str, dict[str, str]]] = Property(default={})
@@ -64,6 +66,10 @@ class PythonProject(Configurable, Extension):
       project['description'] = desc
     if project['name'] != self.name.get():
       config.setdefault('metadata', {})['dist-name'] = self.name.get()
+
+    readme = self.readme.get(get_readme_file(str(self.project.directory)))
+    if readme:
+      project['readme'] = str(Path(readme).relative_to(self.project.directory))
 
     project['scripts'] = self.entry_points.get().get('console_scripts', {})
     for group, entry_points in self.entry_points.get().items():
