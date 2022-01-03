@@ -15,5 +15,6 @@ class PytestBuilder(Extension[PythonProject]):
     if not self.enabled.get():
       return
     task = self.ext_parent.project.task('pytest')
+    task.group = 'check'
     task.do_last(SystemAction(['pytest', self.ext_parent.source.get()], cwd=self.ext_parent.project.directory))
     task.depends_on('updatePyproject')

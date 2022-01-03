@@ -52,6 +52,7 @@ class FlitBuilder(Extension[PythonProject]):
     build_task = self.ext_parent.project.task('build')
     build_task.do(SystemAction(['flit', 'build'] + build_args))
     build_task.depends_on('updatePyproject')
+    build_task.depends_on('check', lazy=True)
 
     publish_task = self.ext_parent.project.task('publish')
     publish_task.default = False

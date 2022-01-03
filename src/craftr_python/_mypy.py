@@ -6,12 +6,11 @@ from pkg_resources import resource_string
 from craftr.bld.system import SystemAction
 from craftr.core import Extension
 from craftr.core.properties import Property
-from craftr.utils.weakproperty import WeakProperty
 from ._python import python_project_extensions, PythonProject
 
 
 @python_project_extensions.register('mypy')
-class MypyBuilder(Extension):
+class MypyBuilder(Extension[PythonProject]):
 
   config = Property[dict[str, Any]](default=dict)
   _load_default_profile = True
@@ -59,5 +58,6 @@ class MypyBuilder(Extension):
     if self._load_default_profile and self.config.get() == {}:
       self.profile('default')
     task = self.ext_parent.project.task('mypy')
+    task.group = 'check'
     task.do_last(SystemAction(command=['mypy', self.ext_parent.source.get()], cwd=self.ext_parent.project.directory))
     task.depends_on('updatePyproject')
