@@ -7,7 +7,7 @@ from ._python import python_project_extensions, PythonProject
 
 
 @python_project_extensions.register('flit')
-class FlitBuilder(Extension[PythonProject]):
+class Flit(Extension[PythonProject]):
   """
   Injects Flit configuration values into the pyproject file.
   """

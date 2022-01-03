@@ -1,0 +1,5 @@
+[tool.isort]
+indent="  "
+lines_before_imports=1
+order_by_type=true
+line_length=120
