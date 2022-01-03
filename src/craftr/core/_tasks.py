@@ -82,6 +82,7 @@ class Task(HasProperties):
     self._finalized = False
     self.dependencies = []
     self.actions = Actions()
+    self._lazy_dependencies: t.List[str] = []
     self.init()
 
   def __repr__(self) -> str:
@@ -136,6 +137,12 @@ class Task(HasProperties):
         if isinstance(ref.owner, Task):
           self.dependencies.append(ref.owner)
 
+    for selector in self._lazy_dependencies:
+      try:
+        self.dependencies += self.project.tasks.resolve(selector)
+      except ValueError:
+        pass
+
     try:
       self.dependencies.remove(self)
     except ValueError:
@@ -185,14 +192,19 @@ class Task(HasProperties):
       ctx.task_hash_store[self.path] = hash_value
 
   @beartype
-  def depends_on(self, *tasks: t.Union[str, 'Task']) -> None:
+  def depends_on(self, *tasks: t.Union[str, 'Task'], lazy: bool = False) -> None:
     """
     Specify that the task dependends on the specified other tasks. Strings are resolved from the tasks own project.
+    If the dependency is marked as lazy, it will be evaluated when the task is being finalized. In the case of lazy
+    evaluation, it is also acceptable if the selector does not resolve to any tasks (no error will be raised).
     """
 
     for item in tasks:
       if isinstance(item, str):
-        self.dependencies += self.project.tasks.resolve(item)
+        if lazy:
+          self._lazy_dependencies.append(item)
+        else:
+          self.dependencies += self.project.tasks.resolve(item)
       elif isinstance(item, Task):
         self.dependencies.append(item)
 
