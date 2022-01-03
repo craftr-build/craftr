@@ -62,7 +62,7 @@ class PythonProject(Extension[Project]):
 
     if version := self.version.get(None):
       project['version'] = version
-    project['name'] = self.module_name.get(self.name.get())
+    project['name'] = self.module_name.get()
     project['authors'] = [x.to_json() for x in self.authors.get()]
     project['urls'] = self.urls.get()
 
@@ -93,6 +93,9 @@ class PythonProject(Extension[Project]):
     if not self.enabled.get():
       return
 
+    self.source.set(self.project.directory / self.source.get())
+    self.module_name.set(self.module_name.get(self.name.get()))
+
     # Propagate author details to the license task if they are missing there.
     if 'license' in self.project.tasks:
       license_task = cast(RenderLicenseTask, self.project.tasks.license)
@@ -102,6 +105,12 @@ class PythonProject(Extension[Project]):
     update_pyproject_task = self.project.task('updatePyproject', UpdatePyprojectTask)
     update_pyproject_task.output_file.set(self.project.directory / 'pyproject.toml')
     update_pyproject_task.updater = self._update_pyproject
+
+    if self.typed.is_set():
+      typed_renderer_task = self.project.task('ensurePyTyped', FileRendererTask)
+      typed_renderer_task.output_file.set(self.source.get() / self.module_name.get().replace('.', '/') / 'py.typed')
+      typed_renderer_task.contents.set('')
+
     super().finalize()
 
 

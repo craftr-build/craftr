@@ -1,11 +1,14 @@
-from craftr.core import Action, ActionContext, PathProperty, Task
+from craftr.core import Action, ActionContext, PathProperty, Property, Task
 
 
 class FileRendererTask(Action, Task):
 
   output_file = PathProperty.output()
+  contents: Property[str]
 
   def get_file_contents(self) -> str:
+    if self.contents.is_set():
+      return self.contents.get()
     raise NotImplementedError
 
   def is_outdated(self) -> bool:

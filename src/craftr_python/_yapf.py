@@ -34,9 +34,12 @@ class Yapf(DefaultPythonExtension):
     if 'COLUMN_LIMIT' not in config:
       config['COLUMN_LIMIT'] = style.line_length.get()
 
+    pyproject = self.ext_parent
+    project = pyproject.project
+
     task = self.ext_parent.project.task('yapf')
     task.do_last(
-      SystemAction(command=['yapf', '-i', '-r', self.ext_parent.source.get()], cwd=self.ext_parent.project.directory)
+      SystemAction(command=['yapf', '-i', '-r', pyproject.source.get()], cwd=self.ext_parent.project.directory)
     )
     task.depends_on('updatePyproject')
 
