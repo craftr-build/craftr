@@ -1,19 +1,15 @@
 
 from typing import Any
-from craftr.core.properties import Configurable, Property
-from ._python import python_project_extension, PythonProject
+from craftr.core.properties import Configurable
+from ._python import python_project_extensions, _PyprojectUpdater
 
 
-class PytestBuilder(Configurable):
+class PytestBuilder(_PyprojectUpdater, Configurable):
 
-  def _update_pyproject(self, config: dict[str, Any]) -> None:
+  def update_pyproject_config(self, config: dict[str, Any]) -> None:
     if not self.enabled.get():
       return
     pass
 
 
-@python_project_extension('pytest')
-def _pytest_plugin(project: PythonProject) -> PytestBuilder:
-  builder = PytestBuilder()
-  project.update_pyproject(builder._update_pyproject)
-  return builder
+python_project_extensions.register('pytest', lambda _: PytestBuilder())

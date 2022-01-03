@@ -4,13 +4,13 @@ import dataclasses
 import hashlib
 import json
 import string
-import types
 import typing as t
 import weakref
 from collections.abc import Callable
 from pathlib import Path
 
 from nr.preconditions import check_not_none
+from ._extension import Extension
 
 if t.TYPE_CHECKING:
   from ._context import Context
@@ -19,7 +19,7 @@ if t.TYPE_CHECKING:
 T_Task = t.TypeVar('T_Task', bound='Task')
 
 
-class Project:
+class Project(Extension):
   """
   A project is a collection of tasks, usually populated through a build script, tied to a directory. Projects
   can have sub projects and there is exactly one root project.
@@ -36,6 +36,7 @@ class Project:
     will be promoted to the root project.
     """
 
+    super().__init__()
     self._context = weakref.ref(context)
     self._parent = weakref.ref(parent) if parent is not None else parent
     self.directory = Path(directory)
@@ -44,11 +45,7 @@ class Project:
     self._tasks: t.Dict[str, 'Task'] = {}
     self._subprojects: t.Dict[Path, 'Project'] = {}
     self.buildscript = BuildScriptConfig(weakref.ref(self))
-    self.extensions = types.SimpleNamespace()
     self._on_finalize: t.List[t.Callable[[], t.Any]] = []
-    # self._on_apply: t.Optional[ProjectOnApplyCallback] = None
-    # self.exports = Namespace(self, 'exports')
-
     context.init_project(self)
 
   def __repr__(self) -> str:
@@ -191,15 +188,6 @@ class Project:
   def on_finalize(self, callback: t.Callable[[], t.Any]) -> None:
     self._on_finalize.append(callback)
 
-  # def on_apply(self, func: ProjectOnApplyCallback) -> None:
-  #   """
-  #   Register a function to call when the project is applied using `apply from_project: <project>`.
-  #   """
-
-  #   if self._on_apply is not None:
-  #     raise RuntimeError(f'{self}.on_apply() already set')
-  #   self._on_apply = func
-
   def apply(self, plugin_name: str) -> None:
     """
     Loads a plugin and applies it to the project. Plugins are loaded via {@link Context#plugin_loader} and applied to the
@@ -210,18 +198,8 @@ class Project:
     plugin = self.context.plugin_loader.load_plugin(plugin_name)
     plugin.apply(self)
 
-  # def file(self, sub_path: str) -> Path:
-  #   return self.directory / sub_path
-
-  # def glob(self, pattern: str) -> list[Path]:
-  #   """
-  #   Apply the specified glob pattern relative to the project directory and return a list of the
-  #   matched files.
-  #   """
-
-  #   return [Path(f) for f in glob.glob(str(self.directory / pattern))]
-
   def finalize(self) -> None:
+    super().__init__()
     for callback in self._on_finalize:
       callback()
     for task in self.tasks:
@@ -229,13 +207,6 @@ class Project:
         task.finalize()
     for project in self.subprojects():
       project.finalize()
-
-  def _buildscript_done(self) -> None:
-    """
-    Internal. Called after the buildscript was configured.
-    """
-
-    self.context.buildscript_config_apply(self.buildscript)
 
 
 class ProjectLoader(abc.ABC):
@@ -338,7 +309,7 @@ class BuildScriptConfig:
     the configuration is done.
     """
 
-    self.project._buildscript_done()
+    self.project.context.buildscript_config_apply(self)
 
   def __call__(self, configurator: Callable[['BuildScriptConfig'], t.Any]) -> None:
     configurator(self)

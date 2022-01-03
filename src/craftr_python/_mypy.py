@@ -3,10 +3,10 @@ from typing import Any
 import toml
 import requests
 from craftr.core.properties import Configurable, Property
-from ._python import python_project_extension, PythonProject
+from ._python import python_project_extensions, _PyprojectUpdater
 
 
-class MypyBuilder(Configurable):
+class MypyBuilder(_PyprojectUpdater, Configurable):
 
   config = Property[dict[str, Any]](default=dict)
 
@@ -34,8 +34,4 @@ class MypyBuilder(Configurable):
     self.config.get().update(toml.loads(response.text)['mypy'])
 
 
-@python_project_extension('mypy')
-def _mypy_plugin(project: PythonProject) -> MypyBuilder:
-  builder = MypyBuilder()
-  project.update_pyproject(builder._update_pyproject)
-  return builder
+python_project_extensions.register('mypy', lambda _: MypyBuilder())

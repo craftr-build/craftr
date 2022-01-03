@@ -4,6 +4,7 @@ import pkg_resources
 import typing as t
 from beartype import beartype
 from loguru import logger
+from .._extension import ExtensionRegistry
 from .._plugins import PluginLoader, PluginNotFoundError, Plugin
 from .._project import Project
 
@@ -28,6 +29,8 @@ class EntrypointPluginLoader(PluginLoader):
       return cls
     elif callable(cls):
       return _FunctionPlugin(cls)
+    elif isinstance(cls, ExtensionRegistry):
+      return _FunctionPlugin(lambda p: cls.apply(p, p))
     return cls
 
 

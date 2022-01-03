@@ -1,33 +1,26 @@
 
 import dataclasses
 import types
-import weakref
 from collections.abc import Callable
-from typing import Any, Optional
+from typing import Any, Optional, Protocol, runtime_checkable
 
 import toml
 from pkg_resources import iter_entry_points
-from craftr.core import Action, Project, Task
-from craftr.core.properties import BoolProperty, Property, Configurable, PathProperty
+from craftr.core import Action, Extension, Project, Task, BoolProperty, Property, Configurable, PathProperty, ExtensionRegistry
 from craftr.utils.weakproperty import WeakProperty
 
 from ._model import Author
 
-PyprojectUpdater = Callable[[dict[str, Any]], Any]
-PythonProjectExtension = Callable[['PythonProject'], Any]
-_python_project_extensions: dict[str, PythonProjectExtension] = {}
+python_project_extensions = ExtensionRegistry['PythonProject']()
 
 
-def python_project_extension(name: str) -> Callable[[PythonProjectExtension], PythonProjectExtension]:
-  assert name not in _python_project_extensions, name
-  def _decorator(func: PythonProjectExtension) -> PythonProjectExtension:
-    assert name not in _python_project_extensions, name
-    _python_project_extensions[name] = func
-    return func
-  return _decorator
+@runtime_checkable
+class _PyprojectUpdater(Protocol):
+  def update_pyproject_config(self, config: dict[str, Any]) -> None:
+    ...
 
 
-class PythonProject(Configurable):
+class PythonProject(Configurable, Extension):
 
   name: Property[str]
   version: Property[str]
@@ -38,18 +31,10 @@ class PythonProject(Configurable):
 
   def __init__(self, project: Project) -> None:
     super().__init__()
-    self._ext = types.SimpleNamespace()
-    self._pyproject_updaters: list[PyprojectUpdater] = []
     self.project = project
     self.requirements = PythonRequirements()
     project.on_finalize(self._finalize)
-    self.update_pyproject(self._update_pyproject)
-    for name, maker in _python_project_extensions.items():
-      setattr(self._ext, name, maker(self))
-    print(vars(self._ext))
-
-  def __getattr__(self, name: str) -> Any:
-    return getattr(self._ext, name)
+    python_project_extensions.apply(self, self)
 
   project = WeakProperty[Project]('_project', once=True)
 
@@ -64,9 +49,6 @@ class PythonProject(Configurable):
     if Source is not None:
       kwargs['Source'] = Source
     self.urls.get().update(kwargs)
-
-  def update_pyproject(self, func: PyprojectUpdater) -> None:
-    self._pyproject_updaters.append(func)
 
   def _update_pyproject(self, config: dict[str, Any]) -> None:
     project = config.setdefault('project', {})
@@ -85,12 +67,16 @@ class PythonProject(Configurable):
     project['dependencies'] = self.requirements._run
     project.setdefault('optional-dependencies', {})['test'] = self.requirements._test
 
+    for value in vars(self.ext).values():
+      if isinstance(value, _PyprojectUpdater):
+        value.update_pyproject_config(config)
+
   def _finalize(self) -> None:
     if not self.enabled.get():
       return
     update_pyproject_task = self.project.task('updatePyproject', UpdatePyprojectTask)
     update_pyproject_task.pyproject_file.set(self.project.directory / 'pyproject.toml')
-    update_pyproject_task.pyproject_updaters.set(self._pyproject_updaters)
+    update_pyproject_task.pyproject_updaters.set([self._update_pyproject])
     print('Finalize!')
 
 
@@ -113,7 +99,7 @@ class PythonRequirements:
 class UpdatePyprojectTask(Action, Task):
 
   pyproject_file = PathProperty.output()
-  pyproject_updaters = Property[list[PyprojectUpdater]](default=[])
+  pyproject_updaters = Property[list[Callable[[dict[str, Any]], None]]](default=[])
 
   def _load_pyproject(self) -> None:
     path = self.pyproject_file.get()

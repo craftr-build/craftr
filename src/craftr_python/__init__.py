@@ -1,8 +1,7 @@
 
-from craftr.core import Project
+from craftr.core import ExtensionRegistry, Project
 from ._python import PythonProject
 from . import _flit, _mypy, _pytest
 
-
-def apply(project: Project) -> None:
-  project.extensions.python = PythonProject(project)
+registry = ExtensionRegistry(__name__)
+registry.register('python', PythonProject)

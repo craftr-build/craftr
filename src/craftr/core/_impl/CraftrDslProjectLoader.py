@@ -1,15 +1,15 @@
 
 import typing as t
 from craftr.dsl import ChainContext, Context, Closure, ObjectContext
-from .._project import Project, ProjectLoader, UnableToLoadProjectError
+from .._project import Extension, Project, ProjectLoader, UnableToLoadProjectError
 
 
 BUILD_SCRIPT_FILENAME = 'build.craftr'
 
 
 def context_factory(obj: t.Any) -> Context:
-  if isinstance(obj, Project):
-    return ChainContext(ObjectContext(obj), ObjectContext(obj.extensions))
+  if isinstance(obj, Extension):
+    return ChainContext(ObjectContext(obj), ObjectContext(obj.ext))
   else:
     return ObjectContext(obj)
 

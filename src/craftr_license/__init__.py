@@ -1,7 +1,5 @@
 
-from craftr.core import Project
+from craftr.core import ExtensionRegistry
 
-
-def apply(project: Project) -> None:
-  # TODO (@nrosenstein)
-  project.extensions.license = lambda n: None
+registry = ExtensionRegistry(__name__)
+registry.register('license', lambda p: lambda _: None)

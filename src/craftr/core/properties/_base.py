@@ -25,7 +25,9 @@ class HasProperties(abc.ABC):
   def __init_subclass__(cls) -> None:
     cls.__properties__ = {}
     for base in cls.__bases__:
-      if issubclass(base, HasProperties):
+      # NOTE (@nrosenstein): If the base is a runtime_checkable typing.Protocol then the issubclass() check
+      #   will be true, but obviously the protocol subclass does not have a __properties__ attribute.
+      if issubclass(base, HasProperties) and hasattr(base, '__properties__'):
         cls.__properties__.update(base.__properties__)
     for key, value in cls.__annotations__.items():
       origin = value.__origin__ if isinstance(value, _GenericAlias) else value
