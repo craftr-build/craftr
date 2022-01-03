@@ -59,8 +59,8 @@ setuptools.setup(
       'craftr = craftr.__main__:main',
     ],
     'craftr_plugins': [
-      'python = craftr_python:apply',
-      'license = craftr_license:apply',
+      'python = craftr_python:registry',
+      'license = craftr_license:registry',
     ]
   },
   cmdclass = {},
