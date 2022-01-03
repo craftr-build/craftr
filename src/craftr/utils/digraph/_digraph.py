@@ -1,6 +1,7 @@
 
 import dataclasses
 import typing as t
+import weakref
 from collections.abc import Mapping
 from nr.pylang.utils.singletons import NotSet
 
@@ -26,47 +27,25 @@ class DiGraph(t.Generic[K, N, E]):
     self._roots: dict[K, None] = {}
     self._leafs: dict[K, None] = {}
     self._edges: dict[tuple[K, K], E] = {}
-    self._nodesview = NodesView(self._nodes)
-    self._edgesview = EdgesView(self._edges)
+    self._nodesview = NodesView(self)
+    self._edgesview = EdgesView(self)
 
-  @t.overload
-  def node(self, node_id: K) -> N:
-    """
-    Retrieve a node from the graph by it's ID.
-
-    @raises UnknownNodeError: If the node does not exist in the graph.
-    """
-
-  @t.overload
-  def node(self, node_id: K, value: N) -> None:
+  def add_node(self, node_id: K, value: N) -> None:
     """
     Add a node to the graph. Overwrites the existing node value if the *node_id* already exists in the graph,
     but keeps its edges intact.
     """
 
-  def node(self, node_id, value=NotSet.Value):
-    if value is NotSet.Value:
-      return self._get_node(node_id).value
+    existing_node = self._nodes.get(node_id, NotSet.Value)
+    if existing_node is NotSet.Value:
+      predecessors, successors = {}, {}
+      self._roots[node_id] = None
+      self._leafs[node_id] = None
     else:
-      existing_node = self._nodes.get(node_id, NotSet.Value)
-      if existing_node is NotSet.Value:
-        predecessors, successors = {}, {}
-        self._roots[node_id] = None
-        self._leafs[node_id] = None
-      else:
-        predecessors, successors = existing_node.predecessors, existing_node.successors
-      self._nodes[node_id] = _Node(value, predecessors, successors)
+      predecessors, successors = existing_node.predecessors, existing_node.successors
+    self._nodes[node_id] = _Node(value, predecessors, successors)
 
-  @t.overload
-  def edge(self, node_id1: K, node_id2: K) -> E:
-    """
-    Retrieves the value of an edge from the graph.
-
-    @raises UnknownEdgeError: If the edge does not exist.
-    """
-
-  @t.overload
-  def edge(self, node_id1: K, node_id2: K, value: E) -> None:
+  def add_edge(self, node_id1: K, node_id2: K, value: E) -> None:
     """
     Adds a directed edge from *node_id1* to *node_id2* to the graph, storing the given value along the edge.
     Overwrites the value if the edge already exists. The edge's nodes must be present in the graph.
@@ -74,20 +53,12 @@ class DiGraph(t.Generic[K, N, E]):
     @raises UnknownNodeError: If one of the nodes don't exist in the graph.
     """
 
-  def edge(self, node_id1, node_id2, value=NotSet.Value):
-    key = (node_id1, node_id2)
-    if value is NotSet.Value:
-      try:
-        return self._edges[key]
-      except KeyError:
-        raise UnknownEdgeError(key)
-    else:
-      node1, node2 = self._get_node(node_id1), self._get_node(node_id2)
-      self._edges[key] = value
-      node1.successors[node_id2] = None
-      node2.predecessors[node_id1] = None
-      self._leafs.pop(node_id1, None)
-      self._roots.pop(node_id2, None)
+    node1, node2 = self._get_node(node_id1), self._get_node(node_id2)
+    self._edges[(node_id1, node_id2)] = value
+    node1.successors[node_id2] = None
+    node2.predecessors[node_id1] = None
+    self._leafs.pop(node_id1, None)
+    self._roots.pop(node_id2, None)
 
   @property
   def nodes(self) -> 'NodesView[K, N]':
@@ -157,8 +128,9 @@ class _Node(t.Generic[K, N]):
 
 class NodesView(Mapping[K, N]):
 
-  def __init__(self, nodes: dict[K, _Node[K, N]]) -> None:
-    self._nodes = nodes
+  def __init__(self, g: DiGraph[K, N, t.Any]) -> None:
+    self._g = weakref.ref(g)
+    self._nodes = g._nodes
 
   def __repr__(self) -> str:
     return f'<NodesView count={len(self)}>'
@@ -173,13 +145,32 @@ class NodesView(Mapping[K, N]):
     return iter(self._nodes)
 
   def __getitem__(self, key: K) -> N:
-    return self._nodes[key].value
+    try:
+      return self._nodes[key].value
+    except KeyError:
+      raise UnknownNodeError(key)
+
+  def __setitem__(self, key: K, value: N) -> None:
+    self._g().add_node(key, value)
+
+  def __delitem__(self, key: K) -> None:
+    g = self._g()
+    node = g._nodes.pop(key)
+    for pred in node.predecessors:
+      g._nodes[pred].successors.pop(key)
+      del g._edges[(pred, key)]
+    for succ in node.successors:
+      g._nodes[succ].predecessors.pop(key)
+      del g._edges[(key, succ)]
+    g._roots.pop(key, None)
+    g._leafs.pop(key, None)
 
 
 class EdgesView(Mapping[tuple[K, K], E]):
 
-  def __init__(self, edges: dict[tuple[K, K], E]) -> None:
-    self._edges = edges
+  def __init__(self, g: DiGraph[K, t.Any, E]) -> None:
+    self._g = weakref.ref(g)
+    self._edges = g._edges
 
   def __repr__(self) -> str:
     return f'<EdgesView count={len(self)}>'
@@ -194,7 +185,16 @@ class EdgesView(Mapping[tuple[K, K], E]):
     return iter(self._edges)
 
   def __getitem__(self, key: tuple[K, K]) -> E:
-    return self._edges[key]
+    try:
+      return self._edges[key]
+    except KeyError:
+      raise UnknownEdgeError(key)
+
+  def __setitem__(self, key: tuple[K, K], value: N) -> None:
+    self._g().add_edge(key[0], key[1], value)
+
+  def __delitem__(self, key: tuple[K, K]) -> None:
+    del self._edges[key]
 
 
 class UnknownNodeError(KeyError):

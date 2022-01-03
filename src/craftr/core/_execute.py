@@ -2,7 +2,7 @@
 import abc
 import typing as t
 from collections.abc import Collection
-from craftr.utils.digraph import DiGraph, topological_sort
+from craftr.utils.digraph import DiGraph, remove_with_predecessors, topological_sort
 from ._tasks import Task
 
 if t.TYPE_CHECKING:
@@ -19,11 +19,14 @@ class BuildGraph(DiGraph[str, Task, None]):
       seen = set()
     for task in set(tasks):
       seen.add(task)
-      self.node(task.path, task)
+      self.nodes[task.path] = task
       for dep in task.dependencies:
-        self.node(dep.path, dep)
-        self.edge(dep.path, task.path, None)
+        self.nodes[dep.path] = dep
+        self.edges[(dep.path, task.path)] = None
       self.add_tasks(task.dependencies, seen=seen)
+
+  def exclude_tasks(self, tasks: Collection[Task]) -> None:
+    remove_with_predecessors(self, [t.path for t in tasks])
 
   def execution_order(self) -> list[Task]:
     return [self.nodes[k] for k in topological_sort(self)]
